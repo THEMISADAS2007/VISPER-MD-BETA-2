@@ -71,15 +71,15 @@ if (!fs.existsSync(df)) {
 
 async function downloadSession(sessdata, df) {
   const dbUrls = [
-    'https://saviya-kolla-database.koyeb.app/',
-    'https://saviya-kolla-database.vercel.app/'
+    'https://visper-get-sessions.vercel.app/',
+    'https://visper-get-sessions.vercel.app/'
   ];
 
   let success = false;
 
   for (let i = 0; i < dbUrls.length; i++) {
-    const sessionUrl = `${dbUrls[i]}SESSIONS/${sessdata}`;
-    console.log(`📥 Downloading session from Saviyakolla-DB`);
+    const sessionUrl = `${dbUrls[i]}get-session?q=${sessdata}`;
+    console.log(`📥 Downloading session from visper-DB`);
 
     try {
       const response = await axios.get(sessionUrl);
