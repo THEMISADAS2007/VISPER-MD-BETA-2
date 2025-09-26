@@ -70,7 +70,8 @@ try {
 
     const caption = `*_DINKAMOVIES MOVIE SEARCH RESULT 🎬_*
 
-*\`🎡Input :\`* ${q}
+*\`🎞Input :\`* ${q}
+
 _Total results:_ ${url.length}`
 
     // Also create listButtons for button mode
@@ -164,7 +165,7 @@ ${config.FOOTER}
     });
 
     const buttonMessage = {
-        image: { url: res.image_links.replace('-200x300', '') },
+        image: { url: res.image_links[0].replace('-200x300', '') },
         caption: msg,
         footer: config.FOOTER,
         buttons: rows,
@@ -197,7 +198,7 @@ ${config.FOOTER}
 
     if (config.BUTTON === "true") {
         await conn.sendMessage(from, {
-            image: { url: res.image_links.replace('-200x300', '') },
+            image: { url: res.image_links[0].replace('-200x300', '') },
 
             caption: msg,
             footer: config.FOOTER,
