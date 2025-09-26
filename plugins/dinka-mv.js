@@ -142,8 +142,8 @@ try {
 
     let msg = `*☘️ 𝗧ɪᴛʟᴇ ➮* *_${res.title || 'N/A'}_*
 
-*📎 Link:* ${q}
-*📆 Year:* ${year || 'N/A'}
+*📎 Link:* ${url}
+*📆 Year:* ${year}
 *📖 Description:* 
 _${res.description || 'N/A'}_
 
