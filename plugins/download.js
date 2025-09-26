@@ -572,7 +572,7 @@ cmd({
 
           try {
 
-		  const prog = await fetchJson(`https://sadas-ytmp3-new-2.vercel.app/convert-youtube?url=${q}`);
+		  const prog = await fetchJson(`https://yt-five-tau.vercel.app/download?q=${q}&format=mp3`);
 
 await conn.sendMessage(from, { react: { text: '⬆️', key: mek.key } });
 		    
@@ -580,7 +580,7 @@ await conn.sendMessage(from, { react: { text: '⬆️', key: mek.key } });
       await conn.sendMessage(
   from,
   {
-    audio: { url: prog.url },
+    audio: { url: prog.result.download },
     mimetype: 'audio/mpeg',
     ptt: true
   },
@@ -735,11 +735,11 @@ async (conn, mek, m, { from, q, reply }) => {
         const botimgBuffer = await botimgResponse.buffer();
 
         // --- Get audio download link ---
-        const prog = await fetchJson(`https://sadas-ytmp3-new-2.vercel.app/convert-youtube?url=${datae}`);
-        if (!prog || !prog.url) return await reply('*Conversion failed, try again!*');
+        const prog = await fetchJson(`https://yt-five-tau.vercel.app/download?q=${datae}&format=mp3`);
+       
 
         // --- File size check with filesizeurl ---
-        const bytes = await file_size_url(prog.url);
+        const bytes = await file_size_url(prog.result.download);
         const sizeInMB = (bytes / (1024 * 1024)).toFixed(2);
 
         if (sizeInMB > config.MAX_SIZE) {
@@ -754,7 +754,7 @@ async (conn, mek, m, { from, q, reply }) => {
         await conn.sendMessage(
             from,
             {
-                document: { url: prog.url },
+                document: { url: prog.result.download },
                 jpegThumbnail: botimgBuffer,
                 mimetype: 'audio/mpeg',
                 caption: wm || config.FOOTER,
