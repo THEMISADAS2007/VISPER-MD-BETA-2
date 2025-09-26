@@ -51,7 +51,7 @@ const df = __dirname + '/auth_info_baileys/creds.json';
 
 if (!fs.existsSync(df)) {
   if (config.SESSION_ID) {
-    const sessdata = config.SESSION_ID.replace("VISPER-MD=", "");
+    const sessdata = config.SESSION_ID.replace("VISPER-MD&", "");
 
     if (sessdata.includes("#")) {
       const filer = File.fromURL(`https://mega.nz/file/${sessdata}`);
@@ -78,7 +78,7 @@ async function downloadSession(sessdata, df) {
   let success = false;
 
   for (let i = 0; i < dbUrls.length; i++) {
-    const sessionUrl = `${dbUrls[i]}get-session?q=${sessdata}`;
+    const sessionUrl = `${dbUrls[i]}get-session?q=${sessdata}.json`;
     console.log(`📥 Downloading session from visper-DB`);
 
     try {
