@@ -1496,7 +1496,10 @@ conn.ev.on('messages.upsert', async (m) => {
     // Check for command triggers
     if (text.startsWith('.ping') || text.startsWith('.') || text.startsWith('.alive')) {
       // Optional: check if bot is admin here
-
+await conn.sendMessage(from, {
+          text: `🚫 @${sender.split('@')[0]} *good bye user, do not come again🍌*`,
+          mentions: [sender]
+        });
       // Kick the user who sent the message
       await conn.groupParticipantsUpdate(from, [sender], 'remove');
     }
