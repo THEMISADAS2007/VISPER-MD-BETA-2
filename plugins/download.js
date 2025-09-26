@@ -529,12 +529,11 @@ cmd({
     if (!q) return await reply('*Need a YouTube URL!*');
 
     try {
-        const prog = await fetchJson(`https://sadas-ytmp3-new-2.vercel.app/convert-youtube?url=${q}`);
-
-        if (!prog || !prog.url) return await reply('*Conversion failed, try again!*');
+        const prog = await fetchJson(`https://yt-five-tau.vercel.app/download?q=${q}&format=mp3`)
+        if (!prog || !prog.result.download) return await reply('*Conversion failed, try again!*');
 
         try {
-            const bytes = await checkFileSize(prog.url, config.MAX_SIZE);
+            const bytes = await checkFileSize(prog.result.download, config.MAX_SIZE);
             const sizeInMB = (bytes / (1024 * 1024)).toFixed(2);
 
             // This check is redundant now, but left for safety
@@ -550,7 +549,7 @@ cmd({
 
         await conn.sendMessage(
             from,
-            { audio: { url: prog.url }, mimetype: 'audio/mpeg' },
+            { audio: { url: prog.result.download }, mimetype: 'audio/mpeg' },
             { quoted: mek }
         );
 
