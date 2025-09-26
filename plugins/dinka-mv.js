@@ -164,7 +164,7 @@ ${config.FOOTER}
     });
 
     const buttonMessage = {
-        image: { url: res.poster.replace('-200x300', '') },
+        image: { url: res.image_links.replace('-200x300', '') },
         caption: msg,
         footer: config.FOOTER,
         buttons: rows,
@@ -197,7 +197,7 @@ ${config.FOOTER}
 
     if (config.BUTTON === "true") {
         await conn.sendMessage(from, {
-            image: { url: res.poster.replace('-200x300', '') },
+            image: { url: res.image_links.replace('-200x300', '') },
 
             caption: msg,
             footer: config.FOOTER,
