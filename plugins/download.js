@@ -562,38 +562,40 @@ cmd({
 });
 
 cmd({
-    pattern: "ytaap",
-    react: "⬇️",
-    dontAddCommandList: true,
-    filename: __filename
+  pattern: "ytaap",
+  react: "⬇️",
+  dontAddCommandList: true,
+  filename: __filename
 },
-    async (conn, mek, m, { from, q, reply }) => {
-        if (!q) return await reply('*Need a youtube url!*');
+async (conn, mek, m, { from, q, reply }) => {
+  if (!q) return await reply('*Need a youtube url!*');
 
-          try {
+  try {
+    const prog = await fetchJson(`https://yt-five-tau.vercel.app/download?q=${encodeURIComponent(q)}&format=ogg`);
+    if (!prog?.result?.download) throw new Error('No download URL');
 
-		  const prog = await fetchJson(`https://yt-five-tau.vercel.app/download?q=${q}&format=mp3`);
+    await conn.sendMessage(from, { react: { text: '⬆️', key: mek.key } });
 
-await conn.sendMessage(from, { react: { text: '⬆️', key: mek.key } });
-		    
-		        
-      await conn.sendMessage(
-  from,
-  {
-    audio: { url: prog.result.download },
-    mimetype: 'audio/ogg; codecs=opus',
-    ptt: true
-  },
-  { quoted: mek }
-);
+    const res = await fetch(prog.result.download);
+    const arrayBuffer = await res.arrayBuffer();
+    const buffer = Buffer.from(arrayBuffer);
 
-       
-                await conn.sendMessage(from, { react: { text: '✔️', key: mek.key } });
-           } catch (e) {
-  reply(N_FOUND)
-  console.log(e)
-}
-})
+    await conn.sendMessage(
+      from,
+      {
+        audio: buffer,
+        mimetype: 'audio/ogg; codecs=opus',
+        ptt: true
+      },
+      { quoted: mek }
+    );
+
+    await conn.sendMessage(from, { react: { text: '✔️', key: mek.key } });
+  } catch (e) {
+    await reply('❌ Failed: ' + (e.message || e));
+    console.log(e);
+  }
+});
 
 cmd({
     pattern: "alex",
