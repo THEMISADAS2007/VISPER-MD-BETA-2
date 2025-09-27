@@ -1,0 +1,20 @@
+{
+  "name": "NADEEN-MD",
+  "description": "Javascript WhatsApp bot made by NADEEN POORNA",
+  "logo": "https://files.catbox.moe/2nmi9q.png",
+  "keywords": ["bot"],
+  "success_url": "/",
+
+  "env": {
+    "SESSION_ID": {
+      "description": "Put the session-id here.",
+      "required": true
+    },  
+
+     "buildpacks": [
+        {
+            "url": "https://github.com/heroku/heroku-buildpack-nodejs.git"
+        }
+     ],
+  "stack": "heroku-24"
+}
