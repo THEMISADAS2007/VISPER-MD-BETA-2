@@ -6065,7 +6065,7 @@ ${config.FOOTER}
 }
 })
 
-let isUploadinggg = false; // Track upload status
+let isUploadinggggg = false; // Track upload status
 
 cmd({
     pattern: "dnkzndl",
@@ -6089,7 +6089,7 @@ console.log(`Input:`, q)
         const da = pix;
 		console.log(da)
     
-        isUploadinggg = true; // lock start
+        isUploadinggggg = true; // lock start
 
         //===================================================
         const botimg = imglink.trim();
@@ -6112,6 +6112,6 @@ console.log(`Input:`, q)
         reply('🚫 *Error Occurred !!*\n\n' + e.message);
         console.error("sindl error:", e);
     } finally {
-        isUploadinggg = false; // reset lock always
+        isUploadinggggg = false; // reset lock always
     }
 });
