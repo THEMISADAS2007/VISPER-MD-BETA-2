@@ -998,6 +998,13 @@ async (conn, mek, m, {
                    + 'ORG: API Developer;\n' 
                    + 'TEL;type=CELL;type=VOICE;waid=94766863255:+94766863255\n' 
                    + 'END:VCARD';
+
+   let vcard5 = 'BEGIN:VCARD\n' 
+                   + 'VERSION:3.0\n' 
+                   + 'FN: Poorna Thalisha\n' 
+                   + 'ORG: Supplier;\n' 
+                   + 'TEL;type=CELL;type=VOICE;waid=94719255382:+94719255382\n' 
+                   + 'END:VCARD';
 const fkontattk = {
     key: {
         remoteJid: "13135550002@s.whatsapp.net",
@@ -1019,7 +1026,8 @@ const fkontattk = {
                 contacts: [
                     { vcard: vcard1 },
 					{ vcard: vcard3 },
-					{ vcard: vcard4 },
+					{ vcard: vcard4 }
+        { vcard: vcard5 },
                     { vcard: vcard2 }
                 ]
             } 
