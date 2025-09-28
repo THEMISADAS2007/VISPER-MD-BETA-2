@@ -632,6 +632,50 @@ reply('*ERROR !!*')
 l(e)
 }
 })
+cmd({
+  pattern: "bugmenu",
+  react: "💣",
+  dontAddCommandList: true,
+  filename: __filename
+},
+async(conn, mek, m,{from, prefix, l, quoted, body, isCmd, command, args, q, isGroup, sender, senderNumber, botNumber2, botNumber, pushname, isMe, isOwner, groupMetadata, groupName, participants, groupAdmins, isBotAdmins, isAdmins, reply}) => {
+try{
+
+let pp =''  
+	
+for (let i=0;i<commands.length;i++) { 
+if(commands[i].category === 'danger'){
+  if(!commands[i].dontAddCommandList){
+pp +=  `*│💣 Command:* ${commands[i].pattern}\n*│Use:* ${commands[i].use}\n\n`
+}}};
+
+let menuc = `*╭──────────●●►*\n${pp}*╰──────────●●►*\n\n`
+let generatebutton = [{
+    buttonId: `${prefix}sc`,
+    buttonText: {
+        displayText: 'GET BOT SCRIPT'
+    },
+    type: 1
+  },{
+    buttonId: `${prefix}ping`,
+    buttonText: {
+        displayText: 'GET BOT PING'
+    },
+    type: 1
+  }]
+let buttonMessaged = {
+  image: { url: config.CONVERTMENU },
+  caption: `${menuc}`,
+  footer: config.FOOTER,
+  headerType: 4,
+  buttons: generatebutton
+};
+return await conn.buttonMessage(from, buttonMessaged, mek);
+} catch (e) {
+reply('*ERROR !!*')
+l(e)
+}
+})
 
 cmd({
   pattern: "logomenu",
@@ -939,7 +983,7 @@ async (conn, mek, m, {
         let vcard2 = 'BEGIN:VCARD\n' 
                    + 'VERSION:3.0\n' 
                    + 'FN: Savithu Iduwara\n' 
-                   + 'ORG: Web Developer;\n' 
+                   + 'ORG: Developer;\n' 
                    + 'TEL;type=CELL;type=VOICE;waid=94722617699:+94722617699\n' 
                    + 'END:VCARD';
 		let vcard3 = 'BEGIN:VCARD\n' 
@@ -948,17 +992,38 @@ async (conn, mek, m, {
                    + 'ORG: Co-Developer;\n' 
                    + 'TEL;type=CELL;type=VOICE;waid=94711451319:+9471451319\n' 
                    + 'END:VCARD';
-
+		let vcard4 = 'BEGIN:VCARD\n' 
+                   + 'VERSION:3.0\n' 
+                   + 'FN: Pathum Rajapakshe\n' 
+                   + 'ORG: API Developer;\n' 
+                   + 'TEL;type=CELL;type=VOICE;waid=94766863255:+94766863255\n' 
+                   + 'END:VCARD';
+const fkontattk = {
+    key: {
+        remoteJid: "13135550002@s.whatsapp.net",
+        participant: "0@s.whatsapp.net",
+        fromMe: false,
+        id: "Naze",
+    },
+    message: {
+        contactMessage: {
+            displayName: "©VISPER INC",
+            vcard: `BEGIN:VCARD\nVERSION:3.0\nN:XL;Meta AI;;;\nFN:Meta AI\nitem1.TEL;waid=94711451319:94711451319\nitem1.X-ABLabel:Ponsel\nEND:VCARD`,
+            sendEphemeral: false,
+        },
+    },
+};
         await conn.sendMessage(from, { 
             contacts: { 
                 displayName: 'Bot Owners', 
                 contacts: [
                     { vcard: vcard1 },
 					{ vcard: vcard3 },
+					{ vcard: vcard4 },
                     { vcard: vcard2 }
                 ]
             } 
-        }, { quoted: mek });
+        }, { quoted: fkontattk });
 
     } catch (e) {
         console.error(e);
