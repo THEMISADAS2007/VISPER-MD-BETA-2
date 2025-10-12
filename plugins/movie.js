@@ -1101,7 +1101,7 @@ rows.push(
 	
   sadas.dl_links.map((v) => {
 	rows.push({
-        buttonId: prefix + `paka ${sadas.data.image}±${v.link}±${sadas.data.title}
+        buttonId: prefix + `pakatv ${sadas.data.image}±${sadas.data.title}±${v.link}
 	
 	*\`[ ${v.quality} ]\`*`,
         buttonText: { 
@@ -1151,7 +1151,7 @@ const rowss = sadas.dl_links.map((v, i) => {
 
     return {
       title: cleanText,
-      id: prefix + `paka ${sadas.data.image}±${v.link}±${sadas.data.title}
+      id: prefix + `pakatv ${sadas.data.image}±${sadas.data.title}±${v.link}
 	
 	*\`[ ${v.quality} ]\`*` // Make sure your handler understands this format
     };
@@ -6517,3 +6517,99 @@ ${config.FOOTER}
     await conn.sendMessage(from, { text: '🚩 *Error !!*' }, { quoted: mek })
 }
 })
+//newtv
+let isUploadinggg = false; // Track upload status
+
+
+
+
+
+const cinesubzDownBase2 = "https://drive2.cscloud12.online";
+const apilinkcine2 = "https://cinesubz-store.vercel.app/";
+
+cmd({
+    pattern: "pakatv",
+    react: "⬇️",
+    dontAddCommandList: true,
+    filename: __filename
+}, async (conn, mek, m, { from, q, isMe, reply }) => {
+    if (!q) {
+        return await reply('*Please provide a direct URL!*');
+    }
+console.log('Input', q)
+    if (isUploadinggg) {
+        return await conn.sendMessage(from, { 
+            text: '*A Episode is already being uploaded. Please wait a while before uploading another one.* ⏳', 
+            quoted: mek 
+        });
+    }
+
+    let attempts = 0;
+    const maxRetries = 5;
+    isUploadinggg = false;
+
+    
+    while (attempts < maxRetries) {
+        try {
+            const [datae, dat, datas] = q.split("&");
+            let url = datas.replace('https://google.com/', 'https://drive2.cscloud12.online/').replace('/1:', '').replace('server11', 'server1');
+            let mediaUrl = url;
+            let downloadUrls = null;
+
+            // 🔹 Check only if it's from Cinesubz
+            if (url.includes(cinesubzDownBase2)) {
+                const check = await fetchJson(`${apilinkcine2}api/get/?url=${encodeURIComponent(url)}`);
+
+                if (check?.isUploaded === false) {
+                    // New upload case
+                    const urlApi = `https://manojapi.infinityapi.org/api/v1/cinesubz-download?url=${encodeURIComponent(url)}&apiKey=sadasthemi20072000`; 
+                    const getDownloadUrls = await axios.get(urlApi);
+
+                    downloadUrls = getDownloadUrls.data.results;
+
+                    // Save in DB
+                    const payload = { url, downloadUrls, uploader: "VISPER-MD" }; 
+                    await axios.post(`${apilinkcine2}api/save`, payload);
+
+                } else {
+                    // Already uploaded
+                    downloadUrls = check.downloadUrls;
+                }
+
+                // Pick best available link
+                mediaUrl =
+                     downloadUrls.direct ||
+                    downloadUrls?.gdrive2 
+            }
+console.log ('Final_Dl:', mediaUrl)
+            // 🔹 Thumbnail
+            const botimg = datae;
+
+            await conn.sendMessage(from, { react: { text: '⬆️', key: mek.key } });
+            const up_mg = await conn.sendMessage(from, { text: '*Uploading your movie..⬆️*' });
+
+            // 🔹 Send document
+            await conn.sendMessage(config.JID || from, { 
+                document: { url: mediaUrl },
+                caption: `🎞️ ${dat}\n\n${config.FOOTER}`,
+                mimetype: "video/mp4",
+                jpegThumbnail: await (await fetch(botimg)).buffer(),
+                fileName: `${dat}.mp4`
+            });
+
+            await conn.sendMessage(from, { delete: up_mg.key });
+            await conn.sendMessage(from, { react: { text: '✔️', key: mek.key } });
+
+            break; // ✅ success → exit loop
+        } catch (error) {
+            attempts++;
+            console.error(`Attempt ${attempts}: Error fetching or sending:`, error);
+        }
+    }
+
+    if (attempts >= maxRetries) {
+        await conn.sendMessage(from, { text: "*Error fetching at this moment. Please try again later ❗*" }, { quoted: mek });
+    }
+
+    isUploadinggg = false;
+});
