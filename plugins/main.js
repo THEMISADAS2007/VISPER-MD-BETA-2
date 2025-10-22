@@ -2839,7 +2839,7 @@ let monitoringTargetJid = null;
 // --- UTILITY FUNCTION ---
 const checkAndSendNewOrders = async (conn, targetJid) => {
     try {
-        const GITHUB_TOKEN = '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';
+        const GITHUB_TOKEN = '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';
         const REPO_OWNER = 'THEMISADAS2007';
         const REPO_NAME = 'sadaslk_Oders';
         // Octokit පුස්තකාලයේ ඇති Octokit class එක නිවැරදිව load කිරීමට නව ක්‍රමවේදය
