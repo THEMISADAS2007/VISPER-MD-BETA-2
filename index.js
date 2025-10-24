@@ -263,8 +263,8 @@ fs.readdirSync("./plugins/").forEach((plugin) => {
 });
 
 console.log('All Plugins installed ⚡')
-await connectdb()
-await updb()		
+connectdb()
+updb()		
 console.log('VISPER MOVIE DL CONNECTED ✅')
 
 
