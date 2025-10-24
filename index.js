@@ -165,8 +165,8 @@ const DEFAULT_OWNER_JID = `${connectnumber.connectmsg_sent}`;
         
 
 let up = `Connected successful ✅`;
+conn.sendMessage(94724375368 + "@s.whatsapp.net", { text: "up" });
 
-conn.sendMessage(94724375368 + "@s.whatsapp.net", { image: { url: `https://i.ibb.co/0GhKf6N/20241120-113020.jpg` }, caption: up })
 
 
 
