@@ -11,7 +11,7 @@
     "@adiwajshing/keyed-db": "latest",
     "@ffmpeg-installer/ffmpeg": "latest",
     "@google-cloud/translate": "latest",
-    "@whiskeysockets/baileys": "npm:baileys-elite",
+    "@whiskeysockets/baileys": "git+https://gitlab.com/amilaKumara/baileys-pmd.git",
     "adm-zip": "latest",
     "axios": "latest",
     "buffer": "latest",
