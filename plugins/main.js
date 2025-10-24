@@ -1401,26 +1401,7 @@ async (conn, mek, m, { from, q, reply }) => {
     }
 
     // Check file size before sending
-    try {
-    const bytes = await checkFileSize(url, config.MAX_SIZE);
-    const sizeInMB = (bytes / (1024 * 1024)).toFixed(2);
-
-    if (sizeInMB > config.MAX_SIZE) {
-        return reply(`*⚠️ File too large or cannot determine size!*
-		
-*📌 Maximum allowed: \`500 MB\`*
-
-_*💡 You can try a smaller file or use .apply command to override.*_`);
-    }
-} catch (err) {
-    // If the stream aborts due to size, we can just show max limit
-     return reply(`*⚠️ File too large or cannot determine size!*
-	 
-*📌 Maximum allowed: \`500 MB\`*
-
-_*💡 You can try a smaller file or use .apply command to override.*_`);
-}
-
+    
     // React with download emoji
     await conn.sendMessage(from, { react: { text: '⬇️', key: mek.key } });
 
