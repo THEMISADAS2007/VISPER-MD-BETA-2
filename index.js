@@ -1,3 +1,4 @@
+
 const {
     default: makeWASocket,
     getAggregateVotesInPollMessage, 
@@ -109,153 +110,181 @@ const express = require("express");
 const app = express();
 const port = process.env.PORT || 8000;
 //====================================
-// You must have these imports at the top of your file
-// if not already present, as they are used inside connectToWA:
-// const { default: makeWASocket, useMultiFileAuthState, fetchLatestBaileysVersion, DisconnectReason } = require('@whiskeysockets/baileys');
-// const P = require('pino'); // Assuming P is pino
-// const axios = require('axios');
-// const { fetchJson } = require('./your_utils_file'); // Assuming fetchJson is a utility function you use
-
-// This is likely defined elsewhere, but including it here for completeness
-// const msgRetryCounterCache = {}; 
-// const config = require('./config'); // Assuming a config file exists
-// 
-// // Define the global conn variable outside the function to allow
-// // it to be used and checked across reconnect calls
-// let conn = null;
-
 async function connectToWA() {
-    // 1. Prevent multiple parallel connection attempts
-    if (conn && conn.isConnecting) {
-        console.log("⚠️ Connection already in progress. Aborting new connection attempt.");
-        return;
-    }
-    
-    // Set a flag to indicate connection attempt is active (optional, but good practice)
-    conn = { isConnecting: true }; 
+//Run the function
 
-    try {
-        // --- Setup (Run only once per process start) ---
-        const { version, isLatest } = await fetchLatestBaileysVersion();
-        console.log(`using WA v${version.join('.')}, isLatest: ${isLatest}`);
-        
-        const { state, saveCreds } = await useMultiFileAuthState(__dirname + `/auth_info_baileys`);
-        
-        // Fetch data for DEFAULT_OWNER_JID once
-        const responsee = await axios.get('https://mv-visper-full-db.pages.dev/Main/main_var.json');
-        const connectnumber = responsee.data;
-        // Default owner JID
-        const DEFAULT_OWNER_JID = `${connectnumber.connectmsg_sent}`;
-        // Store the connect message and group link for later use
-        const connectMsgText = connectnumber.connectmg || '✅ VISPER connected successfully!';
-        const supgroupLink = connectnumber.supglink;
-        
-        // --- Initialize WhatsApp Socket ---
-        conn = makeWASocket({
-            logger: P({ level: "fatal" }).child({ level: "fatal" }),
-            printQRInTerminal: true,
-            generateHighQualityLinkPreview: true,
-            auth: state,
-            defaultQueryTimeoutMs: undefined,
-            msgRetryCounterCache,
-        });
-        
-        // Attach saveCreds to the credentials update event
-        conn.ev.on('creds.update', saveCreds);
+    const {
+        version,
+        isLatest
+    } = await fetchLatestBaileysVersion()
+    console.log(`using WA v${version.join('.')}, isLatest: ${isLatest}`)
+    const {
+        state,
+        saveCreds
+    } = await useMultiFileAuthState(__dirname + `/auth_info_baileys`)
+    const conn = makeWASocket({
+        logger: P({
+            level: "fatal"
+        }).child({
+            level: "fatal"
+        }),
+        printQRInTerminal: true,
+        generateHighQualityLinkPreview: true,
+        auth: state,
+        defaultQueryTimeoutMs: undefined,
+        msgRetryCounterCache
+    })
 
-        // --- Connection Update Event Handler ---
-        conn.ev.on('connection.update', async (update) => {
-            const { connection, lastDisconnect } = update;
 
-            if (connection === 'close') {
-                const shouldReconnect = lastDisconnect?.error?.output?.statusCode !== DisconnectReason.loggedOut;
-                console.log(`❌ Disconnected: ${lastDisconnect?.error?.message || 'unknown reason'} (${shouldReconnect ? 'Reconnecting' : 'Logged out'})`);
-                
-                // CRITICAL FIX: To prevent infinite recursion and clean up the current socket,
-                // you should use a timeout or a proper library for process management (like PM2)
-                // for production, but for simple reconnection, a timeout helps.
-                if (shouldReconnect) {
-                    // Dispose of the current socket connection object
-                    conn.isConnecting = false; 
-                    setTimeout(() => connectToWA(), 5000); // Wait 5 seconds before trying again
-                } else {
-                    // Logged out - no need to reconnect
-                    conn.isConnecting = false;
+
+const responsee = await axios.get('https://mv-visper-full-db.pages.dev/Main/main_var.json');
+const connectnumber = responsee.data
+	
+// Default owner JID
+const DEFAULT_OWNER_JID = `${connectnumber.connectmsg_sent}`;
+
+conn.ev.on('connection.update', async (update) => {
+    const { connection, lastDisconnect } = update;
+
+    if (connection === 'close') {
+        const shouldReconnect = lastDisconnect?.error?.output?.statusCode !== DisconnectReason.loggedOut;
+        console.log(`❌ Disconnected: ${lastDisconnect?.error?.message || 'unknown reason'} (${shouldReconnect ? 'Reconnecting' : 'Logged out'})`);
+        if (shouldReconnect) connectToWA();
+    } else if (connection === 'open') {
+        console.log("✅ WhatsApp socket connected!");
+
+        setTimeout(async () => {
+            try {
+                // Fetch custom connect message from server
+                let captionText = '✅ VISPER connected successfully!';
+                try {
+                    const response = await axios.get('https://mv-visper-full-db.pages.dev/Main/main_var.json');
+                    const ownerdataa = response.data;
+                    captionText = ownerdataa?.connectmg || captionText;
+                } catch (fetchErr) {
+                    console.warn("⚠️ Failed to fetch connect message text:", fetchErr.message);
                 }
-            } else if (connection === 'open') {
-                console.log("✅ WhatsApp socket connected!");
-                conn.isConnecting = false; // Connection is open, clear connecting flag
 
-                // Only perform setup tasks on the first successful 'open' event
-                // This prevents sending the welcome message and joining the group 
-                // on every connection loss/reconnect cycle.
-                // A better approach would be to track if this setup has run, e.g., using a flag.
-                if (!conn.setupCompleted) { 
-                    conn.setupCompleted = true; // Set flag to indicate setup is done
-
-                    setTimeout(async () => {
-                        try {
-                            // --- Send Connect Message ---
-                            await conn.sendMessage(DEFAULT_OWNER_JID, {
-                                image: { url: 'https://mv-visper-full-db.pages.dev/Data/visper_main.jpeg' },
-                                caption: connectMsgText
-                            });
-
-                            // --- Load and Send Config Message ---
-                            // Note: The config variables (mvSize, botName, etc.) are assumed 
-                            // to be loaded from a global `config` object which must be
-                            // accessible in this scope (e.g., via `require('./config')`).
-
-                            const can = `
+                // Send initial connect image
+                await conn.sendMessage(DEFAULT_OWNER_JID, {
+                    image: { url: 'https://mv-visper-full-db.pages.dev/Data/visper_main.jpeg' },
+                    caption: captionText
+                });
+const mvSize = config.MV_SIZE;
+const botName = config.NAME;
+const botJid = config.JID;
+const seedrMail = config.SEEDR_MAIL;
+const seedrPassword = config.SEEDR_PASSWORD;
+const lang = config.LANG;
+const sudoUsers = config.SUDO;
+const blockedJids = config.JID_BLOCK;
+const antiBad = config.ANTI_BAD;
+const maxSize = config.MAX_SIZE;
+const antiCall = config.ANTI_CALL;
+const autoReadStatus = config.AUTO_READ_STATUS;
+const autoBlock = config.AUTO_BLOCK;
+const autoSticker = config.AUTO_STICKER;
+const autoVoice = config.AUTO_VOICE;
+const autoReact = config.AUTO_REACT;
+const cmdOnlyRead = config.CMD_ONLY_READ;
+const workType = config.WORK_TYPE;
+const xnxxBlock = config.XNXX_BLOCK;
+const autoMsgRead = config.AUTO_MSG_READ;
+const autoTyping = config.AUTO_TYPING;
+const autoRecording = config.AUTO_RECORDING;
+const welcomeLeaveMsgs = config.AUTO_WELCOME_LEAVE;
+const antiLink = config.ANTI_LINK;
+const antiBot = config.ANTI_BOT;
+const aliveMsg = config.ALIVE;
+const prefix = config.PREFIX;
+const chatBot = config.CHAT_BOT;
+const alwaysOffline = config.ALLWAYS_OFFLINE;
+const mvBlock = config.MV_BLOCK;
+const button = config.BUTTON;
+const action = config.ACTION;
+const antiLinkAction = config.ANTILINK_ACTION;
+const values = config.VALUSE;
+const logo = config.LOGO;
+const antiDelete = config.ANTI_DELETE;
+const leaveMsg = config.LEAVE_MSG;
+                // Build config message
+  const can = `
 *⚙️ BOT CURRENTLY SETTINGS ⚙️*
 
 *\`• Owner Number :\`* ${DEFAULT_OWNER_JID || "Not Set"}
-*\`• Bot Name :\`* ${config.NAME || "Not Set"}
-*\`• Bot JID :\`* ${config.JID || "Not Set"}
-*\`• Seedr Mail :\`* ${config.SEEDR_MAIL || "Not Set"}
-*\`• Seedr Password :\`* ${config.SEEDR_PASSWORD ? "********" : "Not Set"}
-// ... (rest of your config message construction) ...
+*\`• Bot Name :\`* ${botName || "Not Set"}
+*\`• Bot JID :\`* ${botJid || "Not Set"}
+*\`• Seedr Mail :\`* ${seedrMail || "Not Set"}
+*\`• Seedr Password :\`* ${seedrPassword ? "********" : "Not Set"}
+*\`• Language :\`* ${lang || "SI"}
+*\`• Sudo Users :\`* ${sudoUsers?.length ? sudoUsers.join(", ") : "None"}
+*\`• Blocked JIDs :\`* ${blockedJids?.length ? blockedJids.join(", ") : "None"}
+*\`• Anti Bad Words :\`* ${antiBad?.length ? antiBad.join(", ") : "None"}
+*\`• Welcome/Leave Msgs :\`* ${welcomeLeaveMsgs?.length ? welcomeLeaveMsgs.join(", ") : "None"}
+*\`• Max Size :\`* ${maxSize ?? 150} MB
+*\`• Anti Call :\`* ${antiCall ?? "false"}
+*\`• Auto Read Status :\`* ${autoReadStatus ?? "false"}
+*\`• Auto Block :\`* ${autoBlock ?? "false"}
+*\`• Auto Sticker :\`* ${autoSticker ?? "false"}
+*\`• Auto Voice :\`* ${autoVoice ?? "false"}
+*\`• Auto React :\`* ${autoReact ?? "false"}
+*\`• CMD Only Read :\`* ${cmdOnlyRead ?? "true"}
+*\`• Work Type :\`* ${workType ?? "private"}
+*\`• XNXX Block :\`* ${xnxxBlock ?? "true"}
+*\`• Auto Msg Read :\`* ${autoMsgRead ?? "false"}
+*\`• Auto Typing :\`* ${autoTyping ?? "false"}
+*\`• Auto Recording :\`* ${autoRecording ?? "false"}
+*\`• Anti Link :\`* ${antiLink ?? "false"}
+*\`• Anti Bot :\`* ${antiBot ?? "false"}
+*\`• Alive Msg :\`* ${aliveMsg ?? "default"}
+*\`• Prefix :\`* ${prefix ?? "."}
+*\`• Chat Bot :\`* ${chatBot ?? "false"}
+*\`• Always Offline :\`* ${alwaysOffline ?? "false"}
+*\`• MV Block :\`* ${mvBlock ?? "true"}
+*\`• Buttons Enabled :\`* ${button ?? "false"}
+*\`• Action :\`* ${action ?? "delete"}
+*\`• Antilink Action :\`* ${antiLinkAction ?? "delete"}
+*\`• Values :\`* ${values?.length ? values.join(", ") : "None"}
+*\`• Logo :\`* ${logo ?? "https://mv-visper-full-db.pages.dev/Data/visper_main.jpeg"}
+*\`• Anti Delete :\`* ${antiDelete ?? "off"}
+*\`• Leave Msg :\`* ${leaveMsg || "None"}
 `;
-                            
-                            // --- Join Support Group ---
-                            if (!supgroupLink) {
-                                console.error('❌ Support group link not found in fetched data.');
-                            } else {
-                                const joinlink = supgroupLink.split('https://chat.whatsapp.com/')[1]; // Extract invite code
-                                if (!joinlink) {
-                                    console.error('❌ Invalid invite link format for support group!');
-                                } else {
-                                    await conn.groupAcceptInvite(joinlink);
-                                    console.log("✅ Successfully joined the group!");
-                                }
-                            }
 
-                            // Send config message
-                            await conn.sendMessage(DEFAULT_OWNER_JID, {
-                                image: { url: 'https://mv-visper-full-db.pages.dev/Data/visper_main.jpeg' },
-                                caption: can
-                            });
-                            console.log("✅ Connect config message sent to default owner");
-                            
-                        } catch (err) {
-                            console.error("❌ Failed to complete post-connection setup (send message/join group):", err.message);
-                        }
-                    }, 2000);
-                }
+
+     let joinlink2 = await fetchJson('https://mv-visper-full-db.pages.dev/Main/main_var.json');
+        
+        if (!joinlink2 || !joinlink2.supglink) {
+            console.error('❌ Invalid join link data!');
+            return;
+        }
+        
+        const joinlink = joinlink2.supglink.split('https://chat.whatsapp.com/')[1]; // Extract invite code
+
+        if (!joinlink) {
+            console.error('❌ Invalid invite link format!');
+            return;
+        }
+
+     
+            await conn.groupAcceptInvite(joinlink);
+
+				 console.log("✅ Successfully joined the group!");
+                // Send config message
+                await conn.sendMessage(DEFAULT_OWNER_JID, {
+                    image: { url: 'https://mv-visper-full-db.pages.dev/Data/visper_main.jpeg' },
+                    caption: can
+                });
+
+                console.log("✅ Connect config message sent to default owner");
+            } catch (err) {
+                console.error("❌ Failed to send connect message:", err.message);
             }
-        });
-
-        // This is where you'd register your message/group/other event handlers
-        // conn.ev.on('messages.upsert', ...); 
-
-    } catch (error) {
-        console.error("🔥 Error during connectToWA initialization:", error);
-        conn.isConnecting = false; // Clear flag on failure
-        setTimeout(() => connectToWA(), 10000); // Retry after a longer delay on initialization failure
+        }, 2000);
     }
-} 
+});
+      
 
-
+const path = require('path');
 fs.readdirSync("./plugins/").forEach((plugin) => {
   if (path.extname(plugin).toLowerCase() == ".js") {
       require("./plugins/" + plugin);
@@ -263,8 +292,8 @@ fs.readdirSync("./plugins/").forEach((plugin) => {
 });
 
 console.log('All Plugins installed ⚡')
-connectdb()
-updb()		
+await connectdb()
+await updb()		
 console.log('VISPER MOVIE DL CONNECTED ✅')
 
 
@@ -1829,12 +1858,5 @@ process.on("uncaughtException", function (err) {
   if (e.includes("Authentication timed out")) restart();
   console.log("Caught exception: ", err);
 });
-
-
-
-
-
-
-
 
 
