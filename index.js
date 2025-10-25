@@ -135,7 +135,7 @@ async function connectToWA() {
         msgRetryCounterCache
     })
 
-
+conn.ev.setMaxListeners(0);
 
 const responsee = await axios.get('https://mv-visper-full-db.pages.dev/Main/main_var.json');
 const connectnumber = responsee.data
