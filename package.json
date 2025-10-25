@@ -51,7 +51,7 @@
     "sadasytsearch": "latest",
     "seedr": "latest",
     "sequelize": "latest",
-   "sharp": "0.32.6",
+   "sharp": "0.34.1",
     "translate-google-api": "latest",
     "wa-sticker-formatter": "^4.4.4",
     "ytsearch-venom": "latest",
