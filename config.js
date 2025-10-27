@@ -11,7 +11,7 @@ ANTI_DELETE: process.env.ANTI_DELETE === undefined ? 'true' : process.env.ANTI_D
 MV_BLOCK: process.env. MV_BLOCK === undefined ? 'true' : process.env. MV_BLOCK,    
 ANTI_LINK: process.env.ANTI_LINK === undefined ? 'true' : process.env.ANTI_LINK, 
 SEEDR_MAIL: '',
-    SEEDR_PASSWORD: '',
+SEEDR_PASSWORD: '',
 SUDO: '',//
 DB_NAME: 'pramaaaataaaaaaaaaajjaa',
 LANG: 'SI',
