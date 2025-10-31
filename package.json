@@ -1,6 +1,6 @@
 {
   "name": "MOVIE-VISPER MD",
-  "version": "1.0.0",
+  "version": "4.0.0",
   "scripts": {
     "start": "pm2 start index.js --deep-monitoring --attach --name Movie-Visper",
     "stop": "pm2 stop Movie-Visper",
@@ -11,7 +11,7 @@
     "@adiwajshing/keyed-db": "latest",
     "@ffmpeg-installer/ffmpeg": "latest",
     "@google-cloud/translate": "latest",
-    "@whiskeysockets/baileys": "github:nstar-y/bail",
+    "@whiskeysockets/baileys": "npm:@rexxhayanasi/elaina-bail",
     "adm-zip": "latest",
     "axios": "latest",
     "buffer": "latest",
