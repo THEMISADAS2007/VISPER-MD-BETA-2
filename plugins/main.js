@@ -103,6 +103,7 @@ I am alive now 🎈\n✨ Thank you for choosing \`Visper-MD\` — your trusted W
   \`• Founder & Developer\` : 𝗦avithu Induwara
   \`• Co-Develper\` : 𝗗arksadas YT
   \`• Co-Developer\` : 𝗡adeen Poorna
+  \`• Main-Supplier\` : 𝗣oorna Thalisha
   \`• System Leader\` : 𝗔lex-ID
   \`• API Developer\` : 𝗣athum 𝗥ajapakshe
 *└────────────────────┘*
