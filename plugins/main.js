@@ -957,6 +957,13 @@ async (conn, mek, m, {
                    + 'TEL;type=CELL;type=VOICE;waid=94766863255:+94766863255\n' 
                    + 'END:VCARD';
 
+let vcard5 = 'BEGIN:VCARD\n' 
+                   + 'VERSION:3.0\n' 
+                   + 'FN: Poorna Thalisha\n' 
+                   + 'ORG: Suplier;\n' 
+                   + 'TEL;type=CELL;type=VOICE;waid=94719255382:+94724972306\n' 
+                   + 'END:VCARD';
+
         await conn.sendMessage(from, { 
             contacts: { 
                 displayName: 'Bot Owners', 
@@ -964,7 +971,8 @@ async (conn, mek, m, {
                     { vcard: vcard1 },
 					{ vcard: vcard3 },
                     { vcard: vcard2 },
-					{ vcard: vcard4 }
+					{ vcard: vcard4 },
+                    { vcard: vcard5 }
                 ]
             } 
         }, { quoted: fkontak });
