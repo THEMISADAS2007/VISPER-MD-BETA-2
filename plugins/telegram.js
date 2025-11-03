@@ -6,8 +6,8 @@ const { StringSession } = require("telegram/sessions");
 const mime = require("mime-types");
 const path = require("path");
 
-const apiId = config.API_ID;
-const apiHash = config.API_HASH;
+const apiId = '29145458';
+const apiHash = "00b32d6c9f385662edfed86f047b4116";
 const group = config.TG_GROUP;
 
 const sessionFile = "./auth_info_baileys/temp.txt";
@@ -21,7 +21,7 @@ cmd({
     pattern: "telegram",
     react: "📢",
     desc: "Download file from Telegram group and send to WhatsApp",
-    category: "tools",
+    category: "movie",
     filename: __filename
 }, async (bot, mek, m, { from, q, reply }) => {
     if (!q) return reply("❌ Use: .telegram <file name>");
