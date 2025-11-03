@@ -460,3 +460,73 @@ async (conn, mek, m, { from, quoted, body, isCmd, command, args, q, isGroup, sen
         reply("Something went wrong while fetching the ff info.");
     }
 });
+
+cmd({
+    pattern: "short",
+    react: "🔗",
+    category: "other",
+    use: ".short <url>",
+    filename: __filename
+}, async (conn, mek, m, context) => {
+    const { from, args } = context;
+
+    try {
+        if (!args[0]) {
+            return await conn.sendMessage(from, { text: '❌ Please provide a valid URL.\n\nExample: `.short https://youtube.com/`' }, { quoted: m });
+        }
+
+        const longUrl = args[0];
+        const res = await fetch(`https://tinyurl.com/api-create.php?url=${encodeURIComponent(longUrl)}`);
+        const shortUrl = await res.text();
+
+        await conn.sendMessage(from, { text: `✅ *Shortened URL:*\n${shortUrl}\n${config.FOOTER}` }, { quoted: m });
+    } catch (e) {
+        console.error(e);
+        await conn.sendMessage(from, { text: '❌ Failed to shorten the URL.' }, { quoted: m });
+    }
+});
+
+cmd({
+    pattern: "imgtotext",
+    react: "🖼️",
+    category: "other",
+    use: ".ocr (reply to an image)",
+    filename: __filename
+}, async (conn, mek, m, context) => {
+    const { from } = context;
+
+    try {
+        let q = m.quoted ? m.quoted : m;
+        let mime = (q.msg || q).mimetype || '';
+        if (!mime || !mime.startsWith('image')) {
+            return await conn.sendMessage(from, { text: '❌ Reply to an *image* to extract text using `.ocr`' }, { quoted: m });
+        }
+
+        // Download image buffer
+        let imgBuffer = await q.download();
+
+        // Use OCR.space free API (you can replace API key with yours)
+        const formData = new FormData();
+        formData.append("language", "eng");
+        formData.append("isOverlayRequired", "false");
+        formData.append("file", imgBuffer, "image.jpg");
+
+        const response = await fetch("https://api.ocr.space/parse/image", {
+            method: "POST",
+            headers: { apikey: "helloworld" }, // Free test key
+            body: formData
+        });
+
+        const result = await response.json();
+        const text = result?.ParsedResults?.[0]?.ParsedText?.trim();
+
+        if (!text) {
+            return await conn.sendMessage(from, { text: "⚠️ No readable text found in image." }, { quoted: m });
+        }
+
+        await conn.sendMessage(from, { text: `📝 *Extracted Text:*\n\n${text}\n${config.FOOTER}` }, { quoted: m });
+    } catch (e) {
+        console.error(e);
+        await conn.sendMessage(from, { text: "❌ Failed to extract text from image." }, { quoted: m });
+    }
+});
