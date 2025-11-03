@@ -172,6 +172,18 @@ async (conn, mek, m, {
                                     title: "OWNER MENU",
                                     description: "Owner menu",
                                     id: ".ownermenu"
+                                },
+                                {
+                                    header: "1",
+                                    title: "GROUP MENU",
+                                    description: "Group menu",
+                                    id: ".groupmenu"
+                                },
+                                {
+                                    header: "1",
+                                    title: "SEARCH MENU",
+                                    description: "Search menu",
+                                    id: ".searchmenu"
                                 }
                             ]
                         }
