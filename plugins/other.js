@@ -845,55 +845,147 @@ cmd({
   }
 });
 //
+const fs = require('fs');
+const path = require('path');
+const os = require('os');
+const mime = require('mime-types');
 cmd({
   pattern: "story",
-  desc: "Post a WhatsApp status (story) as text, image, or video",
+  desc: "Post a WhatsApp status (text / image / video) — usage: .status <text|url> or reply to media with .status [caption]",
   category: "owner",
-  use: ".story <text|url> [caption]",
+  fromMe: true,
   filename: __filename
-}, async (conn, mek, m, { isOwner, args, quoted }) => {
-  if (!isOwner) return await m.reply("🚫 Only bot owner can use this command!");
+}, async (conn, m, msg, { isOwner, args, quoted, reply }) => {
+  if (!isOwner) return await reply("🚫 Only owner can use this command.");
 
   try {
-    // If quoted image or video
-    if (quoted?.message?.imageMessage || quoted?.message?.videoMessage) {
-      const media = await conn.downloadMediaMessage(quoted);
+    // helpers
+    const tempDir = os.tmpdir();
+
+    const cleanupFile = (filePath) => {
+      try { if (fs.existsSync(filePath)) fs.unlinkSync(filePath); } catch (e) {}
+    };
+
+    // 1) If replied to an image/video/audio/document/sticker
+    if (quoted && quoted.message) {
       const caption = args.join(" ") || "";
-      const type = quoted.message.imageMessage ? "image" : "video";
-      await conn.sendMessage("status@broadcast", { [type]: media, caption });
-      return await m.reply(`✅ ${type.toUpperCase()} status uploaded successfully!`);
-    }
+      // Attempt to detect type from quoted.message keys
+      const msgKeys = Object.keys(quoted.message);
+      // known types: imageMessage, videoMessage, documentMessage, stickerMessage, audioMessage
+      if (msgKeys.includes("imageMessage") || msgKeys.includes("videoMessage") || msgKeys.includes("documentMessage")) {
+        // download media buffer (some libs return buffer, some return stream/object)
+        await reply("⏳ Downloading quoted media and uploading as status...");
+        const mediaBuffer = await conn.downloadMediaMessage(quoted).catch(()=>null);
+        if (!mediaBuffer) return await reply("❌ Failed to download quoted media.");
 
-    // If URL is provided
-    if (args.length && /^https?:\/\/\S+/i.test(args[0])) {
-      const url = args[0];
-      const caption = args.slice(1).join(" ") || "";
-      const res = await axios.head(url);
-      const mime = res.headers["content-type"];
+        // determine type
+        let type = "image";
+        if (msgKeys.includes("videoMessage")) type = "video";
+        else if (msgKeys.includes("documentMessage")) {
+          const doc = quoted.message.documentMessage || quoted.message['documentMessage'];
+          const mimeType = doc && doc.mimetype ? doc.mimetype : '';
+          if (mimeType.startsWith("video")) type = "video";
+          else if (mimeType.startsWith("image")) type = "image";
+          else type = "document";
+        }
 
-      if (mime.startsWith("image")) {
-        await conn.sendMessage("status@broadcast", { image: { url }, caption });
-        return await m.reply("✅ Image status uploaded successfully!");
-      } else if (mime.startsWith("video")) {
-        await conn.sendMessage("status@broadcast", { video: { url }, caption });
-        return await m.reply("✅ Video status uploaded successfully!");
+        // send as status
+        if (type === "image") {
+          await conn.sendMessage("status@broadcast", { image: mediaBuffer, caption });
+          return await reply("✅ Image status uploaded.");
+        } else if (type === "video") {
+          await conn.sendMessage("status@broadcast", { video: mediaBuffer, caption });
+          return await reply("✅ Video status uploaded.");
+        } else {
+          // as document (may not show as story on some clients)
+          await conn.sendMessage("status@broadcast", { document: mediaBuffer, fileName: args.join(" ") || "file", mimetype: mime.lookup(args[0]) || "application/octet-stream", caption });
+          return await reply("✅ Document uploaded as status (may not display as story on all clients).");
+        }
+      } else if (msgKeys.includes("conversation") || msgKeys.includes("extendedTextMessage")) {
+        // replied to a text message
+        const text = args.join(" ") || (quoted.message.conversation || quoted.message.extendedTextMessage && quoted.message.extendedTextMessage.text) || "";
+        if (!text) return await reply("❗ No text found to post.");
+        await conn.sendMessage("status@broadcast", { text });
+        return await reply("✅ Text status uploaded.");
       } else {
-        return await m.reply("⚠️ Unsupported file type! Please send an image or video link.");
+        return await reply("❗ Unsupported quoted message type.");
       }
     }
 
-    // If only text
+    // 2) If first arg is a URL
+    if (args.length && /^https?:\/\/\S+/i.test(args[0])) {
+      const url = args[0];
+      const caption = args.slice(1).join(" ") || "";
+
+      await reply("⏳ Checking remote file...");
+      let head;
+      try {
+        head = await axios.head(url, { timeout: 15000 });
+      } catch (e) {
+        // fallback: try GET small chunk to detect content-type
+        try {
+          const r = await axios.get(url, { responseType: 'stream', headers: { Range: 'bytes=0-1024' }, timeout: 20000 });
+          head = { headers: r.headers };
+          r.data.destroy(); // stop download
+        } catch (e2) {
+          return await reply("❌ Couldn't access URL or detect file type.");
+        }
+      }
+      const ctype = (head && head.headers && (head.headers['content-type'] || head.headers['Content-Type'])) || '';
+      if (!ctype) return await reply("❌ Could not detect content type of URL.");
+
+      if (ctype.startsWith("image")) {
+        await reply("⏳ Downloading image and posting as status...");
+        const tmpPath = path.join(tempDir, `status_img_${Date.now()}.${mime.extension(ctype)||'jpg'}`);
+        const writer = fs.createWriteStream(tmpPath);
+        const r = await axios.get(url, { responseType: 'stream', timeout: 0 });
+        r.data.pipe(writer);
+        await new Promise((res, rej) => { writer.on('finish', res); writer.on('error', rej); });
+        await conn.sendMessage("status@broadcast", { image: fs.readFileSync(tmpPath), caption });
+        cleanupFile(tmpPath);
+        return await reply("✅ Image status uploaded from URL.");
+      } else if (ctype.startsWith("video")) {
+        await reply("⏳ Downloading video and posting as status...");
+        const tmpPath = path.join(tempDir, `status_vid_${Date.now()}.${mime.extension(ctype)||'mp4'}`);
+        const writer = fs.createWriteStream(tmpPath);
+        const r = await axios.get(url, { responseType: 'stream', timeout: 0 });
+        r.data.pipe(writer);
+        await new Promise((res, rej) => { writer.on('finish', res); writer.on('error', rej); });
+
+        // optional: check file size and warn
+        const stats = fs.statSync(tmpPath);
+        if (stats.size > 150 * 1024 * 1024) { // 150MB rough large limit
+          cleanupFile(tmpPath);
+          return await reply("⚠️ Video too large (>150MB). Please provide a smaller video or trim it.");
+        }
+
+        await conn.sendMessage("status@broadcast", { video: fs.readFileSync(tmpPath), caption });
+        cleanupFile(tmpPath);
+        return await reply("✅ Video status uploaded from URL.");
+      } else if (ctype.startsWith("text") || ctype === "application/json") {
+        // treat as text (fetch body)
+        await reply("⏳ Fetching text content...");
+        const body = (await axios.get(url, { timeout: 15000 })).data;
+        const text = typeof body === "string" ? body : JSON.stringify(body, null, 2);
+        await conn.sendMessage("status@broadcast", { text });
+        return await reply("✅ Text status uploaded from URL content.");
+      } else {
+        return await reply("❗ Unsupported URL content-type for status: " + ctype);
+      }
+    }
+
+    // 3) If plain text args provided -> text status
     if (args.length > 0) {
       const text = args.join(" ");
       await conn.sendMessage("status@broadcast", { text });
-      return await m.reply("✅ Text status uploaded successfully!");
+      return await reply("✅ Text status uploaded.");
     }
 
-    // No valid input
-    return await m.reply("❗ Use: `.story <text|url>` or reply to image/video with `.story [caption]`");
+    // 4) nothing provided
+    return await reply("❗ Usage:\n.reply to image/video: `.status [caption]`\n.or `.status <text>`\n.or `.status <url> [caption]`");
 
-  } catch (e) {
-    console.error(e);
-    await m.reply("❌ Failed to post status. Check console for error details.");
+  } catch (err) {
+    console.error("Status upload error:", err);
+    try { await reply("❌ Failed to post status: " + (err.message || String(err))); } catch (e) {}
   }
 });
