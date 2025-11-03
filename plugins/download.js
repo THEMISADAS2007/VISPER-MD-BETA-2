@@ -1484,6 +1484,10 @@ title: '```360p Video```',
 rowId: prefix + `videodl360 ${result.url}`
 },
 {
+title: '```480p Video```',
+rowId: prefix + `videodl480 ${result.url}`
+},  
+{
 title: '```720p Video```',
 rowId: prefix + `videodl720 ${result.url}`
 },       
@@ -1507,6 +1511,10 @@ rowId: prefix + `docdl240 ${result.url}&${result.thumbnail}&${result.title}`
 {
 title: '```360p Document```',
 rowId: prefix + `docdl360 ${result.url}&${result.thumbnail}&${result.title}`
+},
+{
+title: '```480p Document```',
+rowId: prefix + `docdl480 ${result.url}&${result.thumbnail}&${result.title}`
 },
 {
 title: '```720p Document```',
@@ -1537,7 +1545,8 @@ const listButtons = {
         { title: "144p Video", "description":"144p quality download", id: prefix + `videodl144 ${result.url}` },
         { title: "240p Video",  "description":"240p quality download",id: prefix + `videodl240 ${result.url}` },
         { title: "360p Video", "description":"360p quality download", id: prefix + `videodl360 ${result.url}` },
-        { title: "720p Video", "description":"720p quality download",id: prefix + `videodl720 ${result.url}` },
+		 { title: "720p Video", "description":"720p quality download",id: prefix + `videodl720 ${result.url}` },
+        { title: "480p Video", "description":"480p quality download",id: prefix + `videodl480 ${result.url}` },
         { title: "1080p Video","description":"1080p quality download", id: prefix + `videodl1080 ${result.url}` }
       ]
     },
@@ -1547,6 +1556,7 @@ const listButtons = {
         { title: "144p Document","description":"144p quality download", id: prefix + `docdl144 ${result.url}&${result.thumbnail}&${result.title}` },
         { title: "240p Document", "description":"240p quality download",id: prefix + `docdl240 ${result.url}&${result.thumbnail}&${result.title}` },
         { title: "360p Document","description":"360p quality download", id: prefix + `docdl360 ${result.url}&${result.thumbnail}&${result.title}` },
+		 { title: "480p Document", "description":"480p quality download",id: prefix + `docdl480 ${result.url}&${result.thumbnail}&${result.title}` },
         { title: "720p Document", "description":"720p quality download",id: prefix + `docdl720 ${result.url}&${result.thumbnail}&${result.title}` },
         { title: "1080p Document","description":"1080p quality download", id: prefix + `docdl1080 ${result.url}&${result.thumbnail}&${result.title}` }
       ]
@@ -1610,10 +1620,10 @@ async (conn, mek, m, { from, q, reply }) => {
         const resizedBotImg = await resizeImage(botimgBuffer, 200, 200);
 
         // Fetch the video download information
-        const prog = await fetchJson(`https://sadas-ytmp4-5.vercel.app/convert?link=${url}&format=mp4&audioBitrate=128&videoQuality=144&filenameStyle=pretty&vCodec=h264`);
+        const prog = await fetchJson(`https://tharuzz-ofc-api-v3.vercel.app/api/ytdl/yt?url=${url}&format=144`);
 
     
-        const videoUrl = prog.url;
+        const videoUrl = prog.result.download;
 
         // React with upload emoji
         await conn.sendMessage(from, { react: { text: '⬆️', key: mek.key } });
@@ -1622,7 +1632,7 @@ async (conn, mek, m, { from, q, reply }) => {
         await conn.sendMessage(from, {
             document: { url: videoUrl },
             jpegThumbnail: resizedBotImg,
-            caption: config?.FOOTER || '',
+            caption: '`144p`\n' + config?.FOOTER || '',
             mimetype: 'video/mp4',
             fileName: `${prog.filename || title}.mp4`
         }, { quoted: mek });
@@ -1661,9 +1671,8 @@ async (conn, mek, m, { from, q, reply }) => {
         const resizedBotImg = await resizeImage(botimgBuffer, 200, 200);
 
         // Fetch the video download information
-        const prog = await fetchJson(`https://sadas-ytmp4-5.vercel.app/convert?link=${url}&format=mp4&audioBitrate=128&videoQuality=240&filenameStyle=pretty&vCodec=h264`);
+        const prog = await fetchJson(`https://tharuzz-ofc-api-v3.vercel.app/api/ytdl/yt?url=${url}&format=240);
 
-    
         const videoUrl = prog.url;
 
         // React with upload emoji
@@ -1673,7 +1682,7 @@ async (conn, mek, m, { from, q, reply }) => {
         await conn.sendMessage(from, {
             document: { url: videoUrl },
             jpegThumbnail: resizedBotImg,
-            caption: config?.FOOTER || '',
+            caption: '`240p`\n' + config?.FOOTER || '',
             mimetype: 'video/mp4',
             fileName: `${prog.filename || title}.mp4`
         }, { quoted: mek });
@@ -1712,7 +1721,7 @@ async (conn, mek, m, { from, q, reply }) => {
         const resizedBotImg = await resizeImage(botimgBuffer, 200, 200);
 
         // Fetch the video download information
-        const prog = await fetchJson(`https://sadas-ytmp4-5.vercel.app/convert?link=${url}&format=mp4&audioBitrate=128&videoQuality=360&filenameStyle=pretty&vCodec=h264`);
+        const prog = await fetchJson(`https://tharuzz-ofc-api-v3.vercel.app/api/ytdl/yt?url=${url}&format=360`);
 
     
         const videoUrl = prog.url;
@@ -1724,7 +1733,7 @@ async (conn, mek, m, { from, q, reply }) => {
         await conn.sendMessage(from, {
             document: { url: videoUrl },
             jpegThumbnail: resizedBotImg,
-            caption: config?.FOOTER || '',
+            caption: '`360p`\n' + config?.FOOTER || '',
             mimetype: 'video/mp4',
             fileName: `${prog.filename || title}.mp4`
         }, { quoted: mek });
@@ -1738,7 +1747,51 @@ async (conn, mek, m, { from, q, reply }) => {
     }
 });
 
+cmd({
+    pattern: "docdl480",
+    react: "⬇️",
+    dontAddCommandList: true,
+    filename: __filename
+},
+    async (conn, mek, m, { from, q, reply }) => {
+try {
+           if (!q) return await reply('*Need a youtube url!*')
+	        const parts = q.split("&");
+        const url = parts[0];
+        const thumbUrl = parts[1];
+        const title = parts[2] || 'video';
 
+        // Fetch and resize the thumbnail
+        const botimgResponse = await fetch(thumbUrl);
+        const botimgBuffer = await botimgResponse.buffer();
+
+        // Resize function must be defined elsewhere in your codebase
+        const resizedBotImg = await resizeImage(botimgBuffer, 200, 200);
+
+        // Fetch the video download information
+        const prog = await fetchJson(`https://tharuzz-ofc-api-v3.vercel.app/api/ytdl/yt?url=${url}&format=480`);
+
+    
+        const videoUrl = prog.url;
+
+        // React with upload emoji
+        await conn.sendMessage(from, { react: { text: '⬆️', key: mek.key } });
+
+        // Send video as document
+        await conn.sendMessage(from, {
+            document: { url: videoUrl },
+            jpegThumbnail: resizedBotImg,
+            caption: '`480p`\n' + config?.FOOTER || '',
+            mimetype: 'video/mp4',
+            fileName: `${prog.filename || title}.mp4`
+        }, { quoted: mek });
+
+        // React with check mark
+        await conn.sendMessage(from, { react: { text: '✔️', key: mek.key } });
+} catch (e) {
+	       console.log(e)
+        }
+    })
 
 cmd({
     pattern: "docdl720",
@@ -1762,7 +1815,7 @@ try {
         const resizedBotImg = await resizeImage(botimgBuffer, 200, 200);
 
         // Fetch the video download information
-        const prog = await fetchJson(`https://sadas-ytmp4-5.vercel.app/convert?link=${url}&format=mp4&audioBitrate=128&videoQuality=720&filenameStyle=pretty&vCodec=h264`);
+        const prog = await fetchJson(`https://tharuzz-ofc-api-v3.vercel.app/api/ytdl/yt?url=${url}&format=720`);
 
     
         const videoUrl = prog.url;
@@ -1774,7 +1827,7 @@ try {
         await conn.sendMessage(from, {
             document: { url: videoUrl },
             jpegThumbnail: resizedBotImg,
-            caption: config?.FOOTER || '',
+            caption: '`720p`\n' + config?.FOOTER || '',
             mimetype: 'video/mp4',
             fileName: `${prog.filename || title}.mp4`
         }, { quoted: mek });
@@ -1811,7 +1864,7 @@ try {
         const resizedBotImg = await resizeImage(botimgBuffer, 200, 200);
 
         // Fetch the video download information
-        const prog = await fetchJson(`https://sadas-ytmp4-5.vercel.app/convert?link=${url}&format=mp4&audioBitrate=128&videoQuality=1080&filenameStyle=pretty&vCodec=h264`);
+        const prog = await fetchJson(`https://tharuzz-ofc-api-v3.vercel.app/api/ytdl/yt?url=${url}&format=1080`);
 
     
         const videoUrl = prog.url;
@@ -1823,7 +1876,7 @@ try {
         await conn.sendMessage(from, {
             document: { url: videoUrl },
             jpegThumbnail: resizedBotImg,
-            caption: config?.FOOTER || '',
+            caption: '`1080p`\n' + config?.FOOTER || '',
             mimetype: 'video/mp4',
             fileName: `${prog.filename || title}.mp4`
         }, { quoted: mek });
@@ -1838,20 +1891,6 @@ try {
 
 
 
-
-
-
-
-
-
-
-
-
-
-
-
-
-
 cmd({
     pattern: "videodl144",
     react: "⬇️",
@@ -1862,17 +1901,17 @@ async (conn, mek, m, { from, q, reply }) => {
     try {
         if (!q) return await reply('*You must provide a YouTube URL!*');
 
-        const res = await fetchJson(`https://sadas-ytmp4-5.vercel.app/convert?link=${q}&format=mp4&audioBitrate=128&videoQuality=144&filenameStyle=pretty&vCodec=h264`);
+        const res = await fetchJson(`https://tharuzz-ofc-api-v3.vercel.app/api/ytdl/yt?url=${q}&format=144`);
         
 
      
-        const videoUrl = res.url;
+        const videoUrl = res.result.download;
 
         await conn.sendMessage(from, { react: { text: '⬆️', key: mek.key } });
 
         await conn.sendMessage(from, {
             video: { url: videoUrl },
-            caption: res.filename || 'Downloaded Video'
+            caption: res.filename + '\n`144p`' || 'Downloaded Video'
         }, { quoted: mek });
 
         await conn.sendMessage(from, { react: { text: '✔️', key: mek.key } });
@@ -1895,17 +1934,17 @@ cmd({
 
     async (conn, mek, m, { from, q, reply }) => {
         try {
-           const res = await fetchJson(`https://sadas-ytmp4-5.vercel.app/convert?link=${q}&format=mp4&audioBitrate=240&videoQuality=144&filenameStyle=pretty&vCodec=h264`);
+           const res = await fetchJson(`https://tharuzz-ofc-api-v3.vercel.app/api/ytdl/yt?url=${q}&format=240`);
         
 
      
-        const videoUrl = res.url;
+        const videoUrl = res.result.download;
 
         await conn.sendMessage(from, { react: { text: '⬆️', key: mek.key } });
 
         await conn.sendMessage(from, {
             video: { url: videoUrl },
-            caption: res.filename || 'Downloaded Video'
+            caption: res.filename + '\n`240p`' || 'Downloaded Video'
         }, { quoted: mek });
 
         await conn.sendMessage(from, { react: { text: '✔️', key: mek.key } });
@@ -1927,17 +1966,47 @@ cmd({
 
     async (conn, mek, m, { from, q, reply }) => {
         try {
-           const res = await fetchJson(`https://sadas-ytmp4-5.vercel.app/convert?link=${q}&format=mp4&audioBitrate=360&videoQuality=144&filenameStyle=pretty&vCodec=h264`);
+           const res = await fetchJson(`https://tharuzz-ofc-api-v3.vercel.app/api/ytdl/yt?url=${q}&format=360`);
         
 
      
-        const videoUrl = res.url;
+        const videoUrl = res.result.download;
 
         await conn.sendMessage(from, { react: { text: '⬆️', key: mek.key } });
 
         await conn.sendMessage(from, {
             video: { url: videoUrl },
-            caption: res.filename || 'Downloaded Video'
+            caption: res.filename + '\n`360p`' || 'Downloaded Video'
+        }, { quoted: mek });
+
+        await conn.sendMessage(from, { react: { text: '✔️', key: mek.key } });
+
+        } catch (e) {
+            reply('*Error !!*')
+            console.log(e)
+        }
+    })
+
+cmd({
+    pattern: "videodl480",
+    react: "⬇️",
+    dontAddCommandList: true,
+    filename: __filename
+},
+
+    async (conn, mek, m, { from, q, reply }) => {
+        try {
+           const res = await fetchJson(`https://tharuzz-ofc-api-v3.vercel.app/api/ytdl/yt?url=${q}&format=480`);
+        
+
+     
+        const videoUrl = res.result.download;
+
+        await conn.sendMessage(from, { react: { text: '⬆️', key: mek.key } });
+
+        await conn.sendMessage(from, {
+            video: { url: videoUrl },
+            caption: res.filename + '\n`480p`' || 'Downloaded Video'
         }, { quoted: mek });
 
         await conn.sendMessage(from, { react: { text: '✔️', key: mek.key } });
@@ -1949,8 +2018,6 @@ cmd({
     })
 
 
-
-
 cmd({
     pattern: "videodl720",
     react: "⬇️",
@@ -1960,17 +2027,17 @@ cmd({
 
     async (conn, mek, m, { from, q, reply }) => {
         try {
-          const res = await fetchJson(`https://sadas-ytmp4-5.vercel.app/convert?link=${q}&format=mp4&audioBitrate=128&videoQuality=720&filenameStyle=pretty&vCodec=h264`);
+          const res = await fetchJson(`https://tharuzz-ofc-api-v3.vercel.app/api/ytdl/yt?url=${q}&format=720`);
         
 
      
-        const videoUrl = res.url;
+        const videoUrl = res.result.download;
 
         await conn.sendMessage(from, { react: { text: '⬆️', key: mek.key } });
 
         await conn.sendMessage(from, {
             video: { url: videoUrl },
-            caption: res.filename || 'Downloaded Video'
+            caption: res.filename + '\n`720p`' || 'Downloaded Video'
         }, { quoted: mek });
 
         await conn.sendMessage(from, { react: { text: '✔️', key: mek.key } });
@@ -1992,17 +2059,17 @@ cmd({
 
     async (conn, mek, m, { from, q, reply }) => {
         try {
-           const res = await fetchJson(`https://sadas-ytmp4-5.vercel.app/convert?link=${q}&format=mp4&audioBitrate=128&videoQuality=1080&filenameStyle=pretty&vCodec=h264`);
+           const res = await fetchJson(`https://tharuzz-ofc-api-v3.vercel.app/api/ytdl/yt?url=${q}&format=1080`);
         
 
      
-        const videoUrl = res.url;
+        const videoUrl = res.result.download;
 
         await conn.sendMessage(from, { react: { text: '⬆️', key: mek.key } });
 
         await conn.sendMessage(from, {
             video: { url: videoUrl },
-            caption: res.filename || 'Downloaded Video'
+            caption: res.filename + '\n`1080p`' || 'Downloaded Video'
         }, { quoted: mek });
 
         await conn.sendMessage(from, { react: { text: '✔️', key: mek.key } });
@@ -2036,7 +2103,7 @@ let listdata = `*\`🔥 𝙑𝙄𝙎𝙋𝙀𝙍 𝙈𝙀𝘿𝙄𝘼𝙁𝙄�
 *├ \`⏩ Type\` :* ${data.fileType}
 *├ \`📁 Size\` :* ${data.size}
 *├ \`📅 Date\` :* ${data.date}
-*└──────────────────╯*`
+*└──────────────────╯*\n config.FOOTER`
 
 	
 reply(listdata)
