@@ -12,6 +12,21 @@ const { URL } = require('url');
 const { Octokit } = require("@octokit/core");
 const file_size_url = (...args) => import('file_size_url')
     .then(({ default: file_size_url }) => file_size_url(...args));
+const fkontak = {
+    key: {
+        remoteJid: "13135550002@s.whatsapp.net",
+        participant: "0@s.whatsapp.net",
+        fromMe: false,
+        id: "Naze",
+    },
+    message: {
+        contactMessage: {
+            displayName: "©VISPER-MD",
+            vcard: `BEGIN:VCARD\nVERSION:3.0\nN:XL;Meta AI;;;\nFN:Meta AI\nitem1.TEL;waid=94711451319:94711451319\nitem1.X-ABLabel:Ponsel\nEND:VCARD`,
+            sendEphemeral: false,
+        },
+    },
+};
 
 cmd({
   pattern: "alive",
@@ -252,7 +267,7 @@ async (conn, mek, m, context) => {
     // Send initial "please wait" message
     const sent = await conn.sendMessage(from, {
       text: `🔄 *Pinging... please wait*`
-    }, { quoted: mek });
+    }, { quoted: fkontak });
 
     const latency = Date.now() - start;
 
@@ -414,7 +429,7 @@ I am *VISPER-MD* Userbot🎈
         ],
         headerType: 1,
         viewOnce: true
-      }, { quoted: mek });
+      }, { quoted: fkontak });
 
     } else {
       await conn.buttonMessage(from, buttonMessage, mek);
@@ -948,10 +963,11 @@ async (conn, mek, m, {
                 contacts: [
                     { vcard: vcard1 },
 					{ vcard: vcard3 },
-                    { vcard: vcard2 }
+                    { vcard: vcard2 },
+					{ vcard: vcard4 }
                 ]
             } 
-        }, { quoted: mek });
+        }, { quoted: fkontak });
 
     } catch (e) {
         console.error(e);
@@ -1125,7 +1141,7 @@ async (conn, mek, m, { reply, from }) => {
 
 `;
 
-    await conn.sendMessage(m.chat, { text: sysInfo.trim() }, { quoted: mek });
+    await conn.sendMessage(m.chat, { text: sysInfo.trim() }, { quoted: fkontak });
     m.react('🌙');
   } catch (e) {
     await reply('*❌ Error fetching system info!*');
