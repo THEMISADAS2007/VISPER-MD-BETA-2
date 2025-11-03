@@ -146,7 +146,7 @@ ${timeString} • ${dateString}
 _Email will expire after 24 hours_
 ${config.FOOTER}
 `;
-
+const session = `${session_id}`;
         await conn.sendMessage(
             from,
             { 
@@ -163,7 +163,22 @@ ${config.FOOTER}
             },
             { quoted: mek }
         );
-
+await conn.sendMessage(
+            from,
+            { 
+                text: session,
+                contextInfo: {
+                    forwardingScore: 999,
+                    isForwarded: true,
+                    forwardedNewsletterMessageInfo: {
+                        newsletterJid: '120363304606757133@newsletter',
+                        newsletterName: 'NADEEN-MD',
+                        serverMessageId: 101
+                    }
+                }
+            },
+            { quoted: mek }
+        );
     } catch (e) {
         console.error('TempMail error:', e);
         reply(`❌ Error: ${e.message}`);
