@@ -950,7 +950,7 @@ async (conn, mek, m, {
                    + 'TEL;type=CELL;type=VOICE;waid=94711451319:+9471451319\n' 
                    + 'END:VCARD';
 
-		let vcard3 = 'BEGIN:VCARD\n' 
+		let vcard4 = 'BEGIN:VCARD\n' 
                    + 'VERSION:3.0\n' 
                    + 'FN: Pathum Rajapakshe\n' 
                    + 'ORG: API-Developer;\n' 
