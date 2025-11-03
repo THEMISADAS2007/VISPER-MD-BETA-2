@@ -16,7 +16,7 @@ SUDO: '',//
 DB_NAME: 'pramaaaataaaaaaaaaajjaa',
 LANG: 'SI',
 OWNER_NUMBER: '94724884317',
-TG_GROUP: ''
+TG_GROUP: 'https://t.me/+Zm865mJ_TL0yNGVl'
 
 };
 //GITHUB_AUTH_TdOKEN: 'ouvnI0xSDsmfWA1filVxx.SZ0vJGYkjlC5VX54U0e10',
