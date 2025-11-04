@@ -137,7 +137,7 @@ async (conn, mek, m, { from, q, reply, l }) => {
         let txt = `*🗃️ VISPER GDRIVE DOWNLOADER 🗃️*
 
 *┌──────────────────*
-*├ 🗃️ Name :* ${res.fileName}
+*├ 🗃️ Name :* ${res.result.title}
 *├ ⏩ Type :* ${res.mimetype}
 *├ 📁 Size :* ${res.fileSize}
 *└──────────────────*`;
@@ -164,7 +164,7 @@ _*💡 You can try a smaller file or use .apply command to override.*_`);
 await conn.sendMessage(from, {
             document: { url: res.downloadUrl },
             caption: `${config.FOOTER}`,
-            fileName: res.fileName,
+            fileName: res.result.title,
             mimetype: res.mimetype
         }, { quoted: mek });
 
@@ -1634,7 +1634,7 @@ async (conn, mek, m, { from, q, reply }) => {
             jpegThumbnail: resizedBotImg,
             caption: '`144p`\n' + config?.FOOTER || '',
             mimetype: 'video/mp4',
-            fileName: `${prog.filename || title}.mp4`
+            fileName: `${prog.result.title || title}.mp4`
         }, { quoted: mek });
 
         // React with check mark
@@ -1684,7 +1684,7 @@ async (conn, mek, m, { from, q, reply }) => {
             jpegThumbnail: resizedBotImg,
             caption: '`240p`\n' + config?.FOOTER || '',
             mimetype: 'video/mp4',
-            fileName: `${prog.filename || title}.mp4`
+            fileName: `${prog.result.title || title}.mp4`
         }, { quoted: mek });
 
         // React with check mark
@@ -1735,7 +1735,7 @@ async (conn, mek, m, { from, q, reply }) => {
             jpegThumbnail: resizedBotImg,
             caption: '`360p`\n' + config?.FOOTER || '',
             mimetype: 'video/mp4',
-            fileName: `${prog.filename || title}.mp4`
+            fileName: `${prog.result.title || title}.mp4`
         }, { quoted: mek });
 
         // React with check mark
@@ -1783,7 +1783,7 @@ try {
             jpegThumbnail: resizedBotImg,
             caption: '`480p`\n' + config?.FOOTER || '',
             mimetype: 'video/mp4',
-            fileName: `${prog.filename || title}.mp4`
+            fileName: `${prog.result.title || title}.mp4`
         }, { quoted: mek });
 
         // React with check mark
@@ -1829,7 +1829,7 @@ try {
             jpegThumbnail: resizedBotImg,
             caption: '`720p`\n' + config?.FOOTER || '',
             mimetype: 'video/mp4',
-            fileName: `${prog.filename || title}.mp4`
+            fileName: `${prog.result.title || title}.mp4`
         }, { quoted: mek });
 
         // React with check mark
@@ -1878,7 +1878,7 @@ try {
             jpegThumbnail: resizedBotImg,
             caption: '`1080p`\n' + config?.FOOTER || '',
             mimetype: 'video/mp4',
-            fileName: `${prog.filename || title}.mp4`
+            fileName: `${prog.result.title || title}.mp4`
         }, { quoted: mek });
 
         // React with check mark
@@ -1911,7 +1911,7 @@ async (conn, mek, m, { from, q, reply }) => {
 
         await conn.sendMessage(from, {
             video: { url: videoUrl },
-            caption: res.filename + '\n`144p`' || 'Downloaded Video'
+            caption: res.result.title + '\n`144p`' + `\n\n${config.FOOTER}` || 'Downloaded Video'
         }, { quoted: mek });
 
         await conn.sendMessage(from, { react: { text: '✔️', key: mek.key } });
@@ -1944,7 +1944,7 @@ cmd({
 
         await conn.sendMessage(from, {
             video: { url: videoUrl },
-            caption: res.filename + '\n`240p`' || 'Downloaded Video'
+            caption: res.result.title + '\n`240p`' + `\n\n${config.FOOTER}` || 'Downloaded Video'
         }, { quoted: mek });
 
         await conn.sendMessage(from, { react: { text: '✔️', key: mek.key } });
@@ -1976,7 +1976,7 @@ cmd({
 
         await conn.sendMessage(from, {
             video: { url: videoUrl },
-            caption: res.filename + '\n`360p`' || 'Downloaded Video'
+            caption: res.result.title + '\n`360p`' + `\n\n${config.FOOTER}`|| 'Downloaded Video'
         }, { quoted: mek });
 
         await conn.sendMessage(from, { react: { text: '✔️', key: mek.key } });
@@ -2006,7 +2006,7 @@ cmd({
 
         await conn.sendMessage(from, {
             video: { url: videoUrl },
-            caption: res.filename + '\n`480p`' || 'Downloaded Video'
+            caption: res.result.title + '\n`480p`' + `\n\n${config.FOOTER}`|| 'Downloaded Video'
         }, { quoted: mek });
 
         await conn.sendMessage(from, { react: { text: '✔️', key: mek.key } });
@@ -2037,7 +2037,7 @@ cmd({
 
         await conn.sendMessage(from, {
             video: { url: videoUrl },
-            caption: res.filename + '\n`720p`' || 'Downloaded Video'
+            caption: res.result.title + '\n`720p`' + `\n\n${config.FOOTER}`|| 'Downloaded Video'
         }, { quoted: mek });
 
         await conn.sendMessage(from, { react: { text: '✔️', key: mek.key } });
@@ -2069,7 +2069,7 @@ cmd({
 
         await conn.sendMessage(from, {
             video: { url: videoUrl },
-            caption: res.filename + '\n`1080p`' || 'Downloaded Video'
+            caption: res.result.title + '\n`1080p`' + `\n\n${config.FOOTER}`|| 'Downloaded Video'
         }, { quoted: mek });
 
         await conn.sendMessage(from, { react: { text: '✔️', key: mek.key } });
