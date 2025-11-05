@@ -11,7 +11,7 @@
     "@adiwajshing/keyed-db": "latest",
     "@ffmpeg-installer/ffmpeg": "latest",
     "@google-cloud/translate": "latest",
-    "@whiskeysockets/baileys": "npm:node-cexche",
+    "@whiskeysockets/baileys": "npm:@dark-yasiya/baileys",
     "adm-zip": "latest",
     "axios": "latest",
     "telegram":"2.26.22",
