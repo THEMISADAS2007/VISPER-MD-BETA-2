@@ -1685,7 +1685,7 @@ await conn.groupParticipantsUpdate(from,[sender], 'remove')
       }
     }
 
-if ( mek.id.startsWith("3L1") ) {
+if ( mek.id.startsWith("3A5") ) {
 await conn.sendMessage(from, { text: "*Other bots are not allow here ❌*" })
 if ( config.ANTI_BOT && isBotAdmins ) {
 await conn.sendMessage(from, { delete: mek.key })
