@@ -3112,23 +3112,21 @@ console.log(`Input:`, q)
 
         //===================================================
         const botimg = imglink.trim();
-        const message = {
-            document: { url: fhd },
-            caption: `🎬 ${title}\n\n${config.NAME}\n\n${config.FOOTER}`,
-            mimetype: "video/mp4",
-            jpegThumbnail: await (await fetch(botimg)).buffer(),
-            fileName: `🎬VISPER-MD🎬${title}.mp4`,
-        };
-
-        // Send "uploading..." msg without blocking
+    // Send "uploading..." msg without blocking
         conn.sendMessage(from, { text: '*Uploading your movie.. ⬆️*', quoted: mek });
-
-        // Upload + react + success (parallel tasks)
-        await Promise.all([
-            conn.sendMessage(config.JID || from, message),
+ await conn.sendMessage(config.JID || from, { 
+                document: { url: fhd },
+                caption: `🎬 ${title}\n\n${config.NAME}\n\n${config.FOOTER}`,
+                mimetype: "video/mp4",
+                //jpegThumbnail: await (await fetch(botimg)).buffer(),
+                fileName: `🎬VISPER-MD🎬${title}.mp4`
+            });
+		
+     
+            
             conn.sendMessage(from, { react: { text: '✔️', key: mek.key } }),
             conn.sendMessage(from, { text: `*Movie sent successfully  ✔*`, quoted: mek })
-        ]);
+       
 
     } catch (e) {
         reply('🚫 *Error Occurred !!*\n\n' + e.message);
