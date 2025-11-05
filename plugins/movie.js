@@ -2867,114 +2867,219 @@ cmd({
     pattern: "sinhalasub",
     react: '🔎',
     category: "movie",
-    alias: ["sinhalasub"],
-    desc: "sinhalasub.lk movie search",
-    use: ".sinhalasub 2025",
+    alias: ["sinsub", "sinhalasub"],
+    desc: "Search movies on sinhalasub.lk",
+    use: ".sinhalasub <movie name>",
     filename: __filename
 },
 async (conn, m, mek, { from, q, prefix, isPre, isMe, isSudo, isOwner, reply }) => {
+    try {
+        // 🧩 Premium check
+        const pr = (await axios.get('https://raw.githubusercontent.com/Nadeenpoorna-app/main-data/refs/heads/main/master.json')).data;
+        const isFree = pr.mvfree === "true";
+
+        if (!isFree && !isMe && !isPre) {
+            await conn.sendMessage(from, { react: { text: '❌', key: mek.key } });
+            return await conn.sendMessage(from, {
+                text: "*`You are not a premium user⚠️`*\n\n" +
+                      "*Send a message to one of the 2 numbers below and buy Lifetime premium 🎉.*\n\n" +
+                      "_Price : 200 LKR ✔️_\n\n" +
+                      "*👨‍💻Contact us : 0778500326 , 0722617699*"
+            }, { quoted: mek });
+        }
+
+        if (config.MV_BLOCK == "true" && !isMe && !isSudo && !isOwner) {
+            await conn.sendMessage(from, { react: { text: '❌', key: mek.key } });
+            return await conn.sendMessage(from, { 
+                text: "*This command currently only works for the Bot owner. To disable it for others, use the .settings command 👨‍🔧.*" 
+            }, { quoted: mek });
+        }
+
+        if (!q) return await reply('*Please enter a movie name! 🎬*');
+
+        // 🔗 Fetch SinhalaSub API
+        const { data: apiRes } = await axios.get(`https://visper-md-ap-is.vercel.app/movie/sinhalasub/search?q=${encodeURIComponent(q)}`);
+
+        // 🧠 Normalize structure
+        let results = [];
+        if (Array.isArray(apiRes)) results = apiRes;
+        else if (Array.isArray(apiRes.result)) results = apiRes.result;
+        else if (Array.isArray(apiRes.results)) results = apiRes.results;
+        else if (Array.isArray(apiRes.data)) results = apiRes.data;
+        else results = [];
+
+        if (!results.length) {
+            await conn.sendMessage(from, { react: { text: '❌', key: mek.key } });
+            return await conn.sendMessage(from, { text: '*No results found ❌*' }, { quoted: mek });
+        }
+
+        // 🧩 Create list
+        let srh = results.map(v => ({
+            title: (v.Title || v.title || "Unknown Title")
+                .replace(/Sinhala Subtitles\s*\|?\s*සිංහල උපසිරසි.*/gi, "")
+                .trim(),
+            description: "",
+            rowId: prefix + 'sininfo ' + (v.Link || v.link || "")
+        }));
+
+        const sections = [{
+            title: "sinhalasub.lk results",
+            rows: srh
+        }];
+
+        const listMessage = {
+            text: `_*SINHALASUB MOVIE SEARCH RESULTS 🎬*_\n\n*🔎 Input:* ${q}`,
+            footer: config.FOOTER,
+            title: 'sinhalasub.lk Results 🎥',
+            buttonText: '*Reply Below Number 🔢*',
+            sections
+        };
+
+        const caption = `_*SINHALASUB MOVIE SEARCH RESULTS 🎬*_\n\n*🏔️ Input:* ${q}`;
+
+        // 🎛️ Interactive button or list
+        if (config.BUTTON === "true") {
+            const listButtons = {
+                title: "Choose a Movie 🎬",
+                sections: [
+                    {
+                        title: "Available Movies",
+                        rows: srh
+                    }
+                ]
+            };
+
+            await conn.sendMessage(from, {
+                image: { url: config.LOGO },
+                caption: caption,
+                footer: config.FOOTER,
+                buttons: [
+                    {
+                        buttonId: "download_list",
+                        buttonText: { displayText: "🎥 Select Option" },
+                        type: 4,
+                        nativeFlowInfo: {
+                            name: "single_select",
+                            paramsJson: JSON.stringify(listButtons)
+                        }
+                    }
+                ],
+                headerType: 1,
+                viewOnce: true
+            }, { quoted: mek });
+        } else {
+            await conn.listMessage(from, listMessage, mek);
+        }
+
+    } catch (e) {
+        console.error("🔥 SinhalaSub Error:", e);
+        reply('🚫 *Error Occurred !!*\n\n' + e.message);
+    }
+});
+cmd({
+    pattern: "sininfo",
+    alias: ["mdv"],
+    use: '.moviedl <url>',
+    react: "🎥",
+    desc: "Download movies from sinhalasub.lk",
+    filename: __filename
+},
+
+async (conn, mek, m, { from, q, prefix, isMe, isOwner, reply }) => {
 try {
+    if (!q) return reply('🚩 *Please give me a valid movie URL!*');
 
-const pr = (await axios.get('https://raw.githubusercontent.com/Nadeenpoorna-app/main-data/refs/heads/main/master.json')).data;
+    // 🔍 Validate URL
+    if (!q.includes('https://sinhalasub.lk/movies/')) {
+        return await reply('*❗ This appears to be a TV series. Please use the .tv command instead.*');
+    }
 
-// convert string to boolean
-const isFree = pr.mvfree === "true";
+    // 🧠 Fetch movie info from your API
+    const { data: sadass } = await axios.get(`https://visper-md-ap-is.vercel.app/movie/sinhalasub/info?q=${encodeURIComponent(q)}`);
+    const sadas = sadass.result;
 
-// if not free and not premium or owner
-if (!isFree && !isMe && !isPre) {
-    await conn.sendMessage(from, { react: { text: '❌', key: mek.key } });
-    return await conn.sendMessage(from, {
-        text: "*`You are not a premium user⚠️`*\n\n" +
-              "*Send a message to one of the 2 numbers below and buy Lifetime premium 🎉.*\n\n" +
-              "_Price : 200 LKR ✔️_\n\n" +
-              "*👨‍💻Contact us : 0716769285 , 0722617699*"
-    }, { quoted: mek });
-}
+    if (!sadas || Object.keys(sadas).length === 0)
+        return await conn.sendMessage(from, { text: "🚩 *I couldn't find any movie info 😔*" }, { quoted: mek });
 
-if (config.MV_BLOCK == "true" && !isMe && !isSudo && !isOwner) {
-    await conn.sendMessage(from, { react: { text: '❌', key: mek.key } });
-    return await conn.sendMessage(from, { 
-        text: "*This command currently only works for the Bot owner. To disable it for others, use the .settings command 👨‍🔧.*" 
-    }, { quoted: mek });
-}
+    // 🎬 Movie info caption
+    const msg = `*🌾 𝗧ɪᴛʟᴇ ➮* *_${sadas.title || 'N/A'}_*
 
-if(!q) return await reply('*Please enter a movie name! 🎬*')
+*📅 𝗥𝗲𝗹𝗲𝗮𝘀𝗲𝗱 𝗗𝗮𝘁𝗲 ➮* _${sadas.date || 'N/A'}_
+*🌎 𝗖𝗼𝘂𝗻𝘁𝗿𝘆 ➮* _${sadas.country || 'N/A'}_
+*💃 𝗥𝗮𝘁𝗶𝗻𝗴 ➮* _${sadas.rating || 'N/A'}_
+*⏰ 𝗥𝘂𝗻𝘁𝗶𝗺𝗲 ➮* _${sadas.duration || 'N/A'}_
+*🕵️ 𝗦𝘂𝗯𝘁𝗶𝘁𝗹𝗲 𝗕𝘆 ➮* _${sadas.author || 'N/A'}_
+`;
 
-// 🔗 Use your new API
-const { data: urll } = await axios.get(`https://visper-md-ap-is.vercel.app/movie/sinhalasub/search?q=${encodeURIComponent(q)}`);
+    // 🧩 Create buttons
+    const rows = [
+        { buttonId: prefix + 'daqt ' + q, buttonText: { displayText: '💡 Send Details' }, type: 1 },
+        { buttonId: prefix + 'ch ' + q, buttonText: { displayText: '🖼️ Send Images' }, type: 1 }
+    ];
 
-if (!urll || urll.result.length === 0) {
-    await conn.sendMessage(from, { react: { text: '❌', key: mek.key } });
-    return await conn.sendMessage(from, { text: '*No results found ❌*' }, { quoted: mek });
-}
+    // Add download links
+    if (sadas.downloadLinks && sadas.downloadLinks.length > 0) {
+        sadas.downloadLinks.forEach(v => {
+            rows.push({
+                buttonId: prefix + `sindl ${v.link}±${sadas.images?.[1] || ''}±${sadas.title}`,
+                buttonText: { displayText: `${v.size || 'N/A'} - ${v.quality || 'Unknown Quality'}` },
+                type: 1
+            });
+        });
+    }
 
-// 🧩 Create result list
-let srh = urll.result.map(v => ({
-    title: v.Title.replace("Sinhala Subtitles | සිංහල උපසිරසි සමඟ", ""),
-    description: '',
-    rowId: prefix + 'sininfo ' + v.Link
-}));
+    // 🧾 Prepare list menu
+    const listRows = (sadas.downloadLinks || []).map(v => ({
+        title: `${v.size} - ${v.quality}`,
+        id: prefix + `sindl ${v.link}±${sadas.images?.[1] || ''}±${sadas.title}`
+    }));
 
-const sections = [{
-    title: "sinhalasub.lk results",
-    rows: srh
-}];
+    const listButtons = {
+        title: "🎬 Choose a download link :)",
+        sections: [{ title: "Available Download Links", rows: listRows }]
+    };
 
-const listMessage = {
-    text: `_*SINHALASUB MOVIE SEARCH RESULTS 🎬*_\n\n*🌋 Input:* ${q}`,
-    footer: config.FOOTER,
-    title: 'sinhalasub.lk Results 🎥',
-    buttonText: '*Reply Below Number 🔢*',
-    sections
-};
+    // 🖼️ Image + Caption
+    const movieImage = sadas.images?.[0] || config.LOGO;
 
-const caption = `_*SINHALASUB MOVIE SEARCH RESULTS 🎬*_\n\n*🏔️ Input:* ${q}`;
-
-// 🎛️ If button mode = true → show interactive buttons
-const rowss = urll.map((v) => ({
-    title: v.Title.replace(/(WEBDL|WEB DL|BluRay HD|BluRay SD|BluRay FHD|Telegram BluRay SD|Telegram BluRay HD|Direct BluRay SD|Direct BluRay HD|Direct BluRay FHD|FHD|HD|SD|Telegram BluRay FHD)/gi, "").trim(),
-    id: prefix + `sininfo ${v.Link}`
-}));
-
-const listButtons = {
-    title: "Choose a Movie 🎬",
-    sections: [
-      {
-        title: "Available Movies",
-        rows: rowss
-      }
-    ]
-};
-
-if (config.BUTTON === "true") {
-    await conn.sendMessage(from, {
-        image: { url: config.LOGO },
-        caption: caption,
-        footer: config.FOOTER,
-        buttons: [
-            {
-                buttonId: "download_list",
-                buttonText: { displayText: "🎥 Select Option" },
-                type: 4,
-                nativeFlowInfo: {
-                    name: "single_select",
-                    paramsJson: JSON.stringify(listButtons)
+    // ✅ BUTTON MODE ENABLED
+    if (config.BUTTON === "true") {
+        await conn.sendMessage(from, {
+            image: { url: movieImage },
+            caption: msg,
+            footer: config.FOOTER,
+            buttons: [
+                { buttonId: prefix + 'daqt ' + q, buttonText: { displayText: "Details" }, type: 1 },
+                { buttonId: prefix + 'ch ' + q, buttonText: { displayText: "Images" }, type: 1 },
+                {
+                    buttonId: "download_list",
+                    buttonText: { displayText: "🎥 Select Option" },
+                    type: 4,
+                    nativeFlowInfo: {
+                        name: "single_select",
+                        paramsJson: JSON.stringify(listButtons)
+                    }
                 }
-            }
-        ],
-        headerType: 1,
-        viewOnce: true
-    }, { quoted: mek });
-} else {
-    await conn.listMessage(from, listMessage, mek);
-}
+            ],
+            headerType: 1,
+            viewOnce: true
+        }, { quoted: mek });
+    } else {
+        // ✅ NORMAL MODE
+        await conn.sendMessage(from, {
+            image: { url: movieImage },
+            caption: msg,
+            footer: config.FOOTER,
+            buttons: rows,
+            headerType: 4
+        }, { quoted: mek });
+    }
 
 } catch (e) {
-    reply('🚫 *Error Occurred !!*\n\n' + e)
-    console.log(e)
+    console.log(e);
+    reply('🚫 *Error Occurred !!*\n\n' + e);
 }
-})
-
+});
 
 
 let isUploadinggg = false; // Track upload status
