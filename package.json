@@ -11,7 +11,7 @@
     "@adiwajshing/keyed-db": "latest",
     "@ffmpeg-installer/ffmpeg": "latest",
     "@google-cloud/translate": "latest",
-    "@whiskeysockets/baileys": "github:nstar-y/bail",
+    "@whiskeysockets/baileys": "6.7.21",
     "adm-zip": "latest",
     "axios": "latest",
     "telegram":"2.26.22",
@@ -34,7 +34,7 @@
     "human-readable": "latest",
     "image-size": "latest",
     "javascript-obfuscator": "latest",
-    "jimp": "^0.16.1",
+    
     "link-preview-js": "latest",
     "megajs": "latest",
     "mongoose": "latest",
