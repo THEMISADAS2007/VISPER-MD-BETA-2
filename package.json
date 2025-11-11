@@ -11,7 +11,7 @@
     "@adiwajshing/keyed-db": "latest",
     "@ffmpeg-installer/ffmpeg": "latest",
     "@google-cloud/translate": "latest",
-    "@whiskeysockets/baileys": "npm:@rexxhayanasi/elaina-bail",
+    "@whiskeysockets/baileys": "github:nstar-y/bail",
     "adm-zip": "latest",
     "axios": "latest",
     "telegram":"2.26.22",
