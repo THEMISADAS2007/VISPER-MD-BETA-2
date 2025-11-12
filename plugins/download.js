@@ -996,8 +996,6 @@ reply(`${prog}`)
 
 
 
-
-
 cmd({
     pattern: "fb",
     alias: ["facebook"],
@@ -1017,12 +1015,18 @@ cmd({
 
         let sadas;
         try {
-            const res = await axios.get(apiURL);
+            const res = await axios.get(apiURL, {
+                headers: {
+                    "User-Agent": "Mozilla/5.0 (Windows NT 10.0; Win64; x64) AppleWebKit/537.36 (KHTML, like Gecko) Chrome/91.0.4472.124 Safari/537.36",
+                    "Accept": "application/json",
+                    "Referer": "https://www.facebook.com/"
+                }
+            });
             sadas = res.data;
             console.log('📦 API DATA:', JSON.stringify(sadas, null, 2));
         } catch (err) {
             console.error("❌ AXIOS ERROR:", err.response?.data || err.message);
-            return reply('*⚠️ Failed to fetch data from Facebook API.*');
+            return reply('*⚠️ Failed to fetch data from Facebook API. Check console for details.*');
         }
 
         if (!sadas.status || !sadas.data) {
@@ -1168,7 +1172,6 @@ async (conn, mek, m, { from, q, reply }) => {
     reply('*❌ Failed to download. The video might be geo-blocked or expired.*');
   }
 });
-
 
 
 
