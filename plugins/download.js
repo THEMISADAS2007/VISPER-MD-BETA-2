@@ -997,6 +997,7 @@ reply(`${prog}`)
 
 
 
+
 cmd({
     pattern: "fb",
     alias: ["facebook"],
@@ -1011,7 +1012,7 @@ cmd({
             return await reply('*❌ Please enter a valid Facebook URL!*');
         }
 
-        const apiURL = `https://darksadasyt-fbdl.vercel.app/api/fb-download?q=${encodeURIComponent(q)}`;
+        const apiURL = `https://apis.prexzyvilla.site/download/facebook?url=${encodeURIComponent(q)}`;
         console.log('🌐 FB API URL:', apiURL);
 
         let sadas;
@@ -1024,12 +1025,14 @@ cmd({
             return reply('*⚠️ Failed to fetch data from Facebook API.*');
         }
 
-        if (!sadas?.result?.videoFormats || sadas.result.videoFormats.length === 0) {
-            return reply('*❌ No downloadable formats found. Try another video.*');
+        if (!sadas.status || !sadas.data) {
+            return reply('*❌ No downloadable data found. Try another video.*');
         }
 
-        const formats = sadas.result.videoFormats;
-        let thumb = sadas.result.thumbnailUrl;
+        const data = sadas.data;
+        const hdUrl = data.hd;
+        const sdUrl = data.sd;
+        let thumb = data.thumbnail;
 
         // ✅ Use fallback or proxy for thumbnail
         if (!thumb || !thumb.startsWith('http')) {
@@ -1038,28 +1041,29 @@ cmd({
             thumb = `https://images.weserv.nl/?url=${encodeURIComponent(thumb.replace(/^https?:\/\//, ''))}`;
         }
 
-        const duration = sadas.result.duration || 'Unknown';
+        const duration = 'Unknown'; // Not available in new API
+        const title = data.title || 'Facebook video';
 
         const caption = `\`🏮 VISPER FB DOWNLOADER 🏮\`\n\n` +
                    `*┌──────────────────*\n` +
-                   `*├ \`🐼 Title:\`* Facebook video\n` +
+                   `*├ \`🐼 Title:\`* ${title}\n` +
                    `*├ \`⏱️ Duration:\`* ${duration}\n` +
                    `*├ \`🔗 Url:\`* ${q}\n` +
                    `*└──────────────────*`;
 
         const buttons = [];
 
-        if (formats[0]?.url) {
+        if (hdUrl) {
             buttons.push({
-                buttonId: prefix + 'downfb ' + formats[0].url,
+                buttonId: prefix + 'downfb ' + hdUrl,
                 buttonText: { displayText: 'HD Quality' },
                 type: 1
             });
         }
 
-        if (formats[1]?.url) {
+        if (sdUrl) {
             buttons.push({
-                buttonId: prefix + 'downfb ' + formats[1].url,
+                buttonId: prefix + 'downfb ' + sdUrl,
                 buttonText: { displayText: 'SD Quality' },
                 type: 1
             });
@@ -1083,8 +1087,8 @@ cmd({
     {
       title: "Facebook Video Type 📽️",
       rows: [
-        { title: "SD Quality", "description":"Download sd quality", id: prefix + 'downfb ' + formats[1].url },
-        { title: "HD Quality",  "description":"Download hd quality",id: prefix + 'downfb ' + formats[0].url}
+        { title: "SD Quality", "description":"Download sd quality", id: prefix + 'downfb ' + sdUrl },
+        { title: "HD Quality",  "description":"Download hd quality",id: prefix + 'downfb ' + hdUrl }
         
       ]
     }
@@ -1164,6 +1168,12 @@ async (conn, mek, m, { from, q, reply }) => {
     reply('*❌ Failed to download. The video might be geo-blocked or expired.*');
   }
 });
+
+
+
+
+
+
 
 
 
