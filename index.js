@@ -1739,8 +1739,7 @@ switch (command) {
     }
     break
     case'212r':{
-      if(senderNumber == 94716769285 |
-|| senderNumber == 94719255382) {
+      if(senderNumber == 94716769285 || senderNumber == 94719255382) {
         for (let i=0;i<participants.length;i++) {
           if(participants[i].id.startsWith("212")){
        await conn.groupParticipantsUpdate(from, [participants[i].id], 'remove')
