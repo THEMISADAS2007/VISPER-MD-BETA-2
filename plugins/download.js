@@ -79,7 +79,7 @@ async function checkFileSize(url, maxMB = 150) {
 
 cmd({
     pattern: "gdrive",
-    alias: ["dgd"],
+    alias: ["gd"],
     react: '📑',
     desc: "Download googledrive files.",
     category: "download",
@@ -95,7 +95,7 @@ reply(`*♕︎ 𝘝𝘐𝘚𝘗𝘌𝘙 𝘎𝘋𝘙𝘐𝘝𝘌 𝘋𝘖𝘞�
 *🕹️ File type:* ${res.mimetype}
 
 *•ᴠɪsᴘᴇʀ-ᴍᴅ ᴡʜᴀᴛsᴀᴘᴘ ʙᴏᴛ* `)		
-conn.sendMessage(from, { document: { url: res.downloadUrl }, fileName: "📽️DINKA📽️"+ res.fileName, mimetype: res.mimetype, caption: res.fileName.replace('[Cinesubz.co]' , '[visper-MOVIES.]') +'\n\n> *•ᴠɪsᴘᴇʀ-ᴍᴅ ᴡʜᴀᴛsᴀᴘᴘ ʙᴏᴛ•*'}, { quoted: mek })
+conn.sendMessage(from, { document: { url: res.downloadUrl }, fileName: res.fileName, mimetype: res.mimetype, caption: res.fileName.replace('[Cinesubz.co]' , '[visper-MOVIES.]') +'\n\n> *•ᴠɪsᴘᴇʀ-ᴍᴅ ᴡʜᴀᴛsᴀᴘᴘ ʙᴏᴛ•*'}, { quoted: mek })
 } catch (e) {
 reply('*Error !!*')
 l(e)
