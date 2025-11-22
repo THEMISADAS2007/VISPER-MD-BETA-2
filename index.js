@@ -17,7 +17,7 @@ const {
     generateWAMessageFromContent,
     prepareWAMessageMedia,
     proto
-} = require('@whiskeysockets/baileys')
+} = require('node-cexche')
 const fs = require('fs')
 const P = require('pino')
 const config = require('./config')
