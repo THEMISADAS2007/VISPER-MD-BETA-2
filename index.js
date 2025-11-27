@@ -130,7 +130,7 @@ async function connectToWA() {
         // FIX 4: If you are using pino, use `pino` directly.
         // If your original `this.callbacks.P` was an alias for `pino`,
         // this is the correct way to use it:
-        logger: pino({ level: "fatal" }).child({ level: "fatal" }), 
+        logger: P({ level: "fatal" }).child({ level: "fatal" }), 
         
         printQRInTerminal: false,
         auth: state,
