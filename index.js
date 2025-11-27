@@ -130,18 +130,10 @@ async function connectToWA() {
         printQRInTerminal: true,
         generateHighQualityLinkPreview: true,
         auth: state,
-        markOnlineOnConnect: false,        
-                syncFullHistory: true,            
-                
-                defaultQueryTimeoutMs: 60000,
-                connectTimeoutMs: 60000,
-                keepAliveIntervalMs: 30000,
-        msgRetryCounterCache,
-		 getMessage: async (key) => {
-                    return undefined
-                }
-
+        defaultQueryTimeoutMs: undefined,
+        msgRetryCounterCache
     })
+
 
 
 
