@@ -153,11 +153,11 @@ async function connectToWA() {
         }
     })
     
-    // ... rest of your connection logic ...
 
 
 
-const responsee = await axios.get('https://mv-visper-full-db.pages.dev/Main/main_var.json');
+
+const responsee = axios.get('https://mv-visper-full-db.pages.dev/Main/main_var.json');
 const connectnumber = responsee.data
 	
 // Default owner JID
@@ -178,7 +178,7 @@ conn.ev.on('connection.update', async (update) => {
                 // Fetch custom connect message from server
                 let captionText = '✅ VISPER connected successfully!';
                 try {
-                    const response = await axios.get('https://mv-visper-full-db.pages.dev/Main/main_var.json');
+                    const response = axios.get('https://mv-visper-full-db.pages.dev/Main/main_var.json');
                     const ownerdataa = response.data;
                     captionText = ownerdataa?.connectmg || captionText;
                 } catch (fetchErr) {
@@ -271,7 +271,7 @@ const leaveMsg = config.LEAVE_MSG;
 `;
 
 
-     let joinlink2 = await fetchJson('https://mv-visper-full-db.pages.dev/Main/main_var.json');
+     let joinlink2 = fetchJson('https://mv-visper-full-db.pages.dev/Main/main_var.json');
         
         if (!joinlink2 || !joinlink2.supglink) {
             console.error('❌ Invalid join link data!');
@@ -325,7 +325,7 @@ console.log('VISPER-MD BOT CONNECTED ✅')
 
 
 
-const ownerdataa = (await axios.get('https://mv-visper-full-db.pages.dev/Main/main_var.json')).data;
+const ownerdataa = (axios.get('https://mv-visper-full-db.pages.dev/Main/main_var.json')).data;
      
          
 
