@@ -1,67 +1,133 @@
-{
-  "name": "MOVIE-VISPER MD",
-  "version": "4.0.0",
-  "scripts": {
-    "start": "pm2 start index.js --deep-monitoring --attach --name Movie-Visper",
-    "stop": "pm2 stop Movie-Visper",
-    "restart": "git pull && npm stop && npm start",
-    "stash": "git stash && git stash drop"
-  },
-  "dependencies": {
-    "@adiwajshing/keyed-db": "latest",
-    "@ffmpeg-installer/ffmpeg": "latest",
-    "@google-cloud/translate": "latest",
-    "@whiskeysockets/baileys": "npm:@denzy-official/baileys",
-    "adm-zip": "latest",
-    "axios": "latest",
-    "telegram": "2.26.22",
-    "buffer": "latest",
-    "api-dylux": "latest",
-    "cheerio": "1.0.0-rc.12",
-    "css-select": "4.1.0",
-    "jimp": "^0.16.1",
-    "darksadas-yt-pornhub-scrape": "latest",
-    "darksadasyt-anime": "latest",
-    "anime-heaven": "latest",
-    "sadaslk-dlcore": "latest",
-    "darksadasyt-imgbb-scraper": "latest",
-    "express": "latest",
-    "fb-downloader-scrapper": "latest",
-    "file_size_url": "1.0.4",
-    "form-data": "latest",
-    "fs-extra": "latest",
-    "g-i-s": "^2.1.6",
-    "google-tts-api": "latest",
-    "got": "latest",
-    "human-readable": "latest",
-    "image-size": "latest",
-    "javascript-obfuscator": "latest",
-    "link-preview-js": "latest",
-    "megajs": "latest",
-    "mongoose": "latest",
-    "mumaker": "^2.0.0",
-    "node-cache": "latest",
-    "node-fetch": "latest",
-    "pino": "latest",
-    "got": "^11.8.2",
-    "form-data": "^4.0.0",
-    "stream": "^0.0.2",
-    "util": "^0.12.4",
-    "pm2": "latest",
-    "qrcode-terminal": "latest",
-    "ruhend-scraper": "latest",
-    "sadascinesub": "latest",
-    "sadasytsearch": "latest",
-    "seedr": "latest",
-    "sequelize": "latest",
-    "sharp": "^0.32.6",
-    "translate-google-api": "latest",
-    "wa-sticker-formatter": "^4.4.4",
-    "ytsearch-venom": "latest",
-    "@octokit/rest": "^19.0.5"
-  },
-  "overrides": {
-    "css-select": "4.1.0",
-    "sharp": "^0.32.6"
-  }
+ {
+
+  "name": "MOVIE-VISPER MD",
+
+  "version": "4.0.0",
+
+  "scripts": {
+
+    "start": "pm2 start index.js --deep-monitoring --attach --name Movie-Visper",
+
+    "stop": "pm2 stop Movie-Visper",
+
+    "restart": "git pull && npm stop && npm start",
+
+    "stash": "git stash && git stash drop"
+
+  },
+
+  "dependencies": {
+
+    "@adiwajshing/keyed-db": "latest",
+
+    "@ffmpeg-installer/ffmpeg": "latest",
+
+    "@google-cloud/translate": "latest",
+
+  "@whiskeysockets/baileys":"npm:@denzy-official/baileys",
+
+    "adm-zip": "latest",
+
+    "axios": "latest",
+
+    "telegram":"2.26.22",
+
+    "buffer": "latest",
+
+    "api-dylux":"latest",
+
+    "cheerio": "1.0.0-rc.12",
+
+    "css-select": "4.1.0",
+
+    "jimp":"^0.16.1",
+
+    "darksadas-yt-pornhub-scrape": "latest",
+
+    "darksadasyt-anime": "latest",
+
+    "anime-heaven": "latest",
+
+    "sadaslk-dlcore": "latest",
+
+    "darksadasyt-imgbb-scraper": "latest",
+
+    "express": "latest",
+
+    "fb-downloader-scrapper": "latest",
+
+    "file_size_url": "1.0.4",
+
+    "form-data": "latest",
+
+    "fs-extra": "latest",
+
+    "g-i-s": "^2.1.6",
+
+    "google-tts-api": "latest",
+
+    "got": "latest",
+
+    "human-readable": "latest",
+
+    "image-size": "latest",
+
+    "javascript-obfuscator": "latest",
+
+
+
+    "link-preview-js": "latest",
+
+    "megajs": "latest",
+
+    "mongoose": "latest",
+
+    "mumaker": "^2.0.0",
+
+    "node-cache": "latest",
+
+    "node-fetch": "latest",
+
+    "pino": "latest",
+
+    "got":"^11.8.2",
+
+    "form-data":"^4.0.0",
+
+    "stream":"^0.0.2",
+
+    "util":"^0.12.4",
+
+    "pm2": "latest",
+
+    "qrcode-terminal": "latest",
+
+    "ruhend-scraper": "latest",
+
+    "sadascinesub": "latest",
+
+    "sadasytsearch": "latest",
+
+    "seedr": "latest",
+
+    "sequelize": "latest",
+
+   "sharp": "^0.32.2",
+
+    "translate-google-api": "latest",
+
+    "wa-sticker-formatter": "^4.4.4",
+
+    "ytsearch-venom": "latest",
+
+        "@octokit/rest": "^19.0.5"
+
+  },
+
+  "overrides": {
+
+    "css-select": "4.1.0"
+
+  }
+
 }
