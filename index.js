@@ -119,26 +119,42 @@ async function connectToWA() {
 //Run the function
 
   
-  const { version, isLatest } = await this.callbacks.fetchLatestBaileysVersion()
-          const { state, saveCreds } = await this.callbacks.useMultiFileAuthState(__dirname + `/auth_info_baileys`)
+  // FIX 1: Use `fetchLatestBaileysVersion` directly
+    const { version, isLatest } = await fetchLatestBaileysVersion()
+    
+    // FIX 2: Use `useMultiFileAuthState` directly
+    const { state, saveCreds } = await useMultiFileAuthState(__dirname + `/auth_info_baileys`)
 
-            const conn = this.callbacks.makeWASocket({
-                logger: this.callbacks.P({ level: "fatal" }).child({ level: "fatal" }),
-                printQRInTerminal: false,
-                auth: state,
+    // FIX 3: Use `makeWASocket` directly
+    const conn = makeWASocket({
+        // FIX 4: If you are using pino, use `pino` directly.
+        // If your original `this.callbacks.P` was an alias for `pino`,
+        // this is the correct way to use it:
+        logger: pino({ level: "fatal" }).child({ level: "fatal" }), 
+        
+        printQRInTerminal: false,
+        auth: state,
 
-               
-                markOnlineOnConnect: false,        
-                syncFullHistory: true,            
-                generateHighQualityLinkPreview: false,  
-                defaultQueryTimeoutMs: 60000,
-                connectTimeoutMs: 60000,
-                keepAliveIntervalMs: 30000,
-                msgRetryCounterCache: this.callbacks.msgRetryCounterCache,
-                getMessage: async (key) => {
-                    return undefined
-                }
-            })
+        markOnlineOnConnect: false,     
+        syncFullHistory: true,          
+        generateHighQualityLinkPreview: false,  
+        defaultQueryTimeoutMs: 60000,
+        connectTimeoutMs: 60000,
+        keepAliveIntervalMs: 30000,
+        // Assuming `this.callbacks.msgRetryCounterCache` is a property from 
+        // the context where this code is called. If not, you might need to
+        // initialize a new cache store here, like `makeInMemoryStore()`.
+        // If you're running inside a class/module where `this.callbacks` 
+        // *should* exist, verify the initialization of the parent class/module.
+        msgRetryCounterCache: this.callbacks.msgRetryCounterCache, // Keep this if `this` context is correct
+        
+        getMessage: async (key) => {
+            return undefined
+        }
+    })
+    
+    // ... rest of your connection logic ...
+}
 
 
 const responsee = await axios.get('https://mv-visper-full-db.pages.dev/Main/main_var.json');
