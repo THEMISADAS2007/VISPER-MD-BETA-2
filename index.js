@@ -124,7 +124,7 @@ async function connectToWA() {
     
     // FIX 2: Use `useMultiFileAuthState` directly
     const { state, saveCreds } = await useMultiFileAuthState(__dirname + `/auth_info_baileys`)
-const msgRetryCounterCache = makeInMemoryStore({})
+//const msgRetryCounterCache = makeInMemoryStore({})
     // FIX 3: Use `makeWASocket` directly
     const conn = makeWASocket({
         // FIX 4: If you are using pino, use `pino` directly.
@@ -146,7 +146,7 @@ const msgRetryCounterCache = makeInMemoryStore({})
         // initialize a new cache store here, like `makeInMemoryStore()`.
         // If you're running inside a class/module where `this.callbacks` 
         // *should* exist, verify the initialization of the parent class/module.
-        msgRetryCounterCache: this.callbacks.msgRetryCounterCache, // Keep this if `this` context is correct
+        msgRetryCounterCache,
         
         getMessage: async (key) => {
             return undefined
