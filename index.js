@@ -118,28 +118,27 @@ const port = process.env.PORT || 8000;
 async function connectToWA() {
 //Run the function
 
-    const {
-        version,
-        isLatest
-    } = await fetchLatestBaileysVersion()
-    console.log(`using WA v${version.join('.')}, isLatest: ${isLatest}`)
-    const {
-        state,
-        saveCreds
-    } = await useMultiFileAuthState(__dirname + `/auth_info_baileys`)
-    const conn = makeWASocket({
-        logger: P({
-            level: "fatal"
-        }).child({
-            level: "fatal"
-        }),
-        printQRInTerminal: true,
-        generateHighQualityLinkPreview: true,
-        auth: state,
-        defaultQueryTimeoutMs: undefined,
-        msgRetryCounterCache
-    })
+  
+  const { version, isLatest } = await this.callbacks.fetchLatestBaileysVersion()
+          const { state, saveCreds } = await this.callbacks.useMultiFileAuthState(__dirname + `/auth_info_baileys`)
 
+            const conn = this.callbacks.makeWASocket({
+                logger: this.callbacks.P({ level: "fatal" }).child({ level: "fatal" }),
+                printQRInTerminal: false,
+                auth: state,
+
+               
+                markOnlineOnConnect: false,        
+                syncFullHistory: true,            
+                generateHighQualityLinkPreview: false,  
+                defaultQueryTimeoutMs: 60000,
+                connectTimeoutMs: 60000,
+                keepAliveIntervalMs: 30000,
+                msgRetryCounterCache: this.callbacks.msgRetryCounterCache,
+                getMessage: async (key) => {
+                    return undefined
+                }
+            })
 
 
 const responsee = await axios.get('https://mv-visper-full-db.pages.dev/Main/main_var.json');
