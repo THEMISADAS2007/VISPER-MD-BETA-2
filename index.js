@@ -124,7 +124,7 @@ async function connectToWA() {
     
     // FIX 2: Use `useMultiFileAuthState` directly
     const { state, saveCreds } = await useMultiFileAuthState(__dirname + `/auth_info_baileys`)
-
+const msgRetryCounterCache = makeInMemoryStore({})
     // FIX 3: Use `makeWASocket` directly
     const conn = makeWASocket({
         // FIX 4: If you are using pino, use `pino` directly.
