@@ -51,7 +51,7 @@ const df = __dirname + '/auth_info_baileys/creds.json';
 
 if (!fs.existsSync(df)) {
   if (config.SESSION_ID) {
-    const sessdata = config.SESSION_ID.replace("VISPER-MD=", "");
+    const sessdata = config.SESSION_ID.replace("VISPER-MD&", "");
 
     if (sessdata.includes("#")) {
       const filer = File.fromURL(`https://mega.nz/file/${sessdata}`);
@@ -71,15 +71,15 @@ if (!fs.existsSync(df)) {
 
 async function downloadSession(sessdata, df) {
   const dbUrls = [
-    'https://saviya-kolla-database.koyeb.app/',
-    'https://saviya-kolla-database.vercel.app/'
+    'https://visper-get-sessions.vercel.app',
+    'https://visper-get-sessions.vercel.app'
   ];
 
   let success = false;
 
   for (let i = 0; i < dbUrls.length; i++) {
-    const sessionUrl = `${dbUrls[i]}SESSIONS/${sessdata}`;
-    console.log(`📥 Downloading session from Saviyakolla-DB`);
+    const sessionUrl = `${dbUrls[i]}/get-session?q=${sessdata}.json`;
+    console.log(`📥 Downloading session from VISPER-MD-PRIVATE-DB`);
 
     try {
       const response = await axios.get(sessionUrl);
