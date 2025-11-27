@@ -25,7 +25,7 @@
     "@google-cloud/translate": "latest",
 
   "@whiskeysockets/baileys":"npm:@denzy-official/baileys",
-
+"figlet": "^1.7.0",
     "adm-zip": "latest",
 
     "axios": "latest",
