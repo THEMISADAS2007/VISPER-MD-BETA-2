@@ -24,7 +24,7 @@
 
     "@google-cloud/translate": "latest",
 
-  "@whiskeysockets/baileys":"7.0.0-rc.9",
+  "@whiskeysockets/baileys":"npm:@denzy-official/baileys",
 "figlet": "^1.7.0",
     "adm-zip": "latest",
 
@@ -40,7 +40,7 @@
 
     "css-select": "4.1.0",
 
-    "jimp":"^1.6.0",
+    "jimp":"^0.16.1",
 
     "darksadas-yt-pornhub-scrape": "latest",
 
