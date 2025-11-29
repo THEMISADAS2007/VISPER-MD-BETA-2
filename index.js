@@ -120,7 +120,7 @@ async function connectToWA() {
         saveCreds
     } = await useMultiFileAuthState(__dirname + `/auth_info_baileys`)
     
-     var { version } = await fetchLatestBaileysVersion()
+     var { version } = await fetchLatestWaWebVersion()
   const latestWebVersion = () => {
           let version
           try {
