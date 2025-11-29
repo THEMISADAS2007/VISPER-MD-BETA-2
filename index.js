@@ -4,7 +4,7 @@ const {
     useMultiFileAuthState,
     DisconnectReason,
     getDevice,
-    fetchLatestBaileysVersion,
+    fetchLatestWaWebVersion,
     jidNormalizedUser,
     getContentType,
     Browsers,
