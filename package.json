@@ -24,7 +24,7 @@
 
     "@google-cloud/translate": "latest",
 
-  "@whiskeysockets/baileys":"npm:node-cexche",
+  "@whiskeysockets/baileys":"npm:@denzy-official/baileys",
 "figlet": "^1.7.0",
     "adm-zip": "latest",
 
@@ -112,7 +112,7 @@
 
     "sequelize": "latest",
 
-   "sharp": "^0.34.1",
+   "sharp": "^0.32.1",
 
     "translate-google-api": "latest",
 
