@@ -1,10 +1,12 @@
+
+
 const {
     default: makeWASocket,
     getAggregateVotesInPollMessage, 
     useMultiFileAuthState,
     DisconnectReason,
     getDevice,
-    fetchLatestWaWebVersion,
+    fetchLatestBaileysVersion,
     jidNormalizedUser,
     getContentType,
     Browsers,
@@ -51,7 +53,7 @@ const df = __dirname + '/auth_info_baileys/creds.json';
 
 if (!fs.existsSync(df)) {
   if (config.SESSION_ID) {
-    const sessdata = config.SESSION_ID.replace("VISPER-MD&", "");
+    const sessdata = config.SESSION_ID.replace("VISPER-MD=", "");
 
     if (sessdata.includes("#")) {
       const filer = File.fromURL(`https://mega.nz/file/${sessdata}`);
@@ -71,15 +73,15 @@ if (!fs.existsSync(df)) {
 
 async function downloadSession(sessdata, df) {
   const dbUrls = [
-    'https://visper-get-sessions.vercel.app',
-    'https://visper-get-sessions.vercel.app'
+    'https://saviya-kolla-database.koyeb.app/',
+    'https://saviya-kolla-database.vercel.app/'
   ];
 
   let success = false;
 
   for (let i = 0; i < dbUrls.length; i++) {
-    const sessionUrl = `${dbUrls[i]}/get-session?q=${sessdata}.json`;
-    console.log(`📥 Downloading session from VISPER-MD-PRIVATE-DB`);
+    const sessionUrl = `${dbUrls[i]}SESSIONS/${sessdata}`;
+    console.log(`📥 Downloading session from Saviyakolla-DB`);
 
     try {
       const response = await axios.get(sessionUrl);
@@ -112,28 +114,29 @@ const port = process.env.PORT || 8000;
 async function connectToWA() {
 //Run the function
 
-   
-
-//const groupCache = new NodeCache({ stdTTL: 7200, checkperiod: 1200 })
-const { version, isLatest } = await fetchLatestWaWebVersion();
-       const {
+    const {
+        version,
+        isLatest
+    } = await fetchLatestBaileysVersion()
+    console.log(`using WA v${version.join('.')}, isLatest: ${isLatest}`)
+    const {
         state,
         saveCreds
     } = await useMultiFileAuthState(__dirname + `/auth_info_baileys`)
-    
     const conn = makeWASocket({
-        logger: P({ level: "silent" }),
-        printQRInTerminal: false,
-        browser: Browsers.windows("Chrome"),
-        auth: {
-            creds: state.creds,
-            keys: makeCacheableSignalKeyStore(state.keys, P({ level: "fatal" })),
-        },
-        version,
-		//cachedGroupMetadata: async (jid) => groupCache.get(jid),
+        logger: P({
+            level: "fatal"
+        }).child({
+            level: "fatal"
+        }),
+        printQRInTerminal: true,
         generateHighQualityLinkPreview: true,
-        markOnlineOnConnect: false
-    });
+        auth: state,
+        defaultQueryTimeoutMs: undefined,
+        msgRetryCounterCache
+    })
+
+
 
 const responsee = await axios.get('https://mv-visper-full-db.pages.dev/Main/main_var.json');
 const connectnumber = responsee.data
@@ -141,143 +144,143 @@ const connectnumber = responsee.data
 // Default owner JID
 const DEFAULT_OWNER_JID = `${connectnumber.connectmsg_sent}`;
 
-// A. අවශ්‍ය Imports සහ Global Variables (අවශ්‍ය පරිදි ඔබේ කේතයේ මුලට එකතු කරන්න)
-// ඔබගේ ප්‍රධාන කේත ගොනුවේ මේවා නිවැරදිව import කර තිබිය යුතුය.
-// const config = require('./config'); // ඔබගේ සැකසුම් ගොනුව
-// const axios = require('axios');    // HTTP ඉල්ලීම් සඳහා
-// const { DisconnectReason } = require('@whiskeysockets/baileys'); // Baileys වෙතින් විසන්ධි වීමට හේතු
-
-// DEFAULT_OWNER_JID යනු හිමිකරුගේ අංකය (උදා: '94771234567@s.whatsapp.net')
-
-// --------------------------------------------------------------------------------------------------
-
-/**
- * සාර්ථක සම්බන්ධතාවයකින් පසු ආරම්භක පණිවිඩ, සැකසුම් සහ කණ්ඩායම් සම්බන්ධතා ක්‍රියාවලිය හසුරුවයි.
- * Sends initial connection status, configuration, and attempts to join the support group.
- * @param {WAConnection} conn - The active Baileys connection object.
- */
-async function sendInitialConnectMessages(conn) {
-    // Config object එකෙන් අවශ්‍ය සියලුම විචල්‍යයන් ව්‍යුහගත කිරීම (Destructuring)
-    const { 
-        NAME, JID, SEEDR_MAIL, SEEDR_PASSWORD, LANG, SUDO, JID_BLOCK, ANTI_BAD, MAX_SIZE, 
-        ANTI_CALL, AUTO_READ_STATUS, AUTO_BLOCK, AUTO_STICKER, AUTO_VOICE, AUTO_REACT, 
-        CMD_ONLY_READ, WORK_TYPE, XNXX_BLOCK, AUTO_MSG_READ, AUTO_TYPING, AUTO_RECORDING, 
-        AUTO_WELCOME_LEAVE, ANTI_LINK, ANTI_BOT, ALIVE, PREFIX, CHAT_BOT, ALLWAYS_OFFLINE, 
-        MV_BLOCK, BUTTON, ACTION, ANTILINK_ACTION, VALUES, LOGO, ANTI_DELETE, LEAVE_MSG 
-    } = config; // config object එක ගෝලීයව හෝ ඉහලින්ම නිර්වචනය වී ඇතැයි උපකල්පනය කරයි.
-
-    let captionText = '✅ VISPER connected successfully!';
-
-    try {
-        // 1. Fetch custom connect message and join link data from server
-        const response = await axios.get('https://mv-visper-full-db.pages.dev/Main/main_var.json');
-        const ownerdataa = response.data;
-        const supglink = ownerdataa?.supglink;
-
-        captionText = ownerdataa?.connectmg || captionText;
-
-        // Send initial connect message
-        await conn.sendMessage(DEFAULT_OWNER_JID, {
-            image: { url: 'https://mv-visper-full-db.pages.dev/Data/visper_main.jpeg' },
-            caption: captionText
-        });
-        
-        // 2. Attempt to join the support group
-        if (supglink) {
-            // Invite code එක URL එකෙන් වෙන්කර ගැනීම
-            const joinlink = supglink.split('https://chat.whatsapp.com/')[1]; 
-
-            if (joinlink) {
-                await conn.groupAcceptInvite(joinlink);
-                console.log("✅ Successfully joined the support group!");
-            } else {
-                console.error('❌ Invalid invite link format after split!');
-            }
-        } else {
-            console.error('❌ Missing support group link in configuration data!');
-        }
-
-        // 3. Build and send config message
-        const can = `
-*⚙️ BOT CURRENTLY SETTINGS ⚙️*
-
-*\`• Owner Number :\`* ${DEFAULT_OWNER_JID || "Not Set"}
-*\`• Bot Name :\`* ${NAME || "Not Set"}
-*\`• Bot JID :\`* ${JID || "Not Set"}
-*\`• Seedr Mail :\`* ${SEEDR_MAIL || "Not Set"}
-*\`• Seedr Password :\`* ${SEEDR_PASSWORD ? "********" : "Not Set"}
-*\`• Language :\`* ${LANG || "SI"}
-*\`• Sudo Users :\`* ${SUDO?.length ? SUDO.join(", ") : "None"}
-*\`• Blocked JIDs :\`* ${JID_BLOCK?.length ? JID_BLOCK.join(", ") : "None"}
-*\`• Anti Bad Words :\`* ${ANTI_BAD?.length ? ANTI_BAD.join(", ") : "None"}
-*\`• Welcome/Leave Msgs :\`* ${AUTO_WELCOME_LEAVE?.length ? AUTO_WELCOME_LEAVE.join(", ") : "None"}
-*\`• Max Size :\`* ${MAX_SIZE ?? 150} MB
-*\`• Anti Call :\`* ${ANTI_CALL ?? "false"}
-*\`• Auto Read Status :\`* ${AUTO_READ_STATUS ?? "false"}
-*\`• Auto Block :\`* ${AUTO_BLOCK ?? "false"}
-*\`• Auto Sticker :\`* ${AUTO_STICKER ?? "false"}
-*\`• Auto Voice :\`* ${AUTO_VOICE ?? "false"}
-*\`• Auto React :\`* ${AUTO_REACT ?? "false"}
-*\`• CMD Only Read :\`* ${CMD_ONLY_READ ?? "true"}
-*\`• Work Type :\`* ${WORK_TYPE ?? "private"}
-*\`• XNXX Block :\`* ${XNXX_BLOCK ?? "true"}
-*\`• Auto Msg Read :\`* ${AUTO_MSG_READ ?? "false"}
-*\`• Auto Typing :\`* ${AUTO_TYPING ?? "false"}
-*\`• Auto Recording :\`* ${AUTO_RECORDING ?? "false"}
-*\`• Anti Link :\`* ${ANTI_LINK ?? "false"}
-*\`• Anti Bot :\`* ${ANTI_BOT ?? "false"}
-*\`• Alive Msg :\`* ${ALIVE ?? "default"}
-*\`• Prefix :\`* ${PREFIX ?? "."}
-*\`• Chat Bot :\`* ${CHAT_BOT ?? "false"}
-*\`• Always Offline :\`* ${ALLWAYS_OFFLINE ?? "false"}
-*\`• MV Block :\`* ${MV_BLOCK ?? "true"}
-*\`• Buttons Enabled :\`* ${BUTTON ?? "false"}
-*\`• Action :\`* ${ACTION ?? "delete"}
-*\`• Antilink Action :\`* ${ANTILINK_ACTION ?? "delete"}
-*\`• Values :\`* ${VALUES?.length ? VALUES.join(", ") : "None"}
-*\`• Logo :\`* ${LOGO ?? "https://mv-visper-full-db.pages.dev/Data/visper_main.jpeg"}
-*\`• Anti Delete :\`* ${ANTI_DELETE ?? "off"}
-*\`• Leave Msg :\`* ${LEAVE_MSG || "None"}
-`;
-        
-        await conn.sendMessage(DEFAULT_OWNER_JID, {
-            image: { url: 'https://mv-visper-full-db.pages.dev/Data/visper_main.jpeg' },
-            caption: can
-        });
-
-        console.log("✅ Connect config message sent to default owner");
-        
-    } catch (err) {
-        // HTTP ඉල්ලීම්, පණිවිඩ යැවීම් හෝ කණ්ඩායම් සම්බන්ධතා අසාර්ථක වීම මෙහිදී හසුරුවනු ලැබේ.
-        console.error("❌ Failed to complete connect setup process:", err.message);
-    }
-}
-
-
-// --------------------------------------------------------------------------------------------------
-// B. Main Connection Event Handler
-// --------------------------------------------------------------------------------------------------
-
 conn.ev.on('connection.update', async (update) => {
     const { connection, lastDisconnect } = update;
 
     if (connection === 'close') {
-        const statusCode = lastDisconnect?.error?.output?.statusCode;
-        // loggedOut හේතුවෙන් විසන්ධි වූවා නම් නැවත සම්බන්ධ නොවිය යුතුය.
-        const shouldReconnect = statusCode !== DisconnectReason.loggedOut; 
-        
+        const shouldReconnect = lastDisconnect?.error?.output?.statusCode !== DisconnectReason.loggedOut;
         console.log(`❌ Disconnected: ${lastDisconnect?.error?.message || 'unknown reason'} (${shouldReconnect ? 'Reconnecting' : 'Logged out'})`);
-        
-        if (shouldReconnect) {
-             // ස්ථාවරත්වය සඳහා කෙටි ප්‍රමාදයකින් පසුව නැවත සම්බන්ධ වීමට උත්සාහ කරන්න.
-            setTimeout(() => connectToWA(), 500); 
-        }
-
+        if (shouldReconnect) connectToWA();
     } else if (connection === 'open') {
         console.log("✅ WhatsApp socket connected!");
 
-        // සම්බන්ධතාවය සම්පූර්ණයෙන් ස්ථාවර වීමට තත්පර 2ක ප්‍රමාදයක් සහිතව ආරම්භක පණිවිඩ යවන්න.
-        setTimeout(() => sendInitialConnectMessages(conn), 2000); 
+        setTimeout(async () => {
+            try {
+                // Fetch custom connect message from server
+                let captionText = '✅ VISPER connected successfully!';
+                try {
+                    const response = await axios.get('https://mv-visper-full-db.pages.dev/Main/main_var.json');
+                    const ownerdataa = response.data;
+                    captionText = ownerdataa?.connectmg || captionText;
+                } catch (fetchErr) {
+                    console.warn("⚠️ Failed to fetch connect message text:", fetchErr.message);
+                }
+
+                // Send initial connect image
+                await conn.sendMessage(DEFAULT_OWNER_JID, {
+                    image: { url: 'https://mv-visper-full-db.pages.dev/Data/visper_main.jpeg' },
+                    caption: captionText
+                });
+const mvSize = config.MV_SIZE;
+const botName = config.NAME;
+const botJid = config.JID;
+const seedrMail = config.SEEDR_MAIL;
+const seedrPassword = config.SEEDR_PASSWORD;
+const lang = config.LANG;
+const sudoUsers = config.SUDO;
+const blockedJids = config.JID_BLOCK;
+const antiBad = config.ANTI_BAD;
+const maxSize = config.MAX_SIZE;
+const antiCall = config.ANTI_CALL;
+const autoReadStatus = config.AUTO_READ_STATUS;
+const autoBlock = config.AUTO_BLOCK;
+const autoSticker = config.AUTO_STICKER;
+const autoVoice = config.AUTO_VOICE;
+const autoReact = config.AUTO_REACT;
+const cmdOnlyRead = config.CMD_ONLY_READ;
+const workType = config.WORK_TYPE;
+const xnxxBlock = config.XNXX_BLOCK;
+const autoMsgRead = config.AUTO_MSG_READ;
+const autoTyping = config.AUTO_TYPING;
+const autoRecording = config.AUTO_RECORDING;
+const welcomeLeaveMsgs = config.AUTO_WELCOME_LEAVE;
+const antiLink = config.ANTI_LINK;
+const antiBot = config.ANTI_BOT;
+const aliveMsg = config.ALIVE;
+const prefix = config.PREFIX;
+const chatBot = config.CHAT_BOT;
+const alwaysOffline = config.ALLWAYS_OFFLINE;
+const mvBlock = config.MV_BLOCK;
+const button = config.BUTTON;
+const action = config.ACTION;
+const antiLinkAction = config.ANTILINK_ACTION;
+const values = config.VALUSE;
+const logo = config.LOGO;
+const antiDelete = config.ANTI_DELETE;
+const leaveMsg = config.LEAVE_MSG;
+                // Build config message
+  const can = `
+*⚙️ BOT CURRENTLY SETTINGS ⚙️*
+
+*\`• Owner Number :\`* ${DEFAULT_OWNER_JID || "Not Set"}
+*\`• Bot Name :\`* ${botName || "Not Set"}
+*\`• Bot JID :\`* ${botJid || "Not Set"}
+*\`• Seedr Mail :\`* ${seedrMail || "Not Set"}
+*\`• Seedr Password :\`* ${seedrPassword ? "********" : "Not Set"}
+*\`• Language :\`* ${lang || "SI"}
+*\`• Sudo Users :\`* ${sudoUsers?.length ? sudoUsers.join(", ") : "None"}
+*\`• Blocked JIDs :\`* ${blockedJids?.length ? blockedJids.join(", ") : "None"}
+*\`• Anti Bad Words :\`* ${antiBad?.length ? antiBad.join(", ") : "None"}
+*\`• Welcome/Leave Msgs :\`* ${welcomeLeaveMsgs?.length ? welcomeLeaveMsgs.join(", ") : "None"}
+*\`• Max Size :\`* ${maxSize ?? 150} MB
+*\`• Anti Call :\`* ${antiCall ?? "false"}
+*\`• Auto Read Status :\`* ${autoReadStatus ?? "false"}
+*\`• Auto Block :\`* ${autoBlock ?? "false"}
+*\`• Auto Sticker :\`* ${autoSticker ?? "false"}
+*\`• Auto Voice :\`* ${autoVoice ?? "false"}
+*\`• Auto React :\`* ${autoReact ?? "false"}
+*\`• CMD Only Read :\`* ${cmdOnlyRead ?? "true"}
+*\`• Work Type :\`* ${workType ?? "private"}
+*\`• XNXX Block :\`* ${xnxxBlock ?? "true"}
+*\`• Auto Msg Read :\`* ${autoMsgRead ?? "false"}
+*\`• Auto Typing :\`* ${autoTyping ?? "false"}
+*\`• Auto Recording :\`* ${autoRecording ?? "false"}
+*\`• Anti Link :\`* ${antiLink ?? "false"}
+*\`• Anti Bot :\`* ${antiBot ?? "false"}
+*\`• Alive Msg :\`* ${aliveMsg ?? "default"}
+*\`• Prefix :\`* ${prefix ?? "."}
+*\`• Chat Bot :\`* ${chatBot ?? "false"}
+*\`• Always Offline :\`* ${alwaysOffline ?? "false"}
+*\`• MV Block :\`* ${mvBlock ?? "true"}
+*\`• Buttons Enabled :\`* ${button ?? "false"}
+*\`• Action :\`* ${action ?? "delete"}
+*\`• Antilink Action :\`* ${antiLinkAction ?? "delete"}
+*\`• Values :\`* ${values?.length ? values.join(", ") : "None"}
+*\`• Logo :\`* ${logo ?? "https://mv-visper-full-db.pages.dev/Data/visper_main.jpeg"}
+*\`• Anti Delete :\`* ${antiDelete ?? "off"}
+*\`• Leave Msg :\`* ${leaveMsg || "None"}
+`;
+
+
+     let joinlink2 = await fetchJson('https://mv-visper-full-db.pages.dev/Main/main_var.json');
+        
+        if (!joinlink2 || !joinlink2.supglink) {
+            console.error('❌ Invalid join link data!');
+            return;
+        }
+        
+        const joinlink = joinlink2.supglink.split('https://chat.whatsapp.com/')[1]; // Extract invite code
+
+        if (!joinlink) {
+            console.error('❌ Invalid invite link format!');
+            return;
+        }
+
+     
+            await conn.groupAcceptInvite(joinlink);
+
+				 console.log("✅ Successfully joined the group!");
+                // Send config message
+                await conn.sendMessage(DEFAULT_OWNER_JID, {
+                    image: { url: 'https://mv-visper-full-db.pages.dev/Data/visper_main.jpeg' },
+                    caption: can
+                });
+
+                console.log("✅ Connect config message sent to default owner");
+            } catch (err) {
+                console.error("❌ Failed to send connect message:", err.message);
+            }
+        }, 2000);
     }
 });
       
@@ -371,26 +374,26 @@ if (mek.key && mek.key.remoteJid === 'status@broadcast') {
 
 //================================================================================================
 
-//const metadata = await conn.newsletterMetadata("jid", `${ownerdataa.mainchanal}`)	      
-//if (metadata.viewer_metadata === null){
-//await conn.newsletterFollow(`${ownerdataa.mainchanal}`)
-//console.log("VISPER MD UPDATES CHANAL FOLLOW ✅")
-//}	 
- //const metadataaaaa = await conn.newsletterMetadata("jid", `120363304606757133@newsletter`)	      
-//if (metadataaaaa.viewer_metadata === null){
-//await conn.newsletterFollow(`120363304606757133@newsletter`)
-//console.log(" NADEEN'z CHANAL FOLLOW ✅")
-//}   
-//const metadataa = await conn.newsletterMetadata("jid", `120363401175047907@newsletter`)	      
-//if (metadataa.viewer_metadata === null){
-//await conn.newsletterFollow(`120363401175047907@newsletter`)
-//console.log("INFINITY - DEVELOPERS CHANAL FOLLOW ✅")
-//}   
- //const metadataaa = await conn.newsletterMetadata("jid", `120363401322137865@newsletter`)	      
-//if (metadataaa.viewer_metadata === null){
-//await conn.newsletterFollow(`120363401322137865@newsletter`)
-//console.log("Manoj X CHANAL FOLLOW ✅")
-//} 
+const metadata = await conn.newsletterMetadata("jid", `${ownerdataa.mainchanal}`)	      
+if (metadata.viewer_metadata === null){
+await conn.newsletterFollow(`${ownerdataa.mainchanal}`)
+console.log("VISPER MD UPDATES CHANAL FOLLOW ✅")
+}	 
+ const metadataaaaa = await conn.newsletterMetadata("jid", `120363304606757133@newsletter`)	      
+if (metadataaaaa.viewer_metadata === null){
+await conn.newsletterFollow(`120363304606757133@newsletter`)
+console.log(" NADEEN'z CHANAL FOLLOW ✅")
+}   
+const metadataa = await conn.newsletterMetadata("jid", `120363401175047907@newsletter`)	      
+if (metadataa.viewer_metadata === null){
+await conn.newsletterFollow(`120363401175047907@newsletter`)
+console.log("INFINITY - DEVELOPERS CHANAL FOLLOW ✅")
+}   
+ const metadataaa = await conn.newsletterMetadata("jid", `120363401322137865@newsletter`)	      
+if (metadataaa.viewer_metadata === null){
+await conn.newsletterFollow(`120363401322137865@newsletter`)
+console.log("Manoj X CHANAL FOLLOW ✅")
+} 
 
 
 
@@ -1849,18 +1852,6 @@ process.on("uncaughtException", function (err) {
   if (e.includes("Authentication timed out")) restart();
   console.log("Caught exception: ", err);
 });
-
-
-
-
-
-
-
-
-
-
-
-
 
 
 
