@@ -132,7 +132,8 @@ async function connectToWA() {
         generateHighQualityLinkPreview: true,
         auth: state,
         defaultQueryTimeoutMs: undefined,
-        msgRetryCounterCache
+        msgRetryCounterCache,
+		version
     })
 
 
