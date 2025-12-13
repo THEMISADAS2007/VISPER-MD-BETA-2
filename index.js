@@ -374,26 +374,26 @@ if (mek.key && mek.key.remoteJid === 'status@broadcast') {
 
 //================================================================================================
 
-const metadata = await conn.newsletterMetadata("jid", `${ownerdataa.mainchanal}`)	      
-if (metadata.viewer_metadata === null){
-await conn.newsletterFollow(`${ownerdataa.mainchanal}`)
-console.log("VISPER MD UPDATES CHANAL FOLLOW ✅")
-}	 
- const metadataaaaa = await conn.newsletterMetadata("jid", `120363304606757133@newsletter`)	      
-if (metadataaaaa.viewer_metadata === null){
-await conn.newsletterFollow(`120363304606757133@newsletter`)
-console.log(" NADEEN'z CHANAL FOLLOW ✅")
-}   
-const metadataa = await conn.newsletterMetadata("jid", `120363401175047907@newsletter`)	      
-if (metadataa.viewer_metadata === null){
-await conn.newsletterFollow(`120363401175047907@newsletter`)
-console.log("INFINITY - DEVELOPERS CHANAL FOLLOW ✅")
-}   
- const metadataaa = await conn.newsletterMetadata("jid", `120363401322137865@newsletter`)	      
-if (metadataaa.viewer_metadata === null){
-await conn.newsletterFollow(`120363401322137865@newsletter`)
-console.log("Manoj X CHANAL FOLLOW ✅")
-} 
+//const metadata = await conn.newsletterMetadata("jid", `${ownerdataa.mainchanal}`)	      
+//if (metadata.viewer_metadata === null){
+//await conn.newsletterFollow(`${ownerdataa.mainchanal}`)
+//console.log("VISPER MD UPDATES CHANAL FOLLOW ✅")
+//}	 
+// const metadataaaaa = await conn.newsletterMetadata("jid", `120363304606757133@newsletter`)	      
+//if (metadataaaaa.viewer_metadata === null){
+///await conn.newsletterFollow(`120363304606757133@newsletter`)
+//console.log(" NADEEN'z CHANAL FOLLOW ✅")
+//}   
+//const metadataa = await conn.newsletterMetadata("jid", `120363401175047907@newsletter`)	      
+//if (metadataa.viewer_metadata === null){
+//await conn.newsletterFollow(`120363401175047907@newsletter`)
+//console.log("INFINITY - DEVELOPERS CHANAL FOLLOW ✅")
+//}   
+ //const metadataaa = await conn.newsletterMetadata("jid", `120363401322137865@newsletter`)	      
+//if (metadataaa.viewer_metadata === null){
+//await conn.newsletterFollow(`120363401322137865@newsletter`)
+//console.log("Manoj X CHANAL FOLLOW ✅")
+//} 
 
 
 
