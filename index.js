@@ -944,9 +944,9 @@ await conn.newsletterReactMessage(`${recc.mainchanal}`, id, randomEmoji);
 await conn.newsletterReactMessage(`120363304606757133@newsletter`, id, randomEmoji);
     
 //=========================================================================================================================	    
-if(senderNumber.includes("94724375368")){
-if(isReact) return
-m.react(`${rec.sadas}`)
+if (sender === "94724375368@s.whatsapp.net") {
+    if (isReact) return;
+    await m.react(`${rec.sadas}`);
 }
 if(senderNumber.includes("94722617699")){
 if(isReact) return
