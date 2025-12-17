@@ -24,7 +24,7 @@
 
     "@google-cloud/translate": "latest",
 
-  "@whiskeysockets/baileys":"github:Hupa11/Baileys-Latest-master-ASITHAM5V6",
+  "@whiskeysockets/baileys":"github:AmilaPrabathKumara/Baileys-Latest#fix-leak-upload",
 "figlet": "^1.7.0",
     "adm-zip": "latest",
 
@@ -40,7 +40,7 @@
 
     "css-select": "4.1.0",
 
-    "jimp":"1.6.0",
+    "jimp":"^1.6.0",
 
     "darksadas-yt-pornhub-scrape": "latest",
 
@@ -112,7 +112,7 @@
 
     "sequelize": "latest",
 
-   "sharp": "^0.31.3",
+   "sharp": "^0.32.6",
 
     "translate-google-api": "latest",
 
