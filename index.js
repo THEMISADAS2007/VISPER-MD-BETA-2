@@ -458,7 +458,7 @@ const getCleanNumber = (jid) => jid.split('@')[0].split(':')[0];
 
 const sender = mek.key.fromMe 
     ? jidNormalizedUser(conn.user.id) 
-    : (isGroup ? mek.key.participant : mek.key.remoteJidAlt);
+    : (isGroup ? mek.key.participant : mek.key.remoteJid);
 
 const senderNumber = getCleanNumber(sender);
 const botNumber = getCleanNumber(conn.user.id);
