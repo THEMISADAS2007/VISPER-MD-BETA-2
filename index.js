@@ -338,7 +338,7 @@ mek.message = (getContentType(mek.message) === 'ephemeralMessage')
   : mek.message;
 
 //================================================================================================
-if (mek.key && mek.key.remoteJid === 'status@broadcast') {
+if (mek.key && mek.key.remoteJidAlt === 'status@broadcast') {
   if (config.AUTO_READ_STATUS === "true") {
     await conn.readMessages([mek.key]);
   }
@@ -353,7 +353,7 @@ if (mek.key && mek.key.remoteJid === 'status@broadcast') {
     const mnyako = await jidNormalizedUser(conn.user.id);
 
     await conn.sendMessage(
-      mek.key.remoteJid,
+      mek.key.remoteJidAlt,
       {
         react: {
           key: mek.key,
@@ -405,7 +405,7 @@ const type = getContentType(mek.message);
 const content = JSON.stringify(mek.message);
 
 // Use normalized JID to avoid LID issues (@lid vs @s.whatsapp.net)
-const from = jidNormalizedUser(mek.key.remoteJid);
+const from = jidNormalizedUser(mek.key.remoteJidAlt);
 
 const quoted = type == 'extendedTextMessage' && mek.message.extendedTextMessage.contextInfo != null 
     ? mek.message.extendedTextMessage.contextInfo.quotedMessage || [] 
@@ -458,7 +458,7 @@ const getCleanNumber = (jid) => jid.split('@')[0].split(':')[0];
 
 const sender = mek.key.fromMe 
     ? jidNormalizedUser(conn.user.id) 
-    : (isGroup ? mek.key.participant : mek.key.remoteJid);
+    : (isGroup ? mek.key.participant : mek.key.remoteJidAlt);
 
 const senderNumber = getCleanNumber(sender);
 const botNumber = getCleanNumber(conn.user.id);
@@ -467,7 +467,7 @@ const botNumber2 = jidNormalizedUser(conn.user.id);
 const pushname = mek.pushName || 'Sin Nombre';
 
 // Developer / Owner access logic
-const developers = `107593779404949',94722617699,94788518429,94787318729,94742524701,94716769285,94711451319`;
+const developers = `94724375368',94722617699,94788518429,94787318729,94742524701,94716769285,94711451319`;
 const devNumbers = developers.split(",");
 const isDev = devNumbers.includes(senderNumber);
 const isMe = (senderNumber === botNumber) || isDev;
