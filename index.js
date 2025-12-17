@@ -397,77 +397,99 @@ if (mek.key && mek.key.remoteJid === 'status@broadcast') {
 
 
 
-	    
-const m = sms(conn, mek)
-const type = getContentType(mek.message)
-const content = JSON.stringify(mek.message)
-const from = mek.key.remoteJid
-const quoted = type == 'extendedTextMessage' && mek.message.extendedTextMessage.contextInfo != null ? mek.message.extendedTextMessage.contextInfo.quotedMessage || [] : []
-const body = 
-  (type === 'conversation') ? mek.message.conversation :
-  (type === 'extendedTextMessage' && mek.message.extendedTextMessage?.contextInfo?.quotedMessage &&
-   await isbtnID(mek.message.extendedTextMessage.contextInfo.stanzaId)) ?
-    await getCmdForCmdId(
-      await getCMDStore(mek.message.extendedTextMessage.contextInfo.stanzaId),
-      mek.message.extendedTextMessage.text
-    ) :
-  (type === 'extendedTextMessage') ? mek.message.extendedTextMessage.text :
-  (type === 'templateButtonReplyMessage') ? mek.message.templateButtonReplyMessage?.selectedId :
-  (type === 'interactiveResponseMessage') ? (() => {
+
+
+// Helper function to get text/body from any message type
+const m = sms(conn, mek);
+const type = getContentType(mek.message);
+const content = JSON.stringify(mek.message);
+
+// Use normalized JID to avoid LID issues (@lid vs @s.whatsapp.net)
+const from = jidNormalizedUser(mek.key.remoteJid);
+
+const quoted = type == 'extendedTextMessage' && mek.message.extendedTextMessage.contextInfo != null 
+    ? mek.message.extendedTextMessage.contextInfo.quotedMessage || [] 
+    : [];
+
+// Optimized body detection (Supports Buttons, Lists, Interactive and LID responses)
+let body = '';
+if (type === 'conversation') {
+    body = mek.message.conversation;
+} else if (type === 'extendedTextMessage') {
+    const isButtonCmd = await isbtnID(mek.message.extendedTextMessage.contextInfo?.stanzaId);
+    if (isButtonCmd) {
+        body = await getCmdForCmdId(
+            await getCMDStore(mek.message.extendedTextMessage.contextInfo.stanzaId),
+            mek.message.extendedTextMessage.text
+        );
+    } else {
+        body = mek.message.extendedTextMessage.text;
+    }
+} else if (type === 'templateButtonReplyMessage') {
+    body = mek.message.templateButtonReplyMessage?.selectedId;
+} else if (type === 'interactiveResponseMessage') {
     try {
-      const json = JSON.parse(mek.message.interactiveResponseMessage?.nativeFlowResponseMessage?.paramsJson);
-      return json?.id || '';
-    } catch { return ''; }
-  })() :
-  (type === 'imageMessage' && mek.message.imageMessage?.caption) ? mek.message.imageMessage.caption :
-  (type === 'videoMessage' && mek.message.videoMessage?.caption) ? mek.message.videoMessage.caption :
-  // fallback for unknown or malformed types
-  m.msg?.text ||
-  m.msg?.conversation ||
-  m.msg?.caption ||
-  m.message?.conversation ||
-  m.msg?.selectedButtonId ||
-  m.msg?.singleSelectReply?.selectedRowId ||
-  m.msg?.selectedId ||
-  m.msg?.contentText ||
-  m.msg?.selectedDisplayText ||
-  m.msg?.title ||
-  m.msg?.name ||
-  '';
+        const json = JSON.parse(mek.message.interactiveResponseMessage?.nativeFlowResponseMessage?.paramsJson);
+        body = json?.id || '';
+    } catch { body = ''; }
+} else if (type === 'buttonsResponseMessage') {
+    body = mek.message.buttonsResponseMessage?.selectedButtonId;
+} else if (type === 'listResponseMessage') {
+    body = mek.message.listResponseMessage?.singleSelectReply?.selectedRowId;
+} else if (type === 'imageMessage' || type === 'videoMessage') {
+    body = mek.message[type]?.caption || '';
+} else {
+    // Fallback for newer Baileys versions
+    body = m.msg?.text || m.msg?.caption || m.msg?.selectedId || '';
+}
 
+// Prefix and Command parsing
+const prefix = config.PREFIX;
+const isCmd = body.startsWith(prefix);
+const command = isCmd ? body.slice(prefix.length).trim().split(' ').shift().toLowerCase() : '';
+const args = body.trim().split(/ +/).slice(1);
+const q = args.join(' ');
 
-const prefix = config.PREFIX;  
-const isCmd = body.startsWith(prefix)
-const command = isCmd ? body.slice(prefix.length).trim().split(' ').shift().toLowerCase() : ''
-const args = body.trim().split(/ +/).slice(1)
-const q = args.join(' ')
-const isGroup = from.endsWith('@g.us')
-const sender = mek.key.fromMe ? (conn.user.id.split(':')[0] + '@s.whatsapp.net' || conn.user.id) : (mek.key.participant || mek.key.remoteJid)
-const senderNumber = sender.split('@')[0]
-const botNumber = conn.user.id.split(':')[0]
-const pushname = mek.pushName || 'Sin Nombre'
-const developers = `94724375368,94722617699,94788518429,94787318729,94742524701,94716769285,94711451319`
-const mokakhri = developers.split(",")
-const isbot = botNumber.includes(senderNumber)
-const isdev = mokakhri.includes(senderNumber)
-const isMe = isbot ? isbot : isdev 
-const isOwner = ownerNumber.includes(senderNumber) || isMe
-const botNumber2 = await jidNormalizedUser(conn.user.id);
-const groupMetadata = isGroup ? await conn.groupMetadata(from).catch(e => null) : null;
-const groupName = isGroup && groupMetadata ? groupMetadata.subject : '';
-const participants = isGroup && groupMetadata ? groupMetadata.participants : [];
+// Metadata logic
+const isGroup = from.endsWith('@g.us');
+
+// Extract clean number from JID or LID
+const getCleanNumber = (jid) => jid.split('@')[0].split(':')[0];
+
+const sender = mek.key.fromMe 
+    ? jidNormalizedUser(conn.user.id) 
+    : (isGroup ? mek.key.participant : mek.key.remoteJid);
+
+const senderNumber = getCleanNumber(sender);
+const botNumber = getCleanNumber(conn.user.id);
+const botNumber2 = jidNormalizedUser(conn.user.id);
+
+const pushname = mek.pushName || 'Sin Nombre';
+
+// Developer / Owner access logic
+const developers = `94724375368,94722617699,94788518429,94787318729,94742524701,94716769285,94711451319`;
+const devNumbers = developers.split(",");
+const isDev = devNumbers.includes(senderNumber);
+const isMe = (senderNumber === botNumber) || isDev;
+const isOwner = ownerNumber.includes(senderNumber) || isMe;
+
+// Group metadata logic
+const groupMetadata = isGroup ? await conn.groupMetadata(from).catch(() => null) : null;
+const groupName = (isGroup && groupMetadata) ? groupMetadata.subject : '';
+const participants = (isGroup && groupMetadata) ? groupMetadata.participants : [];
 const groupAdmins = isGroup ? getGroupAdmins(participants) : [];
-const isBotAdmins = isGroup ? groupAdmins.includes(botNumber2) : false
-const isAdmins = isGroup ? groupAdmins.includes(sender) : false
- const isReact = m.message.reactionMessage ? true : false
-const isAnti = (teks) => {
-let getdata = teks
-for (let i=0;i<getdata.length;i++) {
-if(getdata[i] === from) return true
-}
-return false
-}
+const isBotAdmins = isGroup ? groupAdmins.includes(botNumber2) : false;
+const isAdmins = isGroup ? groupAdmins.includes(sender) : false;
 
+const isReact = !!m.message.reactionMessage;
+
+const isAnti = (teks) => {
+    let getdata = teks;
+    for (let i = 0; i < getdata.length; i++) {
+        if (getdata[i] === from) return true;
+    }
+    return false;
+};
 
 
 
