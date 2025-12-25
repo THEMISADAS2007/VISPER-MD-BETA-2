@@ -24,7 +24,7 @@
 
     "@google-cloud/translate": "latest",
 
-  "@whiskeysockets/baileys":"github:AmilaPrabathKumara/Baileys-Latest#fix-leak-upload",
+  "@whiskeysockets/baileys":"7.0.0-rc.9",
 "figlet": "^1.7.0",
     "adm-zip": "latest",
 
