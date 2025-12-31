@@ -173,10 +173,10 @@ conn.ev.on('connection.update', async (update) => {
 • Work Type: ${config.WORK_TYPE}
 • Status: Online ✅
 `;
-                await conn.sendMessage(targetJid, { 
-                    image: { url: 'https://mv-visper-full-db.pages.dev/Data/visper_main.jpeg' }, 
-                    caption: ownerdata.connectmg || configMsg 
-                });
+                ///await conn.sendMessage(targetJid, { 
+                   /// image: { url: 'https://mv-visper-full-db.pages.dev/Data/visper_main.jpeg' }, 
+                   // caption: ownerdata.connectmg || configMsg 
+               // });
                 
                 console.log("✅ Initialization message sent.");
             } catch (e) {
