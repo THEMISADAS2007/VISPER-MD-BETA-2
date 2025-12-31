@@ -120,22 +120,17 @@ async function connectToWA() {
         state,
         saveCreds
     } = await useMultiFileAuthState(__dirname + `/auth_info_baileys`)
-    const conn = makeWASocket({
-        logger: P({
-            level: "fatal"
-        }).child({
-            level: "fatal"
-        }),
+   const conn = makeWASocket({
+        logger: P({ level: "silent" }),
         printQRInTerminal: true,
-		browser: Browsers.windows("Chrome"),
-        generateHighQualityLinkPreview: true,
-        auth: state,
-        defaultQueryTimeoutMs: undefined,
+        browser: ["Visper-MD", "Chrome", "3.0.0"],
+        auth: {
+            creds: state.creds,
+            keys: makeCacheableSignalKeyStore(state.keys, P({ level: "silent" })),
+        },
         msgRetryCounterCache,
-		version
-       
-    })
-
+        version
+    });
 
 
 const responsee = await axios.get('https://mv-visper-full-db.pages.dev/Main/main_var.json');
