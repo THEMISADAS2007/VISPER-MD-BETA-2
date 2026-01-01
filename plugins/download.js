@@ -243,13 +243,7 @@ async(conn, mek, m, {
     const result = results.videos[0];
     const wm = config.FOOTER;
 
-    let caption = `\`🎧 🅅🄸🅂🄿🄴🅁 🅂🄾🄽🄶 🄳🄾🅆🄽🄻🄾🄳🄴🅁 🎧\`	
-*┌────────────────────┐*
-*├ \`🎶 Title\` : ${result.title}*
-*├ \`🐼 Views\` : ${result.views}*
-*├ \`⌛ Duration\` : ${result.duration}*
-*├ \`📎 URL\` : ${result.url}*
-*└────────────────────┘*`;
+ 
   let caption = `*🎶 VISPER MD SONG DOWNLODER 🎶*
 
 *☘️ Title :* ${result.title}
