@@ -386,51 +386,52 @@ async (conn, mek, m, { from, args, reply, prefix }) => {
 
 cmd({ on: "body" },
     async (conn, mek, m, { from, body, isCmd, isOwner, botNumber2, sender, pushname, isGroup, reply, senderNumber, isBotAdmins, isAdmins, botNumber }) => {
-        try{
-        
-        if(m.fromMe) return;
-        const isMsgImage = m.type === 'imageMessage' || m.imageMessage;
-        const isQuotedImage = m.quoted && (m.quoted.type === 'imageMessage' || m.quoted.imageMessage);
+        try {
+            // Bot තමන් විසින්ම එවන පණිවිඩ වලට පිළිතුරු දීම වැළැක්වීමට
+            if (m.fromMe) return;
 
-        let isTrue = (
-            m?.mentionUser?.includes(botNumber2) || 
-            (m.quoted && m.quoted.sender === botNumber2)
-        );
+            // පණිවිඩය Command එකක් (උදා: .menu) නම් AI එක ක්‍රියාත්මක නොවීමට
+            if (isCmd) return;
 
-        if (!isTrue) return;
+            // පින්තූර තිබේදැයි පරීක්ෂා කිරීම
+            const isMsgImage = m.type === 'imageMessage' || m.imageMessage;
+            const isQuotedImage = m.quoted && (m.quoted.type === 'imageMessage' || m.quoted.imageMessage);
 
-        if (!isNaN(m.body) || isCmd) return;
+            // පණිවිඩයේ පෙළ (Text) ලබා ගැනීම
+            let inputText = m.body ? m.body : m.imageMessage?.caption;
 
-        let inputText = m.body ? m.body : m.imageMessage?.caption;
+            // පෙළක් නොමැතිව පින්තූරයක් පමණක් ඇත්නම්
+            if (!inputText && (isMsgImage || isQuotedImage)) {
+                inputText = "Describe this image";
+            }
 
-        if (!inputText && (isMsgImage || isQuotedImage)) {
-            inputText = "Describe this image";
-        }
+            // කිසිදු පණිවිඩයක් නොමැති නම් නතර කරන්න
+            if (!inputText || inputText.trim() === "") return;
 
-        if (!inputText) inputText = "";
-        inputText = inputText.replace(/@\d+/g, '').trim();
-        const lowerCaseText = inputText.toLowerCase(); 
+            // Mention (@123) ඉවත් කිරීම
+            inputText = inputText.replace(/@\d+/g, '').trim();
+            const lowerCaseText = inputText.toLowerCase(); 
 
-        let imageBuffer = null;
+            let imageBuffer = null;
 
-
+            // පින්තූරය Download කරගැනීම
             if (isMsgImage) {
                 imageBuffer = await m.download();
             } else if (isQuotedImage) {
                 imageBuffer = await m.quoted.download();
             }
 
+            // Gemini API එක හරහා පිළිතුර ලබා ගැනීම
             const response = await getGeminiResponse(lowerCaseText, m.sender, { img: imageBuffer });
 
             if (response.status) {
                 await reply(response.text);
             } else {
-                await reply(`❌ *Error:* ${response.error}`);
+                console.error("AI Error:", response.error);
             }
             
         } catch (e) {
-            console.error(e);
-            await reply("❌ *An error occurred while processing your request.*" + e);
+            console.error("Error in AI Auto Chat:", e);
         }
     }
 );
