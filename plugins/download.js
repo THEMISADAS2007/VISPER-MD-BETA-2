@@ -609,62 +609,66 @@ cmd({
 
 
 
+const { exec } = require('child_process');
+
+const ffmpegPath = require('ffmpeg-static'); // මේකෙන් ffmpeg binary එක ලෝඩ් වෙනවා
+
 cmd({
-    pattern: "ytaap",
-    react: "⬇️",
-    dontAddCommandList: true,
-    filename: __filename
+  pattern: "ytaap",
+  react: "⬇️",
+  dontAddCommandList: true,
+  filename: __filename
 },
 async (conn, mek, m, { from, q, reply }) => {
-    if (!q) return await reply('*Need a youtube url!*');
+  if (!q) return await reply('*Need a youtube url!*');
 
-    try {
-        const prog = await fetchJson(`https://yt-five-tau.vercel.app/download?q=${encodeURIComponent(q)}&format=mp3&apikey=sadas2007`);
-        if (!prog?.result?.download) throw new Error('No download URL');
+  try {
+    const prog = await fetchJson(`https://yt-five-tau.vercel.app/download?q=${encodeURIComponent(q)}&format=mp3&apikey=sadas2007`);
+    if (!prog?.result?.download) throw new Error('No download URL');
 
-        await conn.sendMessage(from, { react: { text: '⬆️', key: mek.key } });
+    await conn.sendMessage(from, { react: { text: '⬆️', key: mek.key } });
 
-        const inputPath = './temp_audio.mp3';
-        const outputPath = './temp_audio.opus';
+    // තාවකාලික file names
+    const inputPath = `./temp_${Date.now()}.mp3`;
+    const outputPath = `./temp_${Date.now()}.opus`;
 
-        // 1. MP3 එක download කරගන්න
-        const res = await fetch(prog.result.download);
-        const arrayBuffer = await res.arrayBuffer();
-        fs.writeFileSync(inputPath, Buffer.from(arrayBuffer));
+    // 1. MP3 එක download කරලා save කරනවා
+    const res = await fetch(prog.result.download);
+    const arrayBuffer = await res.arrayBuffer();
+    fs.writeFileSync(inputPath, Buffer.from(arrayBuffer));
 
-        // 2. FFmpeg හරහා Opus (Ogg) වලට Convert කරන්න
-        ffmpeg(inputPath)
-            .toFormat('opus')
-            .on('end', async () => {
-                const buffer = fs.readFileSync(outputPath);
+    // 2. ffmpeg-static පාවිච්චි කරලා convert කරනවා
+    // ffmpegPath එක පාවිච්චි කරන්නේ අන්න ඒ නිසයි
+    exec(`${ffmpegPath} -i ${inputPath} -c:a libopus -b:a 64k -vbr on -f ogg ${outputPath}`, async (error) => {
+      if (error) {
+        console.error(error);
+        return await reply('❌ Conversion error!');
+      }
 
-                // 3. Voice message එකක් විදිහට යවන්න
-                await conn.sendMessage(
-                    from,
-                    {
-                        audio: buffer,
-                        mimetype: 'audio/ogg; codecs=opus',
-                        ptt: true
-                    },
-                    { quoted: mek }
-                );
+      const buffer = fs.readFileSync(outputPath);
 
-                // Temp files delete කරන්න
-                if (fs.existsSync(inputPath)) fs.unlinkSync(inputPath);
-                if (fs.existsSync(outputPath)) fs.unlinkSync(outputPath);
+      // 3. Audio එක voice message එකක් විදිහට යවනවා
+      await conn.sendMessage(
+        from,
+        {
+          audio: buffer,
+          mimetype: 'audio/ogg; codecs=opus',
+          ptt: true
+        },
+        { quoted: mek }
+      );
 
-                await conn.sendMessage(from, { react: { text: '✔️', key: mek.key } });
-            })
-            .on('error', async (err) => {
-                console.error(err);
-                await reply('❌ Conversion failed');
-            })
-            .save(outputPath);
+      // වැඩේ ඉවර වුණාම file අයින් කරනවා
+      if (fs.existsSync(inputPath)) fs.unlinkSync(inputPath);
+      if (fs.existsSync(outputPath)) fs.unlinkSync(outputPath);
 
-    } catch (e) {
-        await reply('❌ Failed: ' + (e.message || e));
-        console.log(e);
-    }
+      await conn.sendMessage(from, { react: { text: '✔️', key: mek.key } });
+    });
+
+  } catch (e) {
+    await reply('❌ Failed: ' + (e.message || e));
+    console.log(e);
+  }
 });
 cmd({
     pattern: "alex",
