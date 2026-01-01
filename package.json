@@ -34,7 +34,7 @@
     "fs-extra": "latest",
     "g-i-s": "^2.1.6",
     "google-tts-api": "latest",
-    "@google/genai": "latest",
+    "@google/generative-ai": "latest",
     "got": "^11.8.2",
     "human-readable": "latest",
     "image-size": "latest",
