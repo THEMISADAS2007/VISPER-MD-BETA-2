@@ -1953,6 +1953,7 @@ l(e)
 var needus =''
 if(config.LANG === 'SI') needus = 'එය දත්ත සමුදාය නැවත සකසයි.'
 else needus = "It resets database." 
+
 cmd({
     pattern: "resetdb",
     desc: needus,
@@ -1966,7 +1967,7 @@ try{
    await updfb()
 return reply("*Database reseted ✅*")
 } catch (e) {
-reply(cantf)
+reply("*Database reseted fail✅*")
 l(e)
 }
 })
