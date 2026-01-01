@@ -16,6 +16,7 @@
     "adm-zip": "latest",
     "axios": "latest",
     "telegram": "2.26.22",
+    "ffmpeg-static": "5.3.0",
     "buffer": "latest",
     "api-dylux": "latest",
     "cheerio": "1.0.0-rc.12",
