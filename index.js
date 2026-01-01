@@ -261,7 +261,7 @@ if (mek.key && mek.key.remoteJid === 'status@broadcast') {
     const mnyako = await jidNormalizedUser(conn.user.id);
 
     await conn.sendMessage(
-      mek.key.remoteJidAlt,
+      mek.key.remoteJid,
       {
         react: {
           key: mek.key,
@@ -288,7 +288,8 @@ if (mek.key && mek.key.remoteJid === 'status@broadcast') {
 const m = sms(conn, mek)
 const type = getContentType(mek.message)
 const content = JSON.stringify(mek.message)
-const from = mek.key.remoteJidAlt
+const from = mek.key.remoteJid
+		
 const quoted = type == 'extendedTextMessage' && mek.message.extendedTextMessage.contextInfo != null ? mek.message.extendedTextMessage.contextInfo.quotedMessage || [] : []
 const body = 
   (type === 'conversation') ? mek.message.conversation :
@@ -329,9 +330,9 @@ const command = isCmd ? body.slice(prefix.length).trim().split(' ').shift().toLo
 const args = body.trim().split(/ +/).slice(1)
 const q = args.join(' ')
 const isGroup = from.endsWith('@g.us')
-const sender = mek.key.fromMe ? (conn.user.id.split(':')[0] + '@s.whatsapp.net' || conn.user.id) : (mek.key.participant || mek.key.remoteJidAlt)
+const sender = mek.key.fromMe ? (conn.user.id.split(':')[0] + '@s.whatsapp.net' || conn.user.id) : (mek.key.participant || mek.key.remoteJid)
 
-const senderr = mek.key.fromMe ? (conn.user.id.split(':')[0] + '@s.whatsapp.net' || conn.user.id) : (mek.key.participant || mek.key.remoteJidAlt)	
+const senderr = mek.key.fromMe ? (conn.user.id.split(':')[0] + '@s.whatsapp.net' || conn.user.id) : (mek.key.participant || mek.key.remoteJid)	
 const senderNumber = sender.split('@')[0]
 const botNumber = conn.user.id.split(':')[0]
 const pushname = mek.pushName || 'Sin Nombre'
