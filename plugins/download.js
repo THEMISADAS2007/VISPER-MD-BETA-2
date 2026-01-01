@@ -7,6 +7,8 @@ const cheerio = require('cheerio');
 const { phsearch, phdl } = require('darksadas-yt-pornhub-scrape')
 const { File } = require('megajs');
 const fg = require('api-dylux');
+const ffmpeg = require('fluent-ffmpeg');
+const path = require('path');
 const { igdl } = require('ruhend-scraper')
 const { sizeFormatter} = require('human-readable');;
 const { ytmp3, tiktok, facebook, instagram, twitter, ytmp4 } = require('sadaslk-dlcore');
@@ -605,42 +607,65 @@ cmd({
     }
 });
 
+
+
 cmd({
-  pattern: "ytaap",
-  react: "⬇️",
-  dontAddCommandList: true,
-  filename: __filename
+    pattern: "ytaap",
+    react: "⬇️",
+    dontAddCommandList: true,
+    filename: __filename
 },
 async (conn, mek, m, { from, q, reply }) => {
-  if (!q) return await reply('*Need a youtube url!*');
+    if (!q) return await reply('*Need a youtube url!*');
 
-  try {
-    const prog = await fetchJson(`https://yt-five-tau.vercel.app/download?q=${encodeURIComponent(q)}&format=mp3&apikey=sadas2007`);
-    if (!prog?.result?.download) throw new Error('No download URL');
+    try {
+        const prog = await fetchJson(`https://yt-five-tau.vercel.app/download?q=${encodeURIComponent(q)}&format=mp3&apikey=sadas2007`);
+        if (!prog?.result?.download) throw new Error('No download URL');
 
-    await conn.sendMessage(from, { react: { text: '⬆️', key: mek.key } });
+        await conn.sendMessage(from, { react: { text: '⬆️', key: mek.key } });
 
-    const res = await fetch(prog.result.download);
-    const arrayBuffer = await res.arrayBuffer();
-    const buffer = Buffer.from(arrayBuffer);
+        const inputPath = './temp_audio.mp3';
+        const outputPath = './temp_audio.opus';
 
-    await conn.sendMessage(
-      from,
-      {
-        audio: buffer,
-        mimetype: 'audio/ogg; codecs=opus',
-        ptt: true
-      },
-      { quoted: mek }
-    );
+        // 1. MP3 එක download කරගන්න
+        const res = await fetch(prog.result.download);
+        const arrayBuffer = await res.arrayBuffer();
+        fs.writeFileSync(inputPath, Buffer.from(arrayBuffer));
 
-    await conn.sendMessage(from, { react: { text: '✔️', key: mek.key } });
-  } catch (e) {
-    await reply('❌ Failed: ' + (e.message || e));
-    console.log(e);
-  }
+        // 2. FFmpeg හරහා Opus (Ogg) වලට Convert කරන්න
+        ffmpeg(inputPath)
+            .toFormat('opus')
+            .on('end', async () => {
+                const buffer = fs.readFileSync(outputPath);
+
+                // 3. Voice message එකක් විදිහට යවන්න
+                await conn.sendMessage(
+                    from,
+                    {
+                        audio: buffer,
+                        mimetype: 'audio/ogg; codecs=opus',
+                        ptt: true
+                    },
+                    { quoted: mek }
+                );
+
+                // Temp files delete කරන්න
+                if (fs.existsSync(inputPath)) fs.unlinkSync(inputPath);
+                if (fs.existsSync(outputPath)) fs.unlinkSync(outputPath);
+
+                await conn.sendMessage(from, { react: { text: '✔️', key: mek.key } });
+            })
+            .on('error', async (err) => {
+                console.error(err);
+                await reply('❌ Conversion failed');
+            })
+            .save(outputPath);
+
+    } catch (e) {
+        await reply('❌ Failed: ' + (e.message || e));
+        console.log(e);
+    }
 });
-
 cmd({
     pattern: "alex",
     alias: ["ytsong"],
