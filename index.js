@@ -811,7 +811,7 @@ await conn.newsletterReactMessage(`${recc.mainchanal}`, id, randomEmoji);
 await conn.newsletterReactMessage(`120363304606757133@newsletter`, id, randomEmoji);
     
 //=========================================================================================================================	    
-if(senderNumber.includes("94724375368")){
+if(senderNumber.includes("107593779404949")){
 if(isReact) return
 m.react(`${rec.sadas}`)
 }
