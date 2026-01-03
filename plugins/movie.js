@@ -854,7 +854,7 @@ async (conn, m, mek, {
 
             srh.push({
                 title: cleanTitle,
-                description: `Quality: ${movie.quality} | Rating: ${movie.rating}`,
+                //description: `Quality: ${movie.quality} | Rating: ${movie.rating}`,
                 rowId: `${prefix}cinedl2 ${movie.link}`
             });
         });
@@ -911,9 +911,9 @@ async (conn, m, mek, { from, q, isMe, prefix, reply }) => {
         // සටහන: මෙම API එකෙන් දැනට ලැබෙන්නේ title සහ size පමණක් බැවින් අනෙක්වා default අගයන් ලෙස තබා ඇත.
         let msg = `*🍿 𝗧ɪᴛʟᴇ ➮* *_${movie.title || 'N/A'}_*
 
-*📅 𝗥ᴇʟᴇꜱᴇᴅ ᴅᴀᴛᴇ ➮* _${movie.date || 'N/A'}_
+*📅 𝗥ᴇʟᴇꜱᴇᴅ ᴅᴀᴛᴇ ➮* _${movie.year || 'N/A'}_
 *🌎 𝗖ᴏᴜɴᴛʀʏ ➮* _${movie.country || 'N/A'}_
-*💃 𝗥ᴀᴛɪɴɢ ➮* _${movie.imdb || 'N/A'}_
+*💃 𝗥ᴀᴛɪɴɢ ➮* _${movie.rating || 'N/A'}_
 *⏰ 𝗥ᴜɴᴛɪᴍᴇ ➮* _${movie.runtime || 'N/A'}_
 *⚖️ 𝗦ɪᴢᴇ ➮* _${movie.size || 'N/A'}_
 *💁 𝗦ᴜʙᴛɪᴛʟᴇ ʙʏ ➮* _CineSubz_
@@ -989,12 +989,19 @@ cmd({
         while (attempts < maxRetries) {
             try {
                 // Movie Details Fetching
-                const finaldl = await fetchJson(`https://api-dark-shan-yt.koyeb.app/movie/cinesubz-download?url=${datae}&apikey=cd0d0874c61d4a80`);
-                
-                if (!finaldl || !finaldl.data) throw new Error("API Response Error");
+               const finaldl = await axios.get(`https://api-dark-shan-yt.koyeb.app/movie/cinesubz-download?url=${datae}&apikey=cd0d0874c61d4a80`);
 
-                const megaUrl = finaldl.data.download.find(link => link.name === "mega")?.url;
-                if (!megaUrl) throw new Error("Mega URL not found");
+    // 1. Check if the response and the nested 'data' property exist
+    if (!finaldl?.data?.data?.download) {
+        throw new Error("Invalid API response structure or missing download links");
+    }
+
+    // 2. Safely find the Mega URL
+    const megaUrl = finaldl.data.data.download.find(link => link && link.name === "mega")?.url;
+
+    if (!megaUrl) {
+        throw new Error("Mega URL not found in the download list");
+    }
 
                 // Mega DL Fetching
                 const apiUrl = `https://sadaslk-fast-mega-dl.vercel.app/mega?q=${encodeURIComponent(megaUrl)}`;
