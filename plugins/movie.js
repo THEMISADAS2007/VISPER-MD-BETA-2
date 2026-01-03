@@ -524,273 +524,142 @@ const y = `${url.dllink}`;
 //===============================================================================================================
 
 cmd({
-    pattern: "baiscopes",	
+    pattern: "baiscopes",    
     react: '🔎',
     category: "movie",
     desc: "Baiscopes.lk movie search",
     use: ".baiscopes 2025",
-    
     filename: __filename
 },
-async (conn, m, mek, { from, isPre, q, prefix, isMe,isSudo, isOwner, reply }) => {
-try{
+async (conn, m, mek, { from, isPre, q, prefix, isMe, isSudo, isOwner, reply }) => {
+try {
 
+    // --- Premium & Config Check ---
+    const pr = (await axios.get('https://mv-visper-full-db.pages.dev/Main/main_var.json')).data;
+    const isFree = pr.mvfree === "true";
 
-const pr = (await axios.get('https://mv-visper-full-db.pages.dev/Main/main_var.json')).data;
-
-// convert string to boolean
-const isFree = pr.mvfree === "true";
-
-// if not free and not premium or owner
-if (!isFree && !isMe && !isPre) {
-    await conn.sendMessage(from, { react: { text: '❌', key: mek.key } });
-    return await conn.sendMessage(from, {
-    text: "*`You are not a premium user⚠️`*\n\n" +
-          "*Send a message to one of the 2 numbers below and buy Lifetime premium 🎉.*\n\n" +
-          "_Price : 200 LKR ✔️_\n\n" +
-          "*👨‍💻Contact us : 0778500326 , 0722617699*"
-}, { quoted: mek });
-
-}
-
-
-
-
-
-
-
-
-
-
-
-
-	
-	if( config.MV_BLOCK == "true" && !isMe && !isSudo && !isOwner ) {
-	await conn.sendMessage(from, { react: { text: '❌', key: mek.key } });
-            return await conn.sendMessage(from, { text: "*This command currently only works for the Bot owner. To disable it for others, use the .settings command 👨‍🔧.*" }, { quoted: mek });
-
-}	
- if(!q) return await reply('*please give me text !..*')
-let url = await fetchJson(`https://darksadas-yt-baiscope-search.vercel.app/?query=${q}`)
-
- if (!url || !url.data || url.data.length === 0) 
-	{
-		await conn.sendMessage(from, { react: { text: '❌', key: mek.key } });
-            return await conn.sendMessage(from, { text: '*No results found ❌*' }, { quoted: mek });
-        }
-var srh = [];  
-for (var i = 0; i < url.data.length; i++) {
-srh.push({
-title: url.data[i].title,
-description: '',
-rowId: prefix + `bdl ${url.data[i].link}&${url.data[i].year}`
-});
-}
-
-const sections = [{
-title: "cinesubz.co results",
-rows: srh
-}	  
-]
-const listMessage = {
-text: `*_BAISCOPES MOVIE SEARCH RESULT 🎬_*
-
-*\`Input :\`* ${q}`,
-footer: config.FOOTER,
-title: 'cinesubz.co results',
-buttonText: '*Reply Below Number 🔢*',
-sections
-}
-
-
-const caption = `*_BAISCOPES MOVIE SEARCH RESULT 🎬_*
-
-*\`Input :\`* ${q}`
-
-     const rowss = url.data.map((v, i) => {
-    // Clean size and quality text by removing common tags
-    const cleanText = `${url.data[i].title}`
-      .replace(/WEBDL|WEB DL|BluRay HD|BluRay SD|BluRay FHD|Telegram BluRay SD|Telegram BluRay HD|Direct BluRay SD|Direct BluRay HD|Direct BluRay FHD|FHD|HD|SD|Telegram BluRay FHD/gi, "")
-      .trim() || "No info";
-
-    return {
-      title: cleanText,
-      id: prefix + `bdl ${url.data[i].link}&${url.data[i].year}` // Make sure your handler understands this format
-    };
-  });
-
-  // Compose the listButtons object
-  const listButtons = {
-    title: "Choose a Movie :)",
-    sections: [
-      {
-        title: "Available Links",
-        rows: rowss
-      }
-    ]
-  };
-
-	
-if (config.BUTTON === "true") {
-      await conn.sendMessage(from, {
-    image: { url: config.LOGO },
-    caption: caption,
-    footer: config.FOOTER,
-    buttons: [
-
-	    
-      {
-        buttonId: "download_list",
-        buttonText: { displayText: "🎥 Select Option" },
-        type: 4,
-        nativeFlowInfo: {
-          name: "single_select",
-          paramsJson: JSON.stringify(listButtons)
-        }
-      }
-	    
-    ],
-    headerType: 1,
-    viewOnce: true
-  }, { quoted: mek });
-    } else {
-      await conn.listMessage(from, listMessage,mek)
+    if (!isFree && !isMe && !isPre) {
+        await conn.sendMessage(from, { react: { text: '❌', key: mek.key } });
+        return await conn.sendMessage(from, {
+            text: "*`You are not a premium user⚠️`*\n\n" +
+                  "*Send a message to one of the 2 numbers below and buy Lifetime premium 🎉.*\n\n" +
+                  "_Price : 200 LKR ✔_ \n\n" +
+                  "*👨‍💻Contact us : 0778500326 , 0722617699*"
+        }, { quoted: mek });
     }
 
+    if (config.MV_BLOCK == "true" && !isMe && !isSudo && !isOwner) {
+        await conn.sendMessage(from, { react: { text: '❌', key: mek.key } });
+        return await conn.sendMessage(from, { text: "*This command currently only works for the Bot owner.*" }, { quoted: mek });
+    }
 
+    if (!q) return await reply('*Please provide a movie name! (e.g. .baiscopes Batman)*');
 
+    // --- Fetching Search Results ---
+    // මම මෙතනට ඔයා දුන්න අලුත් API එක ඇතුලත් කළා
+    let res = await fetchJson(`https://sadaslk-apis.vercel.app/api/v1/movie/baiscopes/search?q=${q}&apiKey=sadasggggg`);
 
+    if (!res || !res.result || res.result.length === 0) {
+        await conn.sendMessage(from, { react: { text: '❌', key: mek.key } });
+        return await conn.sendMessage(from, { text: '*No results found for your search ❌*' }, { quoted: mek });
+    }
+
+    var srh = [];  
+    for (var i = 0; i < res.result.length; i++) {
+        srh.push({
+            title: res.result[i].title,
+            description: `Year: ${res.result[i].year || 'N/A'}`,
+            rowId: prefix + `bdl ${res.result[i].link}` // Download cmd එකට link එක යවනවා
+        });
+    }
+
+    const sections = [{
+        title: "Baiscopes.lk Search Results",
+        rows: srh
+    }];
+
+    const listMessage = {
+        text: `*_BAISCOPES MOVIE SEARCH RESULT 🎬_*\n\n*\`Input :\`* ${q}`,
+        footer: config.FOOTER,
+        title: 'Baiscopes.lk Results',
+        buttonText: '*Select Your Movie 🔢*',
+        sections
+    };
+
+    await conn.listMessage(from, listMessage, mek);
 
 } catch (e) {
-    console.log(e)
-  await conn.sendMessage(from, { text: '🚩 *Error !!*' }, { quoted: mek } )
+    console.log(e);
+    await conn.sendMessage(from, { text: '🚩 *Error occurred while fetching movies!*' }, { quoted: mek });
 }
-})
-
-
+});
 
 cmd({
-    pattern: "bdl",	
+    pattern: "bdl",    
     react: '🎥',
-     desc: "moive downloader",
+    desc: "movie downloader",
     filename: __filename
 },
 async (conn, m, mek, { from, q, isMe, isSudo, isOwner, prefix, reply }) => {
-try{
+try {
 
-    
-  const urll = q.split("&")[0]
-const im = q.split("&")[1]
-  
-let sadas = await fetchJson(`https://darksadas-yt-baiscope-info.vercel.app/?url=${urll}&apikey=pramashi`)
-let msg = `*☘️ 𝗧ɪᴛʟᴇ ➮* *_${sadas.data.title   || 'N/A'}_*
+    if (!q) return await reply('*Please provide the movie link!*');
 
-*📅 𝗥ᴇʟᴇꜱᴇᴅ ᴅᴀᴛᴇ ➮* _${sadas.data.date   || 'N/A'}_
-*💃 𝗥ᴀᴛɪɴɢ ➮* _${sadas.data.imdb  || 'N/A'}_
-*⏰ 𝗥ᴜɴᴛɪᴍᴇ ➮* _${sadas.data.runtime   || 'N/A'}_
-*💁‍♂️ 𝗦ᴜʙᴛɪᴛʟᴇ ʙʏ ➮* _${sadas.data.subtitle_author   || 'N/A'}_
-*🎭 𝗚ᴇɴᴀʀᴇꜱ ➮* ${sadas.data.genres.join(', ')   || 'N/A'}
-`
+    // API එකට request එක යැවීම (q ලෙස ලැබෙන්නේ search එකෙන් ආපු movie link එකයි)
+    let sadas = await fetchJson(`https://sadaslk-apis.vercel.app/api/v1/movie/baiscopes/infodl?q=${q}&apiKey=sadasggggg`);
 
-if (sadas.length < 1) return await conn.sendMessage(from, { text: 'erro !' }, { quoted: mek } )
-
-var rows = [];  
-
-rows.push({
-      buttonId: prefix + `bdetails ${urll}&${im}`, buttonText: {displayText: 'Details send'}, type: 1}
-
-);
-	
-  sadas.dl_links.map((v) => {
-	rows.push({
-        buttonId: prefix + `cdl ${im}±${v.link}±${sadas.data.title}
-	
-	*\`[ ${v.quality} ]\`*`,
-        buttonText: { displayText: `${v.size} - ${v.quality}` },
-        type: 1
-          }
-		 
-		 
-		 );
-        })
-
-
-
-  
-const buttonMessage = {
- 
-image: {url: im.replace("-150x150", "") },	
-  caption: msg,
-  footer: config.FOOTER,
-  buttons: rows,
-  headerType: 4
-}
-
-
-const rowss = sadas.dl_links.map((v, i) => {
-    // Clean size and quality text by removing common tags
-    const cleanText = `${v.size} (${v.quality})`
-      .replace(/WEBDL|WEB DL|BluRay HD|BluRay SD|BluRay FHD|Telegram BluRay SD|Telegram BluRay HD|Direct BluRay SD|Direct BluRay HD|Direct BluRay FHD|FHD|HD|SD|Telegram BluRay FHD/gi, "")
-      .trim() || "No info";
-
-    return {
-      title: cleanText,
-      id: prefix + `cdl ${im}±${v.link}±${sadas.data.title}
-	
-	*\`[ ${v.quality} ]\`*` // Make sure your handler understands this format
-    };
-  });
-
-  // Compose the listButtons object
-  const listButtons = {
-    title: "🎬 Choose a download link :)",
-    sections: [
-      {
-        title: "Available Links",
-        rows: rowss
-      }
-    ]
-  };
-
-	
-if (config.BUTTON === "true") {
-      await conn.sendMessage(from, {
-    image: { url: im.replace("-150x150", "") },
-    caption: msg,
-    footer: config.FOOTER,
-    buttons: [
-{
-            buttonId: prefix + `bdetails ${urll}&${im}`,
-            buttonText: { displayText: "Details Send" },
-            type: 1
-        },
-	    
-      {
-        buttonId: "download_list",
-        buttonText: { displayText: "🎥 Select Option" },
-        type: 4,
-        nativeFlowInfo: {
-          name: "single_select",
-          paramsJson: JSON.stringify(listButtons)
-        }
-      }
-	    
-    ],
-    headerType: 1,
-    viewOnce: true
-  }, { quoted: mek });
-    } else {
-      return await conn.buttonMessage(from, buttonMessage, mek)
+    if (!sadas || !sadas.status || !sadas.data) {
+        return await conn.sendMessage(from, { text: '🚩 *Error: Could not fetch movie details!*' }, { quoted: mek });
     }
 
+    const movie = sadas.data.movieInfo;
+    const dlLinks = sadas.data.downloadLinks;
 
+    let msg = `*☘️ 𝗧ɪᴛʟᴇ ➮* _${movie.title || 'N/A'}_
 
+*📅 𝗥ᴇʟᴇꜱᴇᴅ ᴅᴀᴛᴇ ➮* _${movie.releaseDate || 'N/A'}_
+*💃 𝗥ᴀᴛɪɴɢ ➮* _${movie.ratingValue || 'N/A'}_ (${movie.ratingCount} votes)
+*⏰ 𝗥ᴜɴᴛɪᴍᴇ ➮* _${movie.runtime || 'N/A'}_
+*🌍 𝗖𝗼𝘂𝗻𝘁𝗿𝘆 ➮* _${movie.country || 'N/A'}_
+*🎭 𝗚ᴇɴᴀʀᴇꜱ ➮* ${movie.genres ? movie.genres.join(', ') : 'N/A'}
+`;
+
+    var rows = [];  
+
+    // Download links බොත්තම් ලෙස එකතු කිරීම
+    if (dlLinks && dlLinks.length > 0) {
+        dlLinks.map((v) => {
+            rows.push({
+                buttonId: prefix + `cdl ${v.directLinkUrl}±${movie.title}±${displayImg}±${${v.quality}}`,
+                buttonText: { displayText: `📥 ${v.quality} (${v.size})` },
+                type: 1
+            });
+        });
+    } else {
+        return await reply("No download links found for this movie.");
+    }
+
+    // Gallery එකේ පළමු image එක පෙන්වීමට උත්සාහ කරයි, නැතිනම් poster එක පෙන්වයි
+    const displayImg = (movie.galleryImages && movie.galleryImages.length > 0) 
+        ? movie.galleryImages[0] 
+        : movie.posterUrl;
+
+    const buttonMessage = {
+        image: { url: displayImg },    
+        caption: msg,
+        footer: config.FOOTER,
+        buttons: rows,
+        headerType: 4
+    };
+
+    return await conn.buttonMessage(from, buttonMessage, mek);
 
 } catch (e) {
-    console.log(e)
-  await conn.sendMessage(from, { text: '🚩 *Error !!*' }, { quoted: mek } )
+    console.log(e);
+    await conn.sendMessage(from, { text: '🚩 *Error !!*' }, { quoted: mek });
 }
-})
+});
+
 
 let isUploading = false; // Track upload status
 
@@ -827,30 +696,20 @@ cmd({
         const datae = q.split("±")[0];
         const datas = q.split("±")[1];
         const dat = q.split("±")[2];    
+		const dattt = q.split("±")[3];    
 
 
 
 
-
-
-	    
-
-        let sadas = await fetchJson(`https://darksadas-yt-baiscope-dl.vercel.app/?url=${datas}&apikey=pramashi`);
-
-
-        // Ensure `sadas.data` is defined
-        if (!sadas || !sadas.data || !sadas.data.dl_link) {
-            throw new Error('No direct download link found. Try again...');
-        }
-if (!sadas.data.dl_link || !sadas.data.dl_link.includes('https://drive.baiscopeslk')) {
+if (!datae.includes('https://drive.baiscopeslk')) {
     console.log('Invalid input:', q);
     return await reply('*❗ Sorry, this download url is incorrect please choose another number*');
 }
-        const mediaUrl = sadas.data.dl_link.trim();
+        const mediaUrl = datae;
 
      
 
-        const botimg = `${datae}`;
+        const botimg = `${dat}`;
 
        
  await conn.sendMessage(from, { react: { text: '⬆️', key: mek.key } });
@@ -860,10 +719,10 @@ if (!sadas.data.dl_link || !sadas.data.dl_link.includes('https://drive.baiscopes
        
  await conn.sendMessage(config.JID || from, { 
             document: { url: mediaUrl },
-            caption: `*🎬 Name :* ${dat}\n\n${config.NAME}`,
+            caption: `*🎬 Name :* ${datas}\n${dattt}\n\n${config.NAME}`,
             mimetype: "video/mp4",
             jpegThumbnail: await (await fetch(botimg)).buffer(),
-            fileName: `${dat}.mp4`
+            fileName: `${datas}.mp4`
         });
 
 
