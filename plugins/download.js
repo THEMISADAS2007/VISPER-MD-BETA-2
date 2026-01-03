@@ -987,7 +987,7 @@ try {
     await conn.sendMessage(from, { 
         video: { url: downloadUrl }, 
         mimetype: "video/mp4", 
-        caption: "Downloaded by Instagram Downloader\n\n" + config.FOOTER 
+        caption: "*💃 VISPER MD IG DOWNLODER 💃*\n\n" + config.FOOTER 
     }, { quoted: mek });
 
     m.react('✔️');
