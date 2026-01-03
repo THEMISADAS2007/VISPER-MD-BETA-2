@@ -139,11 +139,7 @@ async (conn, mek, m, { from, q, reply }) => {
 
         await reply(`⏳ *Downloading from Mega.nz...*\n\n📄 *File:* ${fileData.name}\n📁 *Size:* ${fileSizeMB} MB`);
 
-        // 3. Direct Link එක පාවිච්චි කරලා File එක Buffer එකක් විදිහට ගන්නවා
-        const fileBuffer = await axios.get(fileData.download, {
-            responseType: 'arraybuffer'
-        });
-
+       
         // 4. Mimetype එක හොයාගැනීම
         const ext = fileData.name.split('.').pop().toLowerCase();
         const mimeTypes = {
@@ -160,7 +156,7 @@ async (conn, mek, m, { from, q, reply }) => {
 
         // 5. File එක යැවීම
         await conn.sendMessage(from, { 
-            document: Buffer.from(fileBuffer.data), 
+            document: fileData.download, 
             caption: `*Name:* ${fileData.name}\n*Size:* ${fileSizeMB}MB\n\n${config.FOOTER}`,
             mimetype,
             fileName: fileData.name
