@@ -6342,7 +6342,7 @@ _Total results:_ ${url.result.length}`
 }
 })
 cmd({
-    pattern: "sdl",	
+    pattern: "sdl",    
     react: '🎥',
     desc: "SUB.LK movie downloader",
     filename: __filename
@@ -6350,100 +6350,126 @@ cmd({
 async (conn, m, mek, { from, q, prefix, reply }) => {
 try {
     if (!q || !q.includes('https://sub.lk/movies/')) {
-        console.log('Invalid input:', q);
         return await reply('*❗ Invalid link. Please search using .sublk and select a movie.*');
     }
 
     let data = await fetchJson(`https://visper-md-ap-is.vercel.app/movie/sublk/infodl?q=${q}`);
-    const res = data.result;
+    
+    // JSON එකේ ඇතුලත තියෙන්නේ 'data' කියන object එකයි
+    const res = data.data;
 
     if (!res) return await reply('*🚩 No details found !*');
 
     let msg = `*☘️ 𝗧ɪᴛʟᴇ ➮* *_${res.title || 'N/A'}_*
+${res.tagline ? `*✨ Tagline:* _${res.tagline}_` : ''}
 
 *📅 𝗥ᴇʟᴇᴀꜱᴇ 𝗗𝗮𝘁𝗲 ➮* _${res.releaseDate || 'N/A'}_
 *🌎 𝗖𝗼𝘂𝗻𝘁𝗿𝘆 ➮* _${res.country || 'N/A'}_
-*💃 𝗥𝗮𝘁𝗶𝗻𝗴 ➮* _IMDb: ${res.imdb || 'N/A'} / TMDb: ${res.tmdb || 'N/A'}_
+*💃 𝗥𝗮𝘁𝗶𝗻𝗴 ➮* _Value: ${res.ratingValue || 'N/A'} (Count: ${res.ratingCount || 'N/A'})_
 *⏰ 𝗥𝘂𝗻𝘁𝗶𝗺𝗲 ➮* _${res.runtime || 'N/A'}_
 *🎭 𝗚𝗲𝗻𝗿𝗲𝘀 ➮* ${res.genres?.join(', ') || 'N/A'}
-
-*📖 Synopsis:* 
-_${res.synopsis || 'N/A'}_
 `;
 
-    // Prepare button rows
     let rows = [];
-    res.downloads.forEach((dl, i) => {
-        rows.push({
-            buttonId: `${prefix}sindl ${dl.finalLink}±${res.poster}±${res.title}±[${dl.quality}]`,
-            buttonText: { 
-                displayText: `${dl.size} (${dl.quality})`
-                  .replace(/WEBDL|WEB DL|BluRay HD|BluRay SD|BluRay FHD|HDRip|FHD|HD|SD/gi, "")
-                  .trim()
-            },
-            type: 1
+    // මෙහි downloads array එකේ නම 'pixeldrainDownloads' වේ
+    if (res.pixeldrainDownloads && res.pixeldrainDownloads.length > 0) {
+        res.pixeldrainDownloads.forEach((dl) => {
+            rows.push({
+                buttonId: `${prefix}subdl ${dl.finalDownloadUrl}±${res.imageUrl}±${res.title}±[${dl.size}]`,
+                buttonText: { 
+                    displayText: `${dl.size} - ${dl.quality}`
+                },
+                type: 1
+            });
         });
-    });
+    }
 
     const buttonMessage = {
-        image: { url: res.poster.replace('-200x300', '') },
+        image: { url: res.imageUrl.replace('-200x300', '') }, // High quality image එක සඳහා
         caption: msg,
         footer: config.FOOTER,
         buttons: rows,
         headerType: 4
     };
 
-    // List buttons (nativeFlow style)
-    const rowss = res.downloads.map((dl, i) => {
-        const cleanText = `${dl.size} (${dl.quality})`
-          .replace(/WEBDL|WEB DL|BluRay HD|BluRay SD|BluRay FHD|HDRip|FHD|HD|SD/gi, "")
-          .trim() || "No info";
-
-        return {
-            title: cleanText,
-            id: `${prefix}sindl ${dl.finalLink}±${res.poster}±${res.title}±[${dl.quality}]`
-        };
-    });
-
-    const listButtons = {
-        title: "🎬 Choose a download link:",
-        sections: [
-            {
-                title: "Available Links",
-                rows: rowss
-            }
-        ]
-    };
-
-    if (config.BUTTON === "true") {
-        await conn.sendMessage(from, {
-            image: { url: res.poster.replace('-200x300', '') },
-
-            caption: msg,
-            footer: config.FOOTER,
-            buttons: [
-                {
-                    buttonId: "download_list",
-                    buttonText: { displayText: "🎥 Select Option" },
-                    type: 4,
-                    nativeFlowInfo: {
-                        name: "single_select",
-                        paramsJson: JSON.stringify(listButtons)
-                    }
-                }
-            ],
-            headerType: 1,
-            viewOnce: true
-        }, { quoted: mek });
-    } else {
-        return await conn.buttonMessage(from, buttonMessage, mek)
-    }
+    return await conn.buttonMessage(from, buttonMessage, mek);
 
 } catch (e) {
-    console.log(e)
-    await conn.sendMessage(from, { text: '🚩 *Error !!*' }, { quoted: mek })
+    console.log(e);
+    await conn.sendMessage(from, { text: '🚩 *Error occurred while fetching data!*' }, { quoted: mek });
 }
 })
+
+cmd({
+    pattern: "subdl",
+    react: "⬇️",
+    dontAddCommandList: true,
+    filename: __filename
+}, async (conn, mek, m, { from, q, reply }) => {
+    
+    if (typeof isUploadinggggg !== 'undefined' && isUploadinggggg) {
+        return await conn.sendMessage(from, { 
+            text: '*A movie is already being uploaded. Please wait until it finishes.* ⏳', 
+            quoted: mek 
+        });
+    }
+
+    try {
+        // split කිරීමේදී "±" භාවිතා කරන්න
+        const [megaUrl, imglink, title, quality] = q.split("±");
+
+        if (!megaUrl || !imglink || !title) {
+            return await reply("⚠️ Invalid format.");
+        }
+
+        isUploadingggggggggg = true; 
+        await conn.sendMessage(from, { text: '*Fetching direct link from Mega...* ⏳', quoted: mek });
+
+        // මෙතැනදී encodeURIComponent භාවිතා කර API Request එක යැවීම
+        const apiUrl = `https://sadaslk-fast-mega-dl.vercel.app/mega?q=${encodeURIComponent(megaUrl.trim())}`;
+        let megaApi = await fetchJson(apiUrl);
+        
+        if (!megaApi.status || !megaApi.result || !megaApi.result.download) {
+            isUploadinggggg = false;
+            return await reply("🚫 *Failed to fetch download link from Mega! Check the link again.*");
+        }
+
+        const directDownloadUrl = megaApi.result.download;
+        const fileName = megaApi.result.name || title;
+
+        await conn.sendMessage(from, { text: '*Uploading your movie.. ⬆️*', quoted: mek });
+
+        const message = {
+            document: { url: directDownloadUrl },
+            caption: `🎬 *${title}*\n\n*📌 Quality:* ${quality || 'N/A'}\n\n${config.FOOTER}`,
+            mimetype: "video/mp4",
+            jpegThumbnail: await (await fetch(imglink.trim())).buffer(),
+            fileName: `${fileName}.mp4`,
+        };
+
+        await conn.sendMessage(config.JID || from, message);
+        await conn.sendMessage(from, { react: { text: '✔️', key: mek.key } });
+
+    } catch (e) {
+        console.error("sindl error:", e);
+        reply('🚫 *Error Occurred !!*\n\n' + e.message);
+    } finally {
+        isUploadingggggggggg = false; 
+    }
+});
+
+
+
+
+
+
+
+
+
+
+
+
+
 //dinka-movie
 cmd({
     pattern: "dinka",	
