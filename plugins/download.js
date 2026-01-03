@@ -105,7 +105,6 @@ l(e)
 })
 
 
-const axios = require("axios");
 
 cmd({
     pattern: "mega",
