@@ -107,62 +107,75 @@ l(e)
 
 
 
-
 cmd({
     pattern: "mega",
     react: "🍟",
     alias: ["megadl", "meganz"],
     desc: "Download files from Mega.nz",
     category: "download",
-    use: '.mega <mega.nz URL>',
+    use: ".mega <mega.nz URL>",
     filename: __filename
-}, 
+},
 async (conn, mek, m, { from, q, reply }) => {
     try {
-        if (!q) return await reply("*⚠️ Please provide a Mega.nz URL!*");
+        if (!q) return reply("⚠️ *Please provide a Mega.nz URL!*");
 
         const apiUrl = `https://sadaslk-fast-mega-dl.vercel.app/mega?q=${encodeURIComponent(q)}`;
-        const response = await axios.get(apiUrl);
-        const data = response.data;
+        const { data } = await axios.get(apiUrl);
 
         if (!data.status) {
-            return await reply(`❌ *API Error:* ${data.error}`);
+            return reply(`❌ *API Error:* ${data.error}`);
         }
 
-        const fileData = data.result;
-        const fileSizeMB = (fileData.size / (1024 * 1024)).toFixed(2);
+        const file = data.result;
+        const sizeMB = (file.size / 1024 / 1024).toFixed(2);
 
-        await reply(`⏳ *Downloading from Mega.nz...*\n\n📄 *File:* ${fileData.name}\n📁 *Size:* ${fileSizeMB} MB`);
+        await reply(
+            `⏳ *Downloading from Mega.nz...*\n\n` +
+            `📄 *File:* ${file.name}\n` +
+            `📁 *Size:* ${sizeMB} MB`
+        );
 
-        // 4. Mimetype එක හොයාගැනීම
-        const ext = fileData.name.split('.').pop().toLowerCase();
-        const mimeTypes = {
+        // 🔹 mimetype detect
+        const ext = file.name.split('.').pop().toLowerCase();
+        const mime = {
             mp4: "video/mp4",
+            mp3: "audio/mpeg",
             pdf: "application/pdf",
             zip: "application/zip",
             rar: "application/x-rar-compressed",
-            '7z': "application/x-7z-compressed",
             jpg: "image/jpeg",
-            png: "image/png",
-            mp3: "audio/mpeg"
-        };
-        const mimetype = mimeTypes[ext] || "application/octet-stream";
-const dllink = fileData.download
-        // 5. File එක යැවීම (fileName එකට mimetype එක එකතු කර ඇත)
-        await conn.sendMessage(from, { 
-            document: { url: dllink }, // URL එක document විදිහට යැවීම
-            caption: `*Name:* ${fileData.name}\n*Type:* ${mimetype}\n*Size:* ${fileSizeMB}MB\n\n${config.FOOTER}`,
-            mimetype: mimetype,
-            fileName: `${fileData.name} (${mimetype})` // මෙතනින් නමේ අගට ටයිප් එක වැටේ
+            png: "image/png"
+        }[ext] || "application/octet-stream";
+
+        // 🔥 STREAM DOWNLOAD (IMPORTANT FIX)
+        const stream = await axios({
+            method: "GET",
+            url: file.download,
+            //responseType: "arraybuffer",
+            timeout: 0
+        });
+
+        await conn.sendMessage(from, {
+            document: Buffer.from(stream.data),
+            mimetype: mime,
+            fileName: file.name,
+            caption:
+                `*Name:* ${file.name}\n` +
+                `*Size:* ${sizeMB} MB\n\n` +
+                `${config.FOOTER}`
         }, { quoted: mek });
 
-        await conn.sendMessage(from, { react: { text: '✔️', key: mek.key } });
+        await conn.sendMessage(from, {
+            react: { text: "✔️", key: mek.key }
+        });
 
-    } catch (e) {
-        console.error(e);
-        await reply(`❌ *Error occurred:* ${e.response?.data?.error || e.message}`);
+    } catch (err) {
+        console.error(err);
+        reply(`❌ *Error:* ${err.message}`);
     }
-});;
+});
+
 
 function ytreg(url) {
     const ytIdRegex = /(?:http(?:s|):\/\/|)(?:(?:www\.|)youtube(?:\-nocookie|)\.com\/(?:watch\?.*(?:|\&)v=|embed|shorts\/|v\/)|youtu\.be\/)([-_0-9A-Za-z]{11})/
