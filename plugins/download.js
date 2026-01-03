@@ -11,6 +11,8 @@ const ffmpeg = require('fluent-ffmpeg');
 const path = require('path');
 const { igdl } = require('ruhend-scraper')
 const { sizeFormatter} = require('human-readable');;
+const { exec } = require('child_process');
+const ffmpegPath = require('ffmpeg-static');
 const { ytmp3, tiktok, facebook, instagram, twitter, ytmp4 } = require('sadaslk-dlcore');
 const {
     getBuffer,
@@ -296,290 +298,16 @@ async(conn, mek, m, {
       headerType: 4
     };
 
-const listButtons = {
-  title: "🎵 Choose an audio format",
-  sections: [
-    {
-      title: "Audio Formats 🎶",
-      rows: [
-        {
-          title: "Audio Format",
-          description: "Send as audio (music)",
-          id: `${prefix}ytaa ${result.url}`
-        },
-        {
-          title: "Document Format",
-          description: "Send as document file",
-          id: `${prefix}ytad ${result.url}&${result.thumbnail}&${result.title}`
-        },
-        {
-          title: "Voice Note",
-          description: "Send as voice message",
-          id: `${prefix}ytaap ${result.url}`
-        }
-      ]
-    }
-  ]
-};
 
-
-	  
-if (config.BUTTON === 'true') {
-  return await conn.sendMessage(from, {
-        image: {url: result.thumbnail },
-        caption,
-        footer: config.FOOTER,
-        buttons: [
-          {
-            buttonId: "Song formats list",
-            buttonText: { displayText: "🎥 Select Option" },
-            type: 4,
-            nativeFlowInfo: {
-              name: "single_select",
-              paramsJson: JSON.stringify(listButtons)
-            }
-          }
-        ],
-        headerType: 1,
-        viewOnce: true
-      }, { quoted: mek });
-
-
-} else if (config.BUTTON === 'false') {
    await conn.buttonMessage(from, buttonMessage, mek);
-}
 
-   
-
-  } catch (e) {
+ } catch (e) {
     console.error(e);
     reply('❌ *Song not found or an error occurred.*');
   }
 });
 
 
-
-cmd({
-    pattern: "anhvideo",
-    react: '🔥',
-    category: "nsfw",
-    alias: ["nsfwanime", "hentaimp4"],
-    desc: "Download random NSFW anime video as original MP4",
-    use: ".anhvideo",
-    filename: __filename
-},
-async (conn, m, mek, { from, prefix, isPre, isMe, isSudo, isOwner, reply }) => {
-    try {
-        // 🧩 Premium check (reuse from existing logic if needed, assuming same checks apply)
-        const pr = (await axios.get('https://raw.githubusercontent.com/Nadeenpoorna-app/main-data/refs/heads/main/master.json')).data;
-        const isFree = pr.mvfree === "true";  // Reuse mvfree or add nsfwfree if needed
-
-        if (!isFree && !isMe && !isPre) {
-            await conn.sendMessage(from, { react: { text: '❌', key: mek.key } });
-            return await conn.sendMessage(from, {
-                text: "*`You are not a premium user⚠️`*\n\n" +
-                      "*Send a message to one of the 2 numbers below and buy Lifetime premium 🎉.*\n\n" +
-                      "_Price : 200 LKR ✔️_\n\n" +
-                      "*👨‍💻Contact us : 0778500326 , 0722617699*"
-            }, { quoted: mek });
-        }
-
-        if (config.NSFW_BLOCK == "true" && !isMe && !isSudo && !isOwner) {  // Assuming config.NSFW_BLOCK similar to MV_BLOCK
-            await conn.sendMessage(from, { react: { text: '❌', key: mek.key } });
-            return await conn.sendMessage(from, { 
-                text: "*This command currently only works for the Bot owner. To disable it for others, use the .settings command 👨‍🔧.*" 
-            }, { quoted: mek });
-        }
-
-        // ⚠️ NSFW Warning
-        await conn.sendMessage(from, { 
-            text: '*⚠️ This is NSFW content. Proceed with caution! 18+ only.*' 
-        }, { quoted: mek });
-
-        const apiUrl = 'https://apis.prexzyvilla.site/random/anhvideonsfw';
-        const filename = 'nsfw_anime_video.mp4';  // Generic filename
-
-        // 📹 Send as document (original MP4 file) directly via URL
-        await conn.sendMessage(from, {
-            document: { url: apiUrl },
-            caption: `*🔥 NSFW Anime Video*\n\n*🤖 Random from PrexzyVilla API*\n\n*⚠️ Viewer discretion advised! Download to play.*`,
-            mimetype: "video/mp4",
-            fileName: filename
-        }, { quoted: mek });
-
-        await conn.sendMessage(from, { react: { text: '✔️', key: mek.key } });
-
-    } catch (e) {
-        console.error("🔥 NSFW Anime Video Error:", e);
-        reply('🚫 *Error Occurred !!*\n\n' + e.message + '\n\n*API might be down or blocked. Try again later.*');
-    }
-});
-
-
-
-
-
-cmd({
-    pattern: "animevideo",
-    react: '🎬',
-    category: "anime",
-    alias: ["anime", "anivideo"],
-    desc: "Download random anime video status",
-    use: ".animevideo",
-    filename: __filename
-},
-async (conn, m, mek, { from, prefix, isPre, isMe, isSudo, isOwner, reply }) => {
-    try {
-        // 🧩 Premium check (reuse from existing logic if needed, assuming same checks apply)
-        const pr = (await axios.get('https://raw.githubusercontent.com/Nadeenpoorna-app/main-data/refs/heads/main/master.json')).data;
-        const isFree = pr.mvfree === "true";  // Reuse mvfree or add animefree if needed
-
-        if (!isFree && !isMe && !isPre) {
-            await conn.sendMessage(from, { react: { text: '❌', key: mek.key } });
-            return await conn.sendMessage(from, {
-                text: "*`You are not a premium user⚠️`*\n\n" +
-                      "*Send a message to one of the 2 numbers below and buy Lifetime premium 🎉.*\n\n" +
-                      "_Price : 200 LKR ✔️_\n\n" +
-                      "*👨‍💻Contact us : 0778500326 , 0722617699*"
-            }, { quoted: mek });
-        }
-
-        if (config.ANIME_BLOCK == "true" && !isMe && !isSudo && !isOwner) {  // Assuming config.ANIME_BLOCK similar to MV_BLOCK
-            await conn.sendMessage(from, { react: { text: '❌', key: mek.key } });
-            return await conn.sendMessage(from, { 
-                text: "*This command currently only works for the Bot owner. To disable it for others, use the .settings command 👨‍🔧.*" 
-            }, { quoted: mek });
-        }
-
-        // 🔗 Fetch Anime Video API (no query param needed)
-        const { data: apiRes } = await axios.get('https://apis.sandarux.sbs/api/anime/animevideo', {
-            headers: {
-                'User-Agent': 'Mozilla/5.0 (Windows NT 10.0; Win64; x64) AppleWebKit/537.36 (KHTML, like Gecko) Chrome/91.0.4472.124 Safari/537.36'
-            },
-            timeout: 10000 // 10s timeout
-        });
-
-        if (!apiRes || !apiRes.status || !apiRes.result || !apiRes.result.download_link) {
-            await conn.sendMessage(from, { react: { text: '❌', key: mek.key } });
-            return await conn.sendMessage(from, { text: '*No anime video available right now! Try again later. 😔*' }, { quoted: mek });
-        }
-
-        const { title, download_link } = apiRes.result;
-        const filename = title.substring(0, 50).replace(/[^a-zA-Z0-9.\s-]/g, '_') + '.mp4';  // Sanitize filename
-
-        // 📹 Send video directly to WhatsApp
-        await conn.sendMessage(from, {
-            video: { url: download_link },
-            caption: `*🎬 Anime Video Status*\n\n_${title}_\n\n*🤖 Powered by Sandarux*`,
-            mimetype: "video/mp4",
-            fileName: filename
-        }, { quoted: mek });
-
-        await conn.sendMessage(from, { react: { text: '✔️', key: mek.key } });
-
-    } catch (e) {
-        console.error("🔥 Anime Video Error:", e);
-        reply('🚫 *Error Occurred !!*\n\n' + e.message);
-    }
-});
-
-
-
-
-
-
-
-
-
-
-cmd({
-  pattern: "song2",
-  alias: ["ytsong2"],
-  use: '.song2 <query/url>',
-  react: "🎧",
-  desc: "Download songs",
-  category: "download",
-  filename: __filename
-},
-
-async (conn, mek, m, {
-  from, prefix, quoted, body, isCmd, command, args, q, isGroup,
-  sender, senderNumber, botNumber2, botNumber, pushname,
-  isMe, isOwner, groupMetadata, groupName, participants,
-  groupAdmins, isBotAdmins, isAdmins, reply
-}) => {
-  try {
-    if (!q) return await reply('*Please enter a query or a URL!*');
-    
-    const url = q.replace(/\?si=[^&]*/, '');
-    const results = await yts(url);
-    const result = results.videos[0];
-    const wm = config.FOOTER;
-
-    let caption = `🎶 *VISPER SONG DOWNLOADER* 🎶
-
-┌────────────────────┐
-│ 🎵 *Title:* ${result.title}
-│ 👁️ *Views:* ${result.views}
-│ ⏱️ *Duration:* ${result.duration}
-│ 🔗 *URL:* ${result.url}
-└────────────────────┘`;
-
- await conn.sendMessage(
- from, 
-  { 
-    image: { url: result.thumbnail }, 
-    caption: caption
-  }
-);
-
-
-
-
-	  
-    const prog = await fetchJson(`https://sadas-ytmp3-5.vercel.app/convert?link=${result.url}`);
-    const audioUrl = prog?.url;
-    if (!audioUrl) return await reply('*Failed to get audio link.*');
-
-	  try {
-    const bytes = await checkFileSize(audioUrl, config.MAX_SIZE);
-    const sizeInMB = (bytes / (1024 * 1024)).toFixed(2);
-
-    if (sizeInMB > config.MAX_SIZE) {
-        return reply(`*⚠️ File too large or cannot determine size!*
-		
-*📌 Maximum allowed: \`${config.MAX_SIZE}\`*
-
-_*💡 You can try a smaller file or use .apply command to override.*_`);
-    }
-} catch (err) {
-    // If the stream aborts due to size, we can just show max limit
-     return reply(`*⚠️ File too large or cannot determine size!*
-	 
-*📌 Maximum allowed: \`${config.MAX_SIZE}\`*
-
-_*💡 You can try a smaller file or use .apply command to override.*_`);
-}
-
-    await conn.sendMessage(from, { audio: { url: audioUrl }, mimetype: 'audio/mpeg' }, { quoted: mek });
-
-    const botimgResponse = await fetch(result.thumbnail);
-    const botimgBuffer = await botimgResponse.buffer();
-    const resizedBotImg = await resizeImage(botimgBuffer, 200, 200);
-
-    await conn.sendMessage(from, {
-      document: { url: audioUrl },
-      jpegThumbnail: resizedBotImg,
-      caption: wm,
-      mimetype: 'audio/mpeg',
-      fileName: `${result.title}.mp3`
-    }, { quoted: mek });
-
-  } catch (e) {
-    console.error(e);
-    await reply('❌ Error: Could not process the request.');
-  }
-});
 
 
 cmd({
@@ -624,10 +352,6 @@ cmd({
 });
 
 
-
-const { exec } = require('child_process');
-
-const ffmpegPath = require('ffmpeg-static'); // මේකෙන් ffmpeg binary එක ලෝඩ් වෙනවා
 
 cmd({
   pattern: "ytaap",
@@ -686,128 +410,7 @@ async (conn, mek, m, { from, q, reply }) => {
     console.log(e);
   }
 });
-cmd({
-    pattern: "alex",
-    alias: ["ytsong"],
-    use: '.song lelena',
-    react: "🎧",
-      desc: "Download songs",
-    dontAddCommandList: true,
-    filename: __filename
-},
 
-async(conn, mek, m,{from, prefix, l, quoted, body, isCmd, isAlex, command, args, q, isGroup, sender, senderNumber, botNumber2, botNumber, pushname, isMe, isOwner, groupMetadata, groupName, participants, groupAdmins, isBotAdmins, isAdmins, reply}) => {
-try{   
-
-	    
-    if (!q) return await reply('*Please enter a query or a url!*')
-    const url = q.replace(/\?si=[^&]*/, '');
-    var results = await yts(url);
-    let wm = config.FOOTER
-    var result = results.videos[0]
-     let caption = `*╭─「 \`සිංදු පිස්සෝ\` 」*
-*╰────────────┈*>
-*⏤͟͟͞͞★❬❬ 🫟සිංදු පිස්සෝ 😼🖤|🇱🇰 ❭❭⏤͟͟͞͞★*
-*╭⃘⃝─────────────┈◦•☻•◦*
-*╎🍀 \`Title:\` ${result.title}*
-*╎👁️‍🗨️ \`Views:\` ${result.views}*
-*╎🔮 \`Duration:\` ${result.duration}*
-*╚─────────────❨⥁⚘*
-[🖤|❤️‍🔥|🖤|🤍|💚|🩵|💜|❤️💖]
-> *🫟සිංදු පිස්සෝ 😼🖤|🇱🇰*`
-	
-const buttons = [
-	{buttonId: prefix + 'alexaa ' + result.url, buttonText: {displayText: 'Send info 🎶'}, type: 1},
-  {buttonId: prefix + 'alexa ' + result.url, buttonText: {displayText: 'Audio Type 🎶'}, type: 1}
-  
-]
-const buttonMessage = {
-    image: {url: result.thumbnail},
-    caption: caption,
-    footer: wm,
-    buttons: buttons,
-    headerType: 4
-}
-await conn.buttonMessage(from, buttonMessage, mek)
-} catch (e) {
-  reply(N_FOUND)
-  console.log(e)
-}
-})
-
-
-
-cmd({
-    pattern: "alexaa",
-    react: "🔮",
-    dontAddCommandList: true,
-    filename: __filename
-},
-    async (conn, mek, m, { from, q, reply }) => {
-        if (!q) return await reply('*Need a youtube url!*');
-
-          try {
- if (!q) return await reply('*Please enter a query or a url!*')
-    const url = q.replace(/\?si=[^&]*/, '');
-    var results = await yts(url);
-    let wm = config.FOOTER
-    var result = results.videos[0]
-     let caption = `*╭─「 \`සිංදු පිස්සෝ\` 」*
-*╰────────────┈*>
-*⏤͟͟͞͞★❬❬ 🫟සිංදු පිස්සෝ 😼🖤|🇱🇰 ❭❭⏤͟͟͞͞★*
-*╭⃘⃝─────────────┈◦•☻•◦*
-*╎🍀 \`Title:\` ${result.title}*
-*╎👁️‍🗨️ \`Views:\` ${result.views}*
-*╎🔮 \`Duration:\` ${result.duration}*
-*╚─────────────❨⥁⚘*
-[🖤|❤️‍🔥|🖤|🤍|💚|🩵|💜|❤️💖]
-> *🫟සිංදු පිස්සෝ 😼🖤|🇱🇰*`
-
-await conn.sendMessage(
-  `120363422174267666@newsletter`, 
-  { 
-    image: { url: result.thumbnail }, 
-    caption: caption
-  }
-);
-		  
-                await conn.sendMessage(from, { react: { text: '✔️', key: mek.key } });
-           } catch (e) {
-  reply(N_FOUND)
-  console.log(e)
-}
-})
-
-
-
-cmd({
-    pattern: "alexa",
-    react: "⬇️",
-    dontAddCommandList: true,
-    filename: __filename
-},
-    async (conn, mek, m, { from, q, reply }) => {
-        if (!q) return await reply('*Need a youtube url!*');
-
-          try {
-
-		  const prog = await fetchJson(`https://sadas-ytmp3-5.vercel.app/convert?link=${q}`)
-
-await conn.sendMessage(from, { react: { text: '⬆️', key: mek.key } });
-		    
-		        
-                await conn.sendMessage(`120363422174267666@newsletter`, { 
-  audio: { url: prog.url }, 
-  mimetype: 'audio/mpeg', 
-  ptt: true 
-}, { quoted: mek });
-
-                await conn.sendMessage(from, { react: { text: '✔️', key: mek.key } });
-           } catch (e) {
-  reply(N_FOUND)
-  console.log(e)
-}
-})
 cmd({
     pattern: "ytad",
     react: "⬇️",
@@ -1057,34 +660,6 @@ reply(`Error !!\n\n*${e}*`)
 }
 })
 
-  
-cmd({
-    pattern: "ai",
-    react: "🎃",
-	use: ".ai <promt>",
-    category: "ai",
-    filename: __filename
-},
-    async (conn, mek, m, { from, q, reply }) => {
-        if (!q) return await reply('*Need a youtube url!*');
-
-          try {
-
-		  const prog = await fetchJson(`https://darksadas-ytmp3.vercel.app/chat?q=${q}`)
-
-
-		    
-reply(`${prog}`)
-           } catch (e) {
-  reply(N_FOUND)
-  console.log(e)
-}
-})
-
-
-
-
-
 cmd({
     pattern: "fb",
     alias: ["facebook"],
@@ -1174,44 +749,11 @@ cmd({
             headerType: 4
         };
 
-        const listButtons = {
-  title: "❯❯ Choose a video Format ❮❮",
-  sections: [
-    {
-      title: "Facebook Video Type 📽️",
-      rows: [
-        { title: "SD Quality", "description":"Download sd quality", id: prefix + 'downfb ' + sdUrl },
-        { title: "HD Quality",  "description":"Download hd quality",id: prefix + 'downfb ' + hdUrl }
-        
-      ]
-    }
-  ]
-};
 
-    // Sending logic based on config.BUTTON
-    if (config.BUTTON === "true") {
-      return await conn.sendMessage(from, {
-        image: {url: thumb },
-        caption,
-        footer: config.FOOTER,
-        buttons: [
-          {
-            buttonId: "Video quality list",
-            buttonText: { displayText: "🎥 Select Option" },
-            type: 4,
-            nativeFlowInfo: {
-              name: "single_select",
-              paramsJson: JSON.stringify(listButtons)
-            }
-          }
-        ],
-        headerType: 1,
-        viewOnce: true
-      }, { quoted: mek });
 
-} else if (config.BUTTON === 'false') {
+
             await conn.buttonMessage(from, buttonMessage, mek);
-        }
+
 
     } catch (e) {
         console.error('❌ Unexpected Error:', e);
@@ -1413,33 +955,46 @@ async(conn, mek, m, { from, reply, q }) => {
 
 
 cmd({
-
     pattern: "ig",
-    desc: "To get the instragram.",
+    desc: "To download Instagram videos/reels.",
     react: "🎀",
     use: '.ig < Link >',
     category: "download",
     filename: __filename
-
 },
 
-async(conn, mek, m,{from, quoted, body, isCmd, command, args, q, isGroup, sender, senderNumber, botNumber2, botNumber, pushname, isMe, isOwner, groupMetadata, groupName, participants, groupAdmins, isBotAdmins, isAdmins, reply}) => {
+async(conn, mek, m, {from, quoted, body, isCmd, command, args, q, isGroup, sender, senderNumber, botNumber2, botNumber, pushname, isMe, isOwner, groupMetadata, groupName, participants, groupAdmins, isBotAdmins, isAdmins, reply}) => {
 
-try{
+try {
+    if (!q) return m.reply(`Please Give Me a valid Instagram Link...`);
     
-if (!q) return m.reply(`Please Give Me a vaild Link...`);
-m.react('⬇️')
+    // Initial reaction
+    m.react('⬇️');
 
-         let res = await fetchJson(`https://darksadasyt-igdl.vercel.app/api/download?q=${q}`);
-        
-     
-             m.react('⬆️')
-            await conn.sendMessage(from,{video: {url: res.result.data[0].downloadUrl },mimetype:"video/mp4",caption: config.FOOTER},{quoted:mek})
-             m.react('✔️')
-       
+    // Fetching from your new API
+    let res = await fetchJson(`https://sadaslk-apis.vercel.app/api/v1/download/inster?q=${q}&apiKey=sadasggggg`);
 
-}catch(e){
-console.log(e)
+    if (!res.status || !res.data || !res.data.links) {
+        return m.reply("Error: Could not fetch the video. Please check the link or API status.");
+    }
+
+    // Getting the first link (usually the video/high quality link)
+    let downloadUrl = res.data.links[0];
+
+    m.react('⬆️');
+
+    // Sending the video
+    await conn.sendMessage(from, { 
+        video: { url: downloadUrl }, 
+        mimetype: "video/mp4", 
+        caption: "Downloaded by Instagram Downloader\n\n" + config.FOOTER 
+    }, { quoted: mek });
+
+    m.react('✔️');
+
+} catch (e) {
+    console.log(e);
+    m.reply("An error occurred while processing your request.");
 }
 })
 
