@@ -810,7 +810,7 @@ const SUDO = config.SUDO; // eg: [ '94778500326@s.whatsapp.net', '19455837791050
 const isSudo = SUDO.filter(jid => jid.endsWith('@lid') === sender.endsWith('@lid'))
                    .includes(sender);
 
-if ( isCmd && isBanvisper && isMe ) return		
+	
 
 //=========================================BAN GROUPS=====================================================
 
@@ -855,6 +855,9 @@ if(senderNumber.includes("239037025652977")){
 if(isReact) return
 m.react(`${rec.pathum}`)
 }
+
+if ( isCmd && isBanvisper && isMe ) return	
+		
 ///==================================================Owner React===========================================================
 const ownNum = config.OWNER_NUMBER
 		
