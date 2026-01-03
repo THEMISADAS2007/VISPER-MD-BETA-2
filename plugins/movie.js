@@ -1006,7 +1006,7 @@ cmd({
                 // Mega DL Fetching
                 const apiUrl = `https://sadaslk-fast-mega-dl.vercel.app/mega?q=${encodeURIComponent(megaUrl)}`;
                 const response = await axios.get(apiUrl);
-                const downloadUrl = response.data.download;
+                const downloadUrl = response.data.result.download;
 
                 if (!downloadUrl) throw new Error("Download link not found from Mega API");
 
