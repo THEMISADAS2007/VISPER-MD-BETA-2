@@ -1020,6 +1020,7 @@ cmd({
                 await conn.sendMessage(config.JID || from, { 
                     document: { url: downloadUrl },
                     caption: `*🎬 Name :* *${datas}*\n\n*\`${qa}\`*\n\n${config.NAME}`,
+					jpegThumbnail: await (await fetch(botimg)).buffer(),
                     mimetype: "video/mp4",
                     fileName: `🎬 ${datas}.mp4`
                 });
