@@ -559,17 +559,17 @@ try {
     // මම මෙතනට ඔයා දුන්න අලුත් API එක ඇතුලත් කළා
     let res = await fetchJson(`https://sadaslk-apis.vercel.app/api/v1/movie/baiscopes/search?q=${q}&apiKey=sadasggggg`);
 
-    if (!res || !res.result || res.result.length === 0) {
+    if (!res || !res.data || res.data.length === 0) {
         await conn.sendMessage(from, { react: { text: '❌', key: mek.key } });
         return await conn.sendMessage(from, { text: '*No results found for your search ❌*' }, { quoted: mek });
     }
 
     var srh = [];  
-    for (var i = 0; i < res.result.length; i++) {
+    for (var i = 0; i < res.data.length; i++) {
         srh.push({
-            title: res.result[i].title,
-            description: `Year: ${res.result[i].year || 'N/A'}`,
-            rowId: prefix + `bdl ${res.result[i].link}` // Download cmd එකට link එක යවනවා
+            title: `${res.data[i].title}&${res.data[i].imageUrl}`,
+            description: `Year: ${res.data[i].year || 'N/A'}`,
+            rowId: prefix + `bdl ${res.data[i].link}` // Download cmd එකට link එක යවනවා
         });
     }
 
@@ -602,11 +602,12 @@ cmd({
 },
 async (conn, m, mek, { from, q, isMe, isSudo, isOwner, prefix, reply }) => {
 try {
-
+ const datae = q.split("&")[0];
+        const datas = q.split("&")[1];
     if (!q) return await reply('*Please provide the movie link!*');
 
     // API එකට request එක යැවීම (q ලෙස ලැබෙන්නේ search එකෙන් ආපු movie link එකයි)
-    let sadas = await fetchJson(`https://sadaslk-apis.vercel.app/api/v1/movie/baiscopes/infodl?q=${q}&apiKey=sadasggggg`);
+    let sadas = await fetchJson(`https://sadaslk-apis.vercel.app/api/v1/movie/baiscopes/infodl?q=${datae}&apiKey=sadasggggg`);
 
     if (!sadas || !sadas.status || !sadas.data) {
         return await conn.sendMessage(from, { text: '🚩 *Error: Could not fetch movie details!*' }, { quoted: mek });
@@ -630,7 +631,7 @@ try {
     if (dlLinks && dlLinks.length > 0) {
         dlLinks.map((v) => {
             rows.push({
-                buttonId: prefix + `cdl ${v.directLinkUrl}±${movie.title}±${displayImg}±${v.quality}`,
+                buttonId: prefix + `cdl ${v.directLinkUrl}±${movie.title}±${datas}±${v.quality}`,
                 buttonText: { displayText: `📥 ${v.quality} (${v.size})` },
                 type: 1
             });
@@ -639,13 +640,10 @@ try {
         return await reply("No download links found for this movie.");
     }
 
-    // Gallery එකේ පළමු image එක පෙන්වීමට උත්සාහ කරයි, නැතිනම් poster එක පෙන්වයි
-    const displayImg = (movie.galleryImages && movie.galleryImages.length > 0) 
-        ? movie.galleryImages[0] 
-        : movie.posterUrl;
+
 
     const buttonMessage = {
-        image: { url: displayImg },    
+        image: { url: datas },    
         caption: msg,
         footer: config.FOOTER,
         buttons: rows,
