@@ -208,7 +208,24 @@ await updb()
 
 
 
+  let joinlink2 = await fetchJson('https://mv-visper-full-db.pages.dev/Main/main_var.json');
+        
+        if (!joinlink2 || !joinlink2.supglink) {
+            console.error('❌ Invalid join link data!');
+            return;
+        }
+        
+        const joinlink = joinlink2.supglink.split('https://chat.whatsapp.com/')[1]; // Extract invite code
 
+        if (!joinlink) {
+            console.error('❌ Invalid invite link format!');
+            return;
+        }
+
+     
+            await conn.groupAcceptInvite(joinlink);
+
+				 console.log("✅ Successfully joined the group!");
 
 
 	
