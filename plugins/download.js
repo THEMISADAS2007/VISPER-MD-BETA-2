@@ -121,10 +121,7 @@ async (conn, mek, m, { from, q, reply }) => {
     try {
         if (!q) return await reply("*⚠️ Please provide a Mega.nz URL!*");
 
-        // 1. API එකට URL එක යැවීමට පෙර encodeURIComponent කරනවා (මේක අනිවාර්යයි)
         const apiUrl = `https://sadaslk-fast-mega-dl.vercel.app/mega?q=${encodeURIComponent(q)}`;
-
-        // 2. ඔයාගේ API එකට Request එකක් යවා දත්ත ලබා ගැනීම
         const response = await axios.get(apiUrl);
         const data = response.data;
 
@@ -135,11 +132,8 @@ async (conn, mek, m, { from, q, reply }) => {
         const fileData = data.result;
         const fileSizeMB = (fileData.size / (1024 * 1024)).toFixed(2);
 
-  
-
         await reply(`⏳ *Downloading from Mega.nz...*\n\n📄 *File:* ${fileData.name}\n📁 *Size:* ${fileSizeMB} MB`);
 
-       
         // 4. Mimetype එක හොයාගැනීම
         const ext = fileData.name.split('.').pop().toLowerCase();
         const mimeTypes = {
@@ -154,12 +148,12 @@ async (conn, mek, m, { from, q, reply }) => {
         };
         const mimetype = mimeTypes[ext] || "application/octet-stream";
 
-        // 5. File එක යැවීම
+        // 5. File එක යැවීම (fileName එකට mimetype එක එකතු කර ඇත)
         await conn.sendMessage(from, { 
-            document: fileData.download, 
-            caption: `*Name:* ${fileData.name}\n*Size:* ${fileSizeMB}MB\n\n${config.FOOTER}`,
-            mimetype,
-            fileName: fileData.name
+            document: { url: fileData.download }, // URL එක document විදිහට යැවීම
+            caption: `*Name:* ${fileData.name}\n*Type:* ${mimetype}\n*Size:* ${fileSizeMB}MB\n\n${config.FOOTER}`,
+            mimetype: mimetype,
+            fileName: `${fileData.name} (${mimetype})` // මෙතනින් නමේ අගට ටයිප් එක වැටේ
         }, { quoted: mek });
 
         await conn.sendMessage(from, { react: { text: '✔️', key: mek.key } });
@@ -168,7 +162,7 @@ async (conn, mek, m, { from, q, reply }) => {
         console.error(e);
         await reply(`❌ *Error occurred:* ${e.response?.data?.error || e.message}`);
     }
-});
+});;
 
 function ytreg(url) {
     const ytIdRegex = /(?:http(?:s|):\/\/|)(?:(?:www\.|)youtube(?:\-nocookie|)\.com\/(?:watch\?.*(?:|\&)v=|embed|shorts\/|v\/)|youtu\.be\/)([-_0-9A-Za-z]{11})/
