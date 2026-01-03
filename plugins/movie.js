@@ -567,9 +567,9 @@ try {
     var srh = [];  
     for (var i = 0; i < res.data.length; i++) {
         srh.push({
-            title: `${res.data[i].title}&${res.data[i].imageUrl}`,
+            title: `${res.data[i].title}`,
             description: `Year: ${res.data[i].year || 'N/A'}`,
-            rowId: prefix + `bdl ${res.data[i].link}` // Download cmd එකට link එක යවනවා
+            rowId: prefix + `bdl ${res.data[i].link}&${res.data[i].imageUrl}` // Download cmd එකට link එක යවනවා
         });
     }
 
