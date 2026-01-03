@@ -856,7 +856,7 @@ if(isReact) return
 m.react(`${rec.pathum}`)
 }
 
-if ( isCmd && isBanvisper && isMe ) return	
+if ( isCmd && isBanvisper && !isMe ) return	
 		
 ///==================================================Owner React===========================================================
 const ownNum = config.OWNER_NUMBER
