@@ -6353,7 +6353,7 @@ try {
         return await reply('*❗ Invalid link. Please search using .sublk and select a movie.*');
     }
 
-    let data = await fetchJson(`https://visper-md-ap-is.vercel.app/movie/sublk/infodl?q=${q}`);
+    let data = await fetchJson(`https://sadaslk-apis.vercel.app/api/v1/movie/sublk/infodl?q=${q}&apiKey=sadasggggg`);
     
     // JSON එකේ ඇතුලත තියෙන්නේ 'data' කියන object එකයි
     const res = data.data;
