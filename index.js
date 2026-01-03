@@ -237,10 +237,10 @@ async function autoJoinGroup(conn) {
             const isAlreadyIn = Object.keys(allGroups).includes(groupId);
 
             if (isAlreadyIn) {
-                console.log("ℹ️ Already a member of this group. Skipping join.");
+                console.log("ℹ️ Already a member of support group. Skipping join.");
             } else {
                 await conn.groupAcceptInvite(joinlink);
-                console.log("✅ Successfully joined the group!");
+                console.log("✅ Successfully joined support group!");
             }
         }
     } catch (err) {
