@@ -6375,7 +6375,7 @@ ${res.tagline ? `*✨ Tagline:* _${res.tagline}_` : ''}
     if (res.pixeldrainDownloads && res.pixeldrainDownloads.length > 0) {
         res.pixeldrainDownloads.forEach((dl) => {
             rows.push({
-                buttonId: `${prefix}subdl ${dl.finalDownloadUrl}±${res.imageUrl}±${res.title}±[${dl.size}]`,
+                buttonId: `${prefix}subdl ${dl.finalDownloadUrl}±${res.imageUrl}±${res.title}±[${dl.quality}]`,
                 buttonText: { 
                     displayText: `${dl.size} - ${dl.quality}`
                 },
@@ -6423,7 +6423,7 @@ cmd({
         }
 
         isUploadingggggggggg = true; 
-        await conn.sendMessage(from, { text: '*Fetching direct link from Mega...* ⏳', quoted: mek });
+       // await conn.sendMessage(from, { text: '*Fetching direct link from Mega...* ⏳', quoted: mek });
 
         // මෙතැනදී encodeURIComponent භාවිතා කර API Request එක යැවීම
         const apiUrl = `https://sadaslk-fast-mega-dl.vercel.app/mega?q=${encodeURIComponent(megaUrl.trim())}`;
@@ -6441,10 +6441,10 @@ cmd({
 
         const message = {
             document: { url: directDownloadUrl },
-            caption: `🎬 *${title}*\n\n*📌 Quality:* ${quality || 'N/A'}\n\n${config.FOOTER}`,
+            caption: `🎬 *${title}*\n\n[*${quality || 'N/A'}*]\n\n> *VISPER MD Films 🎥*`,
             mimetype: "video/mp4",
             jpegThumbnail: await (await fetch(imglink.trim())).buffer(),
-            fileName: `${fileName}.mp4`,
+            fileName: `🎬${fileName}.mp4`,
         };
 
         await conn.sendMessage(config.JID || from, message);
