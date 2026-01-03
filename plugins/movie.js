@@ -630,7 +630,7 @@ try {
     if (dlLinks && dlLinks.length > 0) {
         dlLinks.map((v) => {
             rows.push({
-                buttonId: prefix + `cdl ${v.directLinkUrl}±${movie.title}±${displayImg}±${${v.quality}}`,
+                buttonId: prefix + `cdl ${v.directLinkUrl}±${movie.title}±${displayImg}±${${v.quality}`,
                 buttonText: { displayText: `📥 ${v.quality} (${v.size})` },
                 type: 1
             });
