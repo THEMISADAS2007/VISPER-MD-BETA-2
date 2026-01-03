@@ -627,6 +627,12 @@ try {
 
     var rows = [];  
 
+rows.push(
+    { buttonId: prefix + 'bdetails ' + `${datae}&${datas}`, buttonText: { displayText: 'Details Card\n' }, type: 1 }
+    
+);
+	
+
     // Download links බොත්තම් ලෙස එකතු කිරීම
     if (dlLinks && dlLinks.length > 0) {
         dlLinks.map((v) => {
@@ -717,10 +723,10 @@ if (!datae.includes('https://drive.baiscopeslk')) {
        
  await conn.sendMessage(config.JID || from, { 
             document: { url: mediaUrl },
-            caption: `*🎬 Name :* ${datas}\n${dattt}\n\n${config.NAME}`,
+            caption: `*🎬 Name :* *${datas}*\n\n*\`${dattt}\`*\n\n${config.NAME}`,
             mimetype: "video/mp4",
             jpegThumbnail: await (await fetch(botimg)).buffer(),
-            fileName: `${datas}.mp4`
+            fileName: `🎬 ${datas}.mp4`
         });
 
 
@@ -736,51 +742,56 @@ if (!datae.includes('https://drive.baiscopeslk')) {
     }
 });
 
-
 cmd({
   pattern: "bdetails",
   react: '🎬',
-  desc: "Movie downloader",
+  desc: "Movie details sender",
   filename: __filename
 },
 async (conn, m, mek, { from, q, isMe, reply }) => {
   try {
     if (!q) 
-      return await reply('⚠️ *Please provide the movie URL and image URL separated by "&".*');
+      return await reply('⚠️ *Please provide the movie URL!*');
+ const [url, imgUrl] = q.split("&");
+    // API එකෙන් විස්තර ලබා ගැනීම
+    let sadas = await fetchJson(`https://sadaslk-apis.vercel.app/api/v1/movie/baiscopes/infodl?q=${url}&apiKey=sadasggggg`);
+    
+    if (!sadas || !sadas.status || !sadas.data) {
+        return await conn.sendMessage(from, { text: '🚩 *Error: Could not fetch movie details!*' }, { quoted: mek });
+    }
 
-    const [url, imgUrl] = q.split("&");
-    if (!url || !imgUrl) 
-      return await reply('❌ *Invalid format! Example:*\n_bdetails https://movieurl.com&https://imageurl.com_');
-
-    let sadas = await fetchJson(`https://darksadas-yt-baiscope-info.vercel.app/?url=${url}&apikey=pramashi`);
+    const movie = sadas.data.movieInfo;
     let details = (await axios.get('https://mv-visper-full-db.pages.dev/Main/main_var.json')).data;
 
-    // Formatted message with emojis and bold Unicode fonts
-    let msg = `*☘️ 𝗧ɪᴛʟᴇ ➮* *_${sadas.data.title   || 'N/A'}_*
+    // විස්තර පෙළ සැකසීම
+    let msg = `*☘️ 𝗧ɪᴛʟᴇ ➮* *_${movie.title || 'N/A'}_*
 
-*📅 𝗥ᴇʟᴇꜱᴇᴅ ᴅᴀᴛᴇ ➮* _${sadas.data.date   || 'N/A'}_
-*💃 𝗥ᴀᴛɪɴɢ ➮* _${sadas.data.imdb  || 'N/A'}_
-*⏰ 𝗥ᴜɴᴛɪᴍᴇ ➮* _${sadas.data.runtime   || 'N/A'}_
-*💁‍♂️ 𝗦ᴜʙᴛɪᴛʟᴇ ʙʏ ➮* _${sadas.data.subtitle_author   || 'N/A'}_
-*🎭 𝗚ᴇɴᴀʀᴇꜱ ➮* ${sadas.data.genres.join(', ')   || 'N/A'}
-
+*📅 𝗥ᴇʟᴇꜱᴇᴅ ᴅᴀᴛᴇ ➮* _${movie.releaseDate || 'N/A'}_
+*💃 𝗥ᴀᴛɪɴɢ ➮* _${movie.ratingValue || 'N/A'}_
+*⏰ 𝗥ᴜɴᴛɪᴍᴇ ➮* _${movie.runtime || 'N/A'}_
+*🌍 𝗖𝗼𝘂𝗻𝘁𝗿𝘆 ➮* _${movie.country || 'N/A'}_
+*🎭 𝗚ᴇɴᴀʀᴇꜱ ➮* ${movie.genres ? movie.genres.join(', ') : 'N/A'}
 
 ✨ *Follow us:* ${details.chlink}`;
 
+    // Gallery එකේ පළමු රූපය හෝ Poster එක තෝරා ගැනීම
+    const displayImg = (movie.galleryImages && movie.galleryImages.length > 0) 
+        ? movie.galleryImages[0] 
+        : movie.posterUrl;
+
+    // පණිවිඩය යැවීම (config.JID තිබේ නම් එයට, නැතිනම් current chat එකට)
     await conn.sendMessage(config.JID || from, {
-      image: { url: imgUrl.replace("-150x150", "") },
+      image: { url: imgUrl },
       caption: msg
     });
 
-    await conn.sendMessage(from, { react: { text: '✅', key: mek.key } });
+    await conn.sendMessage(from, { react: { text: '✔️', key: mek.key } });
 
   } catch (error) {
     console.error('Error:', error);
-    await conn.sendMessage(from, '⚠️ *An error occurred. Please try again later.*', { quoted: mek });
+    await conn.sendMessage(from, '⚠️ *An error occurred while fetching details.*', { quoted: mek });
   }
 });
-
-//=========================================================================================================
 
 
 
@@ -6298,7 +6309,7 @@ cmd({
 
         const message = {
             document: { url: directDownloadUrl },
-            caption: `🎬 *${title}*\n\n*\`${quality}\`*\n\n> *VISPER MD Films 🎥*`,
+            caption: `🎬 *${title}*\n\n*\`${quality}\`*\n\n${config.NAME}`,
             mimetype: "video/mp4",
             jpegThumbnail: await (await fetch(imglink.trim())).buffer(),
             fileName: `🎬 ${fileName}.mp4`,
