@@ -714,13 +714,12 @@ cmd({
         const title = data.title || 'Facebook video';
 
         const caption = `*🏮 VISPER FB DOWNLOADER 🏮*
-                    *┌──────────────────*
-                    *├ 🐼 Title:* ${title}
-                    *├ ⏱️ Duration:* ${duration}
-                    *├ 🔗 Url:* ${q}
-                    *└──────────────────*
-					
-					${config.FOOTER}`;
+         *┌──────────────────*
+         *├ 🐼 Title:* ${title}
+         *├ ⏱️ Duration:* ${duration}
+         *├ 🔗 Url:* ${q}
+         *└──────────────────*
+		 ${config.FOOTER}`;
 
         const buttons = [];
 
@@ -831,11 +830,12 @@ if (!q) return reply('*Please provide a search query!*')
 
 var rows = [];  	
 rows.push(
-    { buttonId: prefix + 'imgdlm ' + q, buttonText: { displayText: '_Normal Type 🎑_' }, type: 1 },
-    { buttonId: prefix + 'imgdld ' + q, buttonText: { displayText: '_Document Type 🎑_' }, type: 1 }
+    { buttonId: prefix + 'imgdlm ' + q, buttonText: { displayText: '*Normal Type 🎑*' }, type: 1 },
+    { buttonId: prefix + 'imgdld ' + q, buttonText: { displayText: '*Document Type 🎑*' }, type: 1 }
 );
 
- const caption = `*🦊 Choose Image Download Type..*`
+ const caption = `*🦊 Choose Image Download Type..*
+ `
 const buttonMessage = {
  
 
@@ -1071,13 +1071,13 @@ async(conn, mek, m,{from, q, reply}) => {
     const data = await download(q)
     if (!data || !data.dllink) return reply("❌ APK not found!")
 
-    let listdata = `*\`🗃️ VISPER APK DOWNLOADER 🗃️\`*
+    let listdata = `*🗃️ VISPER APK DOWNLOADER 🗃️*
 
 *┌──────────────────╮*
-*├ \`📚 Name\` :* ${data.name}
-*├ \`📦 Package\` :* ${data.package}
-*├ \`⬆️ Last update\` :* ${data.lastup}
-*├ \`📥 Size\` :* ${data.size}
+*├ 📚 Name :* ${data.name}
+*├ 📦 Package :* ${data.package}
+*├ ⬆️ Last update :* ${data.lastup}
+*├ 📥 Size :* ${data.size}
 *└──────────────────╯*
 
 ${config.FOOTER}`
@@ -1121,38 +1121,38 @@ try{
     var results = await yts(url);
     let wm = config.FOOTER
     var result = results.videos[0]
-     let caption = `*📹 🅅🄸🅂🄿🄴🅁 🅅🄸🄳🄴🄾 🄳🄾🅆🄽🄻🄾🄰🄳🄴🅁 📹*
+     let caption = `*🎥 VISPER VIDEO DOWNLODER 🎥*
 *┌─────────────────────┐*
-*├ \`📹 Title\` : ${result.title}* 
-*├ \`🐼 Views\` : ${result.views}*
-*├ \`⌛Duration\` : ${result.duration}*
-*├ \`📎 URL\` : ${result.url}*
+*├ 📹 Title : ${result.title}* 
+*├ 🐼 Views : ${result.views}*
+*├ ⌛Duration : ${result.duration}*
+*├ 📎 URL : ${result.url}*
 *└─────────────────────┘*`
 const sections = [
   {
 title: "`Video type 📽️`",
 rows: [{
-title: '```144p Video```',
+title: '*144p Video*',
 rowId: prefix + `videodl144 ${result.url}` 
 },
 {
-title: '```240p Video```',
+title: '*240p Video*',
 rowId: prefix + `videodl240 ${result.url}`
 },
 {
-title: '```360p Video```',
+title: '*360p Video*',
 rowId: prefix + `videodl360 ${result.url}`
 },
 {
-title: '```480p Video```',
+title: '*480p Video*',
 rowId: prefix + `videodl480 ${result.url}`
 },  
 {
-title: '```720p Video```',
+title: '*720p Video*',
 rowId: prefix + `videodl720 ${result.url}`
 },       
 {
-title: '```1080p Video```',
+title: '*1080p Video*',
 rowId: prefix + `videodl1080 ${result.url}`
 }
        
@@ -1161,27 +1161,27 @@ rowId: prefix + `videodl1080 ${result.url}`
 {
 title: "`Document type 📁`",
 rows: [{
-title: '```144p Document```',
+title: '*144p Document*',
 rowId: prefix + `docdl144 ${result.url}&${result.thumbnail}&${result.title}`
 },
 {
-title: '```240p Document```',
+title: '*240p Document*',
 rowId: prefix + `docdl240 ${result.url}&${result.thumbnail}&${result.title}`
 },
 {
-title: '```360p Document```',
+title: '*360p Document*',
 rowId: prefix + `docdl360 ${result.url}&${result.thumbnail}&${result.title}`
 },
 {
-title: '```480p Document```',
+title: '*480p Document*',
 rowId: prefix + `docdl480 ${result.url}&${result.thumbnail}&${result.title}`
 },
 {
-title: '```720p Document```',
+title: '*720p Document*',
 rowId: prefix + `docdl720 ${result.url}&${result.thumbnail}&${result.title}`
 },       
 {
-title: '```1080p Document```',
+title: '*1080p Document*',
 rowId: prefix + `docdl1080 ${result.url}&${result.thumbnail}&${result.title}`
 }
        
@@ -1756,13 +1756,13 @@ try{
 await conn.sendMessage(from, { react: { text: '⬇️', key: mek.key }})
 if(!q) return await conn.sendMessage(from , { text: '*🔥 Enter mediafire link...*' }, { quoted: mek } ) 
 const data = await fetchJson(`https://mfire-dl.vercel.app/mfire?url=${q}`)
-let listdata = `*\`🔥 𝙑𝙄𝙎𝙋𝙀𝙍 𝙈𝙀𝘿𝙄𝘼𝙁𝙄𝙍𝙀 𝘿𝙊𝙒𝙉𝙇𝙊𝘿𝙀𝙍 🔥\`*
+let listdata = `*🔥VISPER MEDIAFIRE DOWNLODER 🔥*
 
 *┌──────────────────╮*
-*├ \`🔥 Name\` :* ${data.fileName}
-*├ \`⏩ Type\` :* ${data.fileType}
-*├ \`📁 Size\` :* ${data.size}
-*├ \`📅 Date\` :* ${data.date}
+*├ 🔥 Name :* ${data.fileName}
+*├ ⏩ Type :* ${data.fileType}
+*├ 📁 Size :* ${data.size}
+*├ 📅 Date :* ${data.date}
 *└──────────────────╯*\n ${config.FOOTER}`
 
 	
@@ -1775,7 +1775,7 @@ let sendapk = await conn.sendMessage(from, {
     },
     mimetype: `${data.type}`,
     fileName: `${data.fileName}`,
-    caption: ''
+    caption: `${data.fileName}\n ${config.FOOTER}`
 }, { quoted: mek });
 
 await conn.sendMessage(from, { react: { text: '📁', key: sendapk.key }})
@@ -1851,7 +1851,7 @@ rows: srh
 }	  
 ]
 const listMessage = {
-text: `*_XNXX SEARCH RESULT 🔞_*
+text: `*VISPER XNXX SEARCH 🔞*
 
 *\`Input :\`* ${q}`,
 footer: config.FOOTER,
@@ -2127,7 +2127,7 @@ rows: srh
 }	  
 ]
 const listMessage = {
-text: `*_SPOTIFY SEARCH RESULT 🎶_*
+text: `*SPOTIFY SEARCH RESULT 🎶*
 
 *\`Input :\`* ${q}`,
 	
@@ -2399,128 +2399,3 @@ conn.sendMessage(from, {
 
 
 
-cmd({
-    pattern: "automp3",
-    react: "🎵",
-    dontAddCommandList: true,
-    filename: __filename
-},
-    async (conn, mek, m, { from, q, reply }) => {
-        if (!q) return await reply('🔍 Please enter a search keyword.');
-
-        try {
-            const search = await yts(q);
-            const results = search.videos;
-
-            if (!results || results.length === 0) {
-                return await reply('❌ No songs found.');
-            }
-
-            await reply(`🎶 Search complete. Found ${results.length} songs. Sending the first now. Others will follow every 40 seconds.`);
-
-            let first = true;
-
-            for (const result of results) {
-                const caption = `🎵 *Now Playing:* ${result.title}
-\`👁️ *Views:*\` ${result.views}
-\`⏱️ *Duration:*\` ${result.duration}
-
-_🎧 Powered by VISPER Music_`;
-
-                // Send thumbnail using buffer
-                try {
-                    const imgBuffer = await (await fetch(result.thumbnail)).buffer();
-                    await safeSend(conn, from, {
-                        image: imgBuffer,
-                        caption
-                    });
-                } catch (e) {
-                    console.error("❌ Error sending thumbnail:", e);
-                }
-
-                try {
-                    const mp3 = await fetchWithRetry(`https://yt-five-tau.vercel.app/download?q=${encodeURIComponent(result.url)}&format=mp3`);
-                    const audioUrl = mp3.result.download;
-
-                    const size = await getFileSizeInMB(audioUrl);
-                    if (size > 16) {
-                        await conn.sendMessage(from, {
-                            text: `⚠️ Skipping "${result.title}" — file size ${size.toFixed(2)} MB exceeds limit.`
-                        });
-                        continue;
-                    }
-
-                    const audioBuffer = await (await fetch(audioUrl)).buffer();
-
-                    await safeSend(conn, from, {
-                        audio: audioBuffer,
-                        mimetype: 'audio/mpeg',
-                        ptt: true
-                    }, { quoted: mek });
-
-                } catch (error) {
-                    console.error(`❌ MP3 fetch/send failed: ${result.title}`, error);
-                    await conn.sendMessage(from, {
-                        text: `⚠️ Could not download "${result.title}".`
-                    });
-                }
-
-                if (first) {
-                    first = false;
-                    continue;
-                }
-
-                await conn.sendMessage(from, {
-                    text: `⏳ Waiting 40 seconds for the next song...`
-                });
-                await new Promise(r => setTimeout(r, 40 * 1000));
-            }
-
-            await conn.sendMessage(from, {
-                text: `✅ Done! Sent ${results.length} songs.`
-            });
-
-        } catch (err) {
-            console.error('🛑 Error in automp3 command:', err);
-            await reply('⚠️ Something went wrong. Try again later.');
-        }
-    }
-);
-
-// 🛠️ Retry fetchJson with node-fetch
-async function fetchWithRetry(url, retries = 3, delay = 3000) {
-    for (let i = 1; i <= retries; i++) {
-        try {
-            const res = await fetch(url);
-            if (!res.ok) throw new Error(`Fetch failed with status ${res.status}`);
-            return await res.json();
-        } catch (err) {
-            console.log(`⚠️ Retry ${i}/${retries} failed:`, err.message || err);
-            if (i < retries) await new Promise(r => setTimeout(r, delay));
-        }
-    }
-    throw new Error('🚫 All retries failed for URL: ' + url);
-}
-
-// 🛠️ Get content-length in MB
-async function getFileSizeInMB(url) {
-    try {
-        const res = await axios.head(url);
-        const size = res.headers['content-length'];
-        return size ? parseFloat(size) / (1024 * 1024) : 0;
-    } catch {
-        return 0;
-    }
-}
-
-// 🛠️ Stable media send with retries
-async function safeSend(conn, jid, msg, opts = {}, retries = 2) {
-    for (let i = 0; i < retries; i++) {
-        try {
-            return await conn.sendMessage(jid, msg, opts);
-        } catch (e) {
-            console.log(`📤 Upload try ${i + 1} failed`, e.message || e);
-            if (i === retries - 1) throw e;
-        }
-    }
-}
