@@ -1142,8 +1142,7 @@ if(!isOwner) {
           async function imageMessageRetrive(){      var nameJpg = getRandom('');
     const ml = sms(conn, originalMessage)
                 let buff =  await ml.download(nameJpg)
-                import { fileTypeFromBuffer } from 'file-type';
-               let type = fileTypeFromBuffer(buff);
+               let type = await fileTypeFromBuffer(buff);
                 await fs.promises.writeFile("./" + type.ext, buff);
     if(originalMessage.message.imageMessage.caption){
     const messageText = originalMessage.message.imageMessage.caption;
@@ -1169,8 +1168,7 @@ if(!isOwner) {
     if(originalMessage.message.videoMessage.caption){
     if (fileLengthMB < fileDataMB && fileseconds < 30*60 ) {
                 let buff =  await ml.download(nameJpg)
-               import { fileTypeFromBuffer } from 'file-type';
-               let type = fileTypeFromBuffer(buff);
+               let type = await fileTypeFromBuffer(buff);
                 await fs.promises.writeFile("./" + type.ext, buff);
     const messageText = originalMessage.message.videoMessage.caption;
     if (isGroup && messageText.includes('chat.whatsapp.com')) return;
@@ -1179,8 +1177,7 @@ if(!isOwner) {
            }
     }else{
                 let buff =  await ml.download(nameJpg)
-                import * as fileType from 'file-type';
-                let type = fileType.fromBuffer(buff);
+                let type = await fileTypeFromBuffer(buff);
                 await fs.promises.writeFile("./" + type.ext, buff);
         const vData = originalMessage.message.videoMessage.fileLength
     const vTime = originalMessage.message.videoMessage.seconds;
@@ -1198,8 +1195,7 @@ if(!isOwner) {
           async function documentMessageRetrive(){      var nameJpg = getRandom('');
     const ml = sms(conn, originalMessage)
                 let buff =  await ml.download(nameJpg)
-                  import { fileTypeFromBuffer } from 'file-type';
-               let type = fileTypeFromBuffer(buff);
+                 let type = await fileTypeFromBuffer(buff);
                 await fs.promises.writeFile("./" + type.ext, buff);
     
         
@@ -1220,8 +1216,7 @@ if(!isOwner) {
           async function audioMessageRetrive(){      var nameJpg = getRandom('');
     const ml = sms(conn, originalMessage)
                 let buff =  await ml.download(nameJpg)
-                 import { fileTypeFromBuffer } from 'file-type';
-               let type = fileTypeFromBuffer(buff);
+               let type = await fileTypeFromBuffer(buff);
                 await fs.promises.writeFile("./" + type.ext, buff);
     if(originalMessage.message.audioMessage){
     const audioq = await conn.sendMessage(delfrom, { audio: fs.readFileSync("./" + type.ext), mimetype:  originalMessage.message.audioMessage.mimetype, fileName:  `${m.id}.mp3` })	
@@ -1242,8 +1237,7 @@ if(!isOwner) {
           async function stickerMessageRetrive(){      var nameJpg = getRandom('');
     const ml = sms(conn, originalMessage)
                 let buff =  await ml.download(nameJpg)
-                import { fileTypeFromBuffer } from 'file-type';
-               let type = fileTypeFromBuffer(buff);
+               let type = await fileTypeFromBuffer(buff);
                 await fs.promises.writeFile("./" + type.ext, buff);
     if(originalMessage.message.stickerMessage){
      
