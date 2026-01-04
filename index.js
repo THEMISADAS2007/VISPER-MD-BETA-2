@@ -19,7 +19,7 @@ import {
 
 // Baileys wala store eka wenama import karanna
 import pkg from '@whiskeysockets/baileys';
-const { makeInMemoryStore } = pkg;
+const { makeInMemoryStore, jidNormalizedUser } = pkg;
 import fs from 'fs';
 import P from 'pino';
 import config from './config.js'; // ESM වලදී .js අනිවාර්යයි
