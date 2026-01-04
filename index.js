@@ -1,49 +1,61 @@
+import pkg from '@whiskeysockets/baileys';
 const { 
-        default: makeWASocket, 
-        getAggregateVotesInPollMessage, 
-        useMultiFileAuthState, 
-        DisconnectReason, 
-        getDevice, 
-        fetchLatestBaileysVersion, 
-        jidNormalizedUser, 
-        getContentType, 
-        Browsers, 
-        makeInMemoryStore, 
-        makeCacheableSignalKeyStore, 
-        downloadContentFromMessage, 
-        generateForwardMessageContent, 
-        generateWAMessageFromContent, 
-        prepareWAMessageMedia, 
-        proto 
-    } = await import('@whiskeysockets/baileys');
-const fs = require('fs')
-const P = require('pino')
-const config = require('./config')
-const qrcode = require('qrcode-terminal')
-const NodeCache = require('node-cache')
-const util = require('util')
-const { getBuffer, getGroupAdmins, getRandom, h2k, isUrl, Json, runtime, sleep, fetchJson, fetchBuffer, getFile } = require('./lib/functions')
-const { sms, downloadMediaMessage } = require('./lib/msg')
-const axios = require('axios')
-const { File } = require('megajs')
-const path = require('path')
-const msgRetryCounterCache = new NodeCache()
+    default: makeWASocket, 
+    getAggregateVotesInPollMessage, 
+    useMultiFileAuthState, 
+    DisconnectReason, 
+    getDevice, 
+    fetchLatestBaileysVersion, 
+    jidNormalizedUser, 
+    getContentType, 
+    Browsers, 
+    makeInMemoryStore, 
+    makeCacheableSignalKeyStore, 
+    downloadContentFromMessage, 
+    generateForwardMessageContent, 
+    generateWAMessageFromContent, 
+    prepareWAMessageMedia, 
+    proto 
+} = pkg;
 
-const FileType = require('file-type')
-const l = console.log
-var {
-  updateCMDStore,
-  isbtnID,
-  getCMDStore,
-  getCmdForCmdId,
-  connectdb,
-  input,
-  get,
-  getalls,
-  updb,
-  updfb,
-  upresbtn,
-} = require("./lib/database");
+import fs from 'fs';
+import P from 'pino';
+import config from './config.js'; // .js අනිවාර්යයි
+import qrcode from 'qrcode-terminal';
+import NodeCache from 'node-cache';
+import util from 'util';
+
+// Destructuring imports for local files
+import { 
+    getBuffer, getGroupAdmins, getRandom, h2k, isUrl, 
+    Json, runtime, sleep, fetchJson, fetchBuffer, getFile 
+} from './lib/functions.js'; 
+
+import { sms, downloadMediaMessage } from './lib/msg.js';
+import axios from 'axios';
+import { File } from 'megajs';
+import path from 'path';
+import FileType from 'file-type';
+
+// Database functions import
+import {
+    updateCMDStore,
+    isbtnID,
+    getCMDStore,
+    getCmdForCmdId,
+    connectdb,
+    input,
+    get,
+    getalls,
+    updb,
+    updfb,
+    upresbtn,
+} from "./lib/database.js";
+
+const msgRetryCounterCache = new NodeCache();
+const l = console.log;
+
+// මෙතන සිට පහලට ඔයාගේ ඉතිරි කෝඩ් එක ලියන්න...
 const ownerNumber = [`${config.OWNER_NUMBER}`];
 //===================SESSION======.===========kj===h========
 
@@ -112,7 +124,7 @@ async function downloadSession(sessdata, df) {
   }
 }
 // <<==========PORTS============>>
-const express = require("express");
+import express from "express";
 const app = express();
 const port = process.env.PORT || 8000;
 //====================================
@@ -194,7 +206,7 @@ conn.ev.on('connection.update', async (update) => {
         }
     });
 
-const path = require('path');
+import path from 'path';
 fs.readdirSync("./plugins/").forEach((plugin) => {
   if (path.extname(plugin).toLowerCase() == ".js") {
       require("./plugins/" + plugin);
