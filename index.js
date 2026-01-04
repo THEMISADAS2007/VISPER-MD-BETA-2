@@ -1,21 +1,21 @@
-const {
-    default: makeWASocket,
-    getAggregateVotesInPollMessage, 
-    useMultiFileAuthState,
-    DisconnectReason,
-    getDevice,
-    fetchLatestBaileysVersion,
-    jidNormalizedUser,
-    getContentType,
-    Browsers,
-    makeInMemoryStore,
-    makeCacheableSignalKeyStore,
-    downloadContentFromMessage,
-    generateForwardMessageContent,
-    generateWAMessageFromContent,
-    prepareWAMessageMedia,
-    proto
-} = require('@whiskeysockets/baileys')
+const { 
+        default: makeWASocket, 
+        getAggregateVotesInPollMessage, 
+        useMultiFileAuthState, 
+        DisconnectReason, 
+        getDevice, 
+        fetchLatestBaileysVersion, 
+        jidNormalizedUser, 
+        getContentType, 
+        Browsers, 
+        makeInMemoryStore, 
+        makeCacheableSignalKeyStore, 
+        downloadContentFromMessage, 
+        generateForwardMessageContent, 
+        generateWAMessageFromContent, 
+        prepareWAMessageMedia, 
+        proto 
+    } = await import('@whiskeysockets/baileys');
 const fs = require('fs')
 const P = require('pino')
 const config = require('./config')
