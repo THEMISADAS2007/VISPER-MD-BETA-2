@@ -206,7 +206,7 @@ conn.ev.on('connection.update', async (update) => {
         }
     });
 
-import path from 'path';
+
 fs.readdirSync("./plugins/").forEach((plugin) => {
   if (path.extname(plugin).toLowerCase() == ".js") {
       require("./plugins/" + plugin);
