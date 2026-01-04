@@ -218,24 +218,20 @@ async function connectToWA() {
         }
     });
 
-    // Plugins Loading
-    // NOTE: require භාවිතා කර ඇත (createRequire හරහා)
-    const pluginsDir = "./plugins/";
+import fs from 'fs';
+import path from 'path';
+import { pathToFileURL } from 'url';
 
-const files = fs.readdirSync(pluginsDir);
+// Menna fix karapu code eka
+const files = fs.readdirSync("./plugins/");
 
 for (const plugin of files) {
     if (path.extname(plugin).toLowerCase() === ".js") {
-        // ESM wala dynamic import karanna pathToFileURL aniwaaryai
-        const fileUrl = pathToFileURL(path.join(pluginsDir, plugin)).href;
+        // Absolute path eka hadaganna (Windows wala errors enna puluwan nisa)
+        const filePath = path.join(process.cwd(), "plugins", plugin);
         
-        await import(fileUrl)
-            .then(() => {
-                console.log(`Successfully loaded plugin: ${plugin}`);
-            })
-            .catch((err) => {
-                console.error(`Failed to load plugin ${plugin}:`, err);
-            });
+        // await import use karanna piliwelata load wenna
+        await import(pathToFileURL(filePath).href);
     }
 }
 
