@@ -1,14 +1,32 @@
-const config = require('../config')
-const os = require('os')
-const axios = require('axios');
-const mimeTypes = require("mime-types");
-const fs = require('fs');
-const path = require('path');
-const { generateForwardMessageContent, prepareWAMessageFromContent, generateWAMessageContent, generateWAMessageFromContent } = require('@whiskeysockets/baileys');
-const { cmd, commands } = require('../command')
-const { getBuffer, getGroupAdmins, getRandom, h2k, isUrl, Json, runtime, sleep, fetchJson} = require('../lib/functions')
+import config from '../config.js';
+import os from 'os';
+import axios from 'axios';
+import mimeTypes from 'mime-types';
+import fs from 'fs';
+import path from 'path';
+import pkg from '@whiskeysockets/baileys';
+const { 
+    generateForwardMessageContent, 
+    prepareWAMessageFromContent, 
+    generateWAMessageContent, 
+    generateWAMessageFromContent 
+} = pkg;
+
+import { cmd, commands } from '../command.js';
+import { 
+    getBuffer, 
+    getGroupAdmins, 
+    getRandom, 
+    h2k, 
+    isUrl, 
+    Json, 
+    runtime, 
+    sleep, 
+    fetchJson 
+} from '../lib/functions.js';
+
 const GEMINI_API_KEY = "AIzaSyB8xtFPtvG_N9S7bBZZOSfTyZW8rQyJQkY";
-const { URL } = require('url');
+import { URL } from 'url';
 
 
 cmd({
