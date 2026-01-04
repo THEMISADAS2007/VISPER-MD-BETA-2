@@ -45,7 +45,7 @@ import { File } from 'megajs';
 import path from 'path';
 import { fileTypeFromFile } from 'file-type';
 import express from 'express';
-import { fileURLToPath, pathToFileURL } from 'url';
+import { fileURLToPath } from 'url';
 import { createRequire } from 'module';
 
 // ESM වල __dirname සහ require නැවත සකස් කර ගැනීම
@@ -219,18 +219,9 @@ async function connectToWA() {
     });
 
 
-import { pathToFileURL } from 'url';
-
-// Menna fix karapu code eka
-const files = fs.readdirSync("./plugins/");
-
-for (const plugin of files) {
-    if (path.extname(plugin).toLowerCase() === ".js") {
-        // Absolute path eka hadaganna (Windows wala errors enna puluwan nisa)
-        const filePath = path.join(process.cwd(), "plugins", plugin);
-        
-        // await import use karanna piliwelata load wenna
-        await import(pathToFileURL(filePath).href);
+for (const plugin of fs.readdirSync("./plugins/")) {
+    if (path.extname(plugin).toLowerCase() == ".js") {
+        await import("./plugins/" + plugin);
     }
 }
 
