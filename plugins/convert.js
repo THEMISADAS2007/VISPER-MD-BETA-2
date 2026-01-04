@@ -1,36 +1,52 @@
-const { cmd, commands } = require('../command')
-const { getBuffer, getGroupAdmins, getRandom, h2k, isUrl, Json, runtime, sleep, fetchJson} = require('../lib/functions')
-const { downloadMediaMessage } = require("../lib/msg")
-const config = require('../config')
-const fs = require('fs')
-const got = require("got")
-const axios = require('axios');
-const googleTTS = require("google-tts-api");
-const { tmpdir } = require("os")
-const translate = require('translate-google-api'); 
-let { unlink } = require("fs/promises")
-const { catboxUploader } = require('../lib/catbox');
-const Crypto = require("crypto")
-const { promisify } = require("util")
-const FormData = require("form-data")
-const stream = require("stream")
-const pipeline = promisify(stream.pipeline)
-const { image2url } = require('darksadasyt-imgbb-scraper')
-const fileType = require("file-type");
-const { Sticker, createSticker, StickerTypes } = require("wa-sticker-formatter");
-const ffmpegPath = require('@ffmpeg-installer/ffmpeg').path;
-const ffmpeg = require('fluent-ffmpeg');
-const path = require('path')
-var imgmsg =''
-if(config.LANG === 'SI') imgmsg = '*ඡායාරූපයකට mention දෙන්න !*'
-else imgmsg = "*Reply to a photo !*"
-var descg = ''
-if(config.LANG === 'SI') descg = "එය ඔබගේ mention දුන් ඡායාරූපය background remove කරයි."
-else descg = "It remove background your replied photo."
-var cant = ''
-if(config.LANG === 'SI') cant = "මට මෙම රූපයේ පසුබිම ඉවත් කළ නොහැක."
-else cant = "I can't remove background on this image."
-var JavaScriptObfuscator = require('javascript-obfuscator');
+// --- Built-in Modules ---
+import fs from 'fs';
+import path from 'path';
+import os from 'os';
+import crypto from 'crypto';
+import stream from 'stream';
+import { promisify } from 'util';
+import { fileURLToPath } from 'url';
+import { dirname } from 'path';
+import { unlink } from 'fs/promises';
+
+// --- Third-party Packages ---
+import axios from 'axios';
+import got from 'got';
+import googleTTS from "google-tts-api";
+import translate from 'translate-google-api';
+import mimeTypes from 'mime-types';
+import FormData from 'form-data';
+import * as fileType from 'file-type';
+import JavaScriptObfuscator from 'javascript-obfuscator';
+import { Sticker, createSticker, StickerTypes } from "wa-sticker-formatter";
+import { path as ffmpegPath } from '@ffmpeg-installer/ffmpeg';
+import ffmpeg from 'fluent-ffmpeg';
+import { image2url } from 'darksadasyt-imgbb-scraper';
+
+// --- Local Project Files (Aniwarayenma .js extension danna) ---
+import config from '../config.js';
+import { cmd, commands } from '../command.js';
+import { 
+    getBuffer, getGroupAdmins, getRandom, h2k, isUrl, 
+    Json, runtime, sleep, fetchJson 
+} from '../lib/functions.js';
+import { downloadMediaMessage } from "../lib/msg.js";
+import { catboxUploader } from '../lib/catbox.js';
+
+// --- ES Modules Environment Fix (filename/dirname) ---
+const __filename = fileURLToPath(import.meta.url);
+const __dirname = dirname(__filename);
+
+// --- Global Variables & Logic ---
+const pipeline = promisify(stream.pipeline);
+const tmpdir = os.tmpdir();
+
+let imgmsg = config.LANG === 'SI' ? '*ඡායාරූපයකට mention දෙන්න !*' : "*Reply to a photo !*";
+let descg = config.LANG === 'SI' ? "එය ඔබගේ mention දුන් ඡායාරූපය background remove කරයි." : "It remove background your replied photo.";
+let cant = config.LANG === 'SI' ? "මට මෙම රූපයේ පසුබිම ඉවත් කළ නොහැක." : "I can't remove background on this image.";
+
+// FFMPEG path eka set kirima
+ffmpeg.setFfmpegPath(ffmpegPath);
 
 async function videoToWebp (media) {
 
