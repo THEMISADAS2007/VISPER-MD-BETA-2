@@ -225,79 +225,76 @@ cmd({
     pattern: "removebg",
     react: "🔮",
     alias: ["rmbg"],
-    desc: "Removes background from images",
+    desc: "Removes background from an image.",
     category: "convert",
     use: '.removebg <Reply to image>',
     filename: __filename
 },
 async(conn, mek, m, { from, l, quoted, prefix, body, isCmd, command, args, q, isGroup, sender, senderNumber, botNumber2, botNumber, pushname, isMe, isOwner, groupMetadata, groupName, participants, groupAdmins, isBotAdmins, isAdmins, reply }) => {
     try {
-        const isQuotedViewOnce = m.quoted ? (m.quoted.type === 'viewOnceMessage') : false;
-        const isQuotedImage = m.quoted ? ((m.quoted.type === 'imageMessage') || (isQuotedViewOnce ? (m.quoted.msg.type === 'imageMessage') : false)) : false;
-
+        // 📌 Quoted image එකක්ද නැද්ද යන්න පරීක්ෂා කිරීම
+        const isQuotedViewOnce = m.quoted ? (m.quoted.type === 'viewOnceMessage') : false
+        const isQuotedImage = m.quoted ? ((m.quoted.type === 'imageMessage') || (isQuotedViewOnce ? (m.quoted.msg.type === 'imageMessage') : false)) : false
+        
         if ((m.type === 'imageMessage') || isQuotedImage) {
-            // 1. Download the buffer
-            let buff = isQuotedImage ? await m.quoted.download() : await m.download();
             
-            // 2. Detect file type (Fix for the TypeError)
-            // If using file-type v16+, use await fileType.fromBuffer(buff) 
-            // If that fails, ensure your package.json has "file-type": "^16.5.3"
-            const type = await fileType.fromBuffer(buff);
-            if (!type) return reply("Could not detect file type.");
-
-            const tempFile = `./temp_${Date.now()}.${type.ext}`;
-            const namePng = `./temp_out_${Date.now()}.png`;
-
-            // 3. Write temp file
-            await fs.promises.writeFile(tempFile, buff);
-
-            // 4. Prepare Form Data
-            var form = new FormData();
-            form.append("image_file", fs.createReadStream(tempFile));
+            // 📌 Image එක download කර buffer එකක් ලබා ගැනීම
+            let buff = isQuotedImage ? await m.quoted.download() : await m.download()
+            
+            // 📌 Form Data සකස් කිරීම (API එකට යැවීමට)
+            const form = new FormData();
+            form.append("image_file", buff, {
+                filename: 'image.jpg',
+                contentType: 'image/jpeg'
+            });
             form.append("size", "auto");
 
-            // 5. API Request
-            const rbg = got.stream.post("https://api.remove.bg/v1.0/removebg", {
+            // 📌 Remove.bg API එකට request එක යැවීම
+            // සටහන: API Key එක 'fLYByZwbPqdyqkdKK6zcBN9H' වලංගු විය යුතුය.
+            const response = await got.post("https://api.remove.bg/v1.0/removebg", {
                 body: form,
                 headers: {
-                    "X-Api-Key": 'fLYByZwbPqdyqkdKK6zcBN9H', // Note: Keep your API keys private!
+                    "X-Api-Key": 'fLYByZwbPqdyqkdKK6zcBN9H', // මෙතනට ඔයාගේ වැඩ කරන API Key එක දාන්න
                 },
+                responseType: 'buffer'
             });
 
-            await pipeline(rbg, fs.createWriteStream(namePng));
+            // 📌 ලැබෙන output එක save කිරීම
+            const namePng = getRandom('.png');
+            const outputPath = path.join(__dirname, namePng);
+            await fs.promises.writeFile(outputPath, response.body);
 
-            // 6. Response
-            let dat = `*🌆 VISPER MD BACKGROUND REMOVER 🌆*`;
-            
-            // Note: Ensure your 'conn.buttonMessage' function is correctly defined in your framework
+            let dat = `*🌆 VISPER-MD BACKGROUND REMOVER 🌆*`
+
             const buttons = [
-                { buttonId: prefix + 'rbgi ' + namePng, buttonText: { displayText: '*IMAGE*' }, type: 1 },
-                { buttonId: prefix + 'rebgs ' + namePng, buttonText: { displayText: '*STICKER*' }, type: 1 },
-                { buttonId: prefix + 'rbgd ' + namePng, buttonText: { displayText: '*DOCUMENT*' }, type: 1 }
-            ];
+                { buttonId: prefix + 'rbgi ' + namePng, buttonText: { displayText: 'IMAGE' }, type: 1 },
+                { buttonId: prefix + 'rebgs ' + namePng, buttonText: { displayText: 'STICKER' }, type: 1 },
+                { buttonId: prefix + 'rbgd ' + namePng, buttonText: { displayText: 'DOCUMENT' }, type: 1 }
+            ]
 
             const buttonMessage = {
+                image: response.body, // Background එක අයින් කරපු image එක කෙලින්ම පෙන්වයි
                 caption: dat,
-                footer: "Powered by Visper-MD",
+                footer: "ᴘᴏᴡᴇʀᴇᴅ ʙʏ ᴠɪsᴘᴇʀ-ᴍᴅ",
                 buttons: buttons,
-                headerType: 1
-            };
+                headerType: 4
+            }
 
-            await conn.buttonMessage(from, buttonMessage, mek);
-
-            // Cleanup temp files
-            setTimeout(() => {
-                if (fs.existsSync(tempFile)) fs.unlinkSync(tempFile);
-            }, 10000);
+            return await conn.buttonMessage(from, buttonMessage, mek)
 
         } else {
-            return await reply("Please reply to an image!");
+            return await reply("ඔබ background එක ඉවත් කිරීමට අවශ්‍ය image එකක් reply කරන්න.")
         }
+
     } catch (e) {
-        l(e);
-        reply("Error occurred while removing background. Make sure your API key is valid.");
+        l(e)
+        // API key එකේ limit ඉවර වුණොත් හෝ වෙනත් error එකක් ආවොත්
+        if (e.response && e.response.status === 402) {
+            return reply("API Limit එක ඉවරයි! කරුණාකර නව API Key එකක් භාවිතා කරන්න.")
+        }
+        return reply("Error එකක් සිදු වුණා. කරුණාකර පසුව උත්සාහ කරන්න.")
     }
-});
+})
 
 cmd({
   pattern: "rbgi",
