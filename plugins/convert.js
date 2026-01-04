@@ -383,8 +383,7 @@ async(conn, mek, m, { from, l, quoted, body, isCmd, command, args, q, isGroup, s
     }
 })
 
-//removebg
-const ffmpegPath = require('ffmpeg-static');
+
 
 
 // ffmpeg පද්ධතියට හඳුන්වා දීම මෙතැනදී සිදු වේ
