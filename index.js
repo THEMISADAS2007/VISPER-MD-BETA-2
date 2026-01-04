@@ -220,11 +220,24 @@ async function connectToWA() {
 
     // Plugins Loading
     // NOTE: require භාවිතා කර ඇත (createRequire හරහා)
-    fs.readdirSync("./plugins/").forEach((plugin) => {
-        if (path.extname(plugin).toLowerCase() == ".js") {
-            require("./plugins/" + plugin);
-        }
-    });
+    const pluginsDir = "./plugins/";
+
+const files = fs.readdirSync(pluginsDir);
+
+for (const plugin of files) {
+    if (path.extname(plugin).toLowerCase() === ".js") {
+        // ESM wala dynamic import karanna pathToFileURL aniwaaryai
+        const fileUrl = pathToFileURL(path.join(pluginsDir, plugin)).href;
+        
+        await import(fileUrl)
+            .then(() => {
+                console.log(`Successfully loaded plugin: ${plugin}`);
+            })
+            .catch((err) => {
+                console.error(`Failed to load plugin ${plugin}:`, err);
+            });
+    }
+}
 
 
     await connectdb()
