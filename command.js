@@ -16,6 +16,7 @@ function cmd(info, func) {
 }
 
 // ESM වලදී export කරන ආකාරය
+// command.js anthima kotasa
 export {
     cmd,
     cmd as AddCommand,
@@ -23,3 +24,6 @@ export {
     cmd as Module,
     commands
 };
+
+// Me peliya aluthen ekathu karanna
+export default commands;
