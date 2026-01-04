@@ -27,6 +27,7 @@
     "darksadasyt-anime": "latest",
     "anime-heaven": "latest",
     "sadaslk-dlcore": "latest",
+    "dotenv": "^16.4.7",
     "darksadasyt-imgbb-scraper": "latest",
     "express": "latest",
     "fb-downloader-scrapper": "latest",
