@@ -35,12 +35,25 @@
 
 ---
 
-## ✨ Features
-- 🎥 **Search Movies**: Easily find movies by name or keyword.
-- 📺 **Stream Movies**: Get high-quality streaming links.
-- 📥 **Download Movies**: Choose between multiple formats and resolutions.
-- 📊 **Detailed Movie Info**: IMDb ratings, cast, and trailers.
-- 🤖 **Automated Commands**: Simple and efficient conversational commands.
+## 🟢 About VISPER-MD
+
+VISPER-MD is an advanced WhatsApp Multi-Device User Bot developed using JavaScript (Node.js), built to deliver a complete all-in-one automation experience on WhatsApp.
+It is designed to work smoothly across multiple devices while maintaining speed, stability, and smart control.
+
+VISPER-MD comes packed with powerful modules including AI tools, movie systems, media downloading, logo generation, smart searching, file conversion, and group management, making it more than just a regular WhatsApp bot.
+
+🧠 AI Features – smart replies, text tools & automation
+🎬 Movie System – search, info, stream & download
+📥 Downloader – videos, audios & files
+🎨 Logo Generator – stylish logos & text designs
+🔍 Smart Search – movies, data & media lookup
+🔄 Converter Tools – audio, video & document formats
+👥 Group Management – admin tools & automation
+⚡ Multi-Device Support – fast, stable & reliable
+
+With its Dark Cyber / Matrix-inspired design and clean command structure, VISPER-MD balances power and simplicity, making it easy for both normal users and advanced users.
+
+Developed and maintained by VISPER INC, VISPER-MD aims to push WhatsApp automation to the next generation while keeping everything secure, modern, and user-friendly.
 
 ---
 
