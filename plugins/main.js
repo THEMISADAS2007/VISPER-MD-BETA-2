@@ -165,6 +165,79 @@ I am alive now 🎈\n✨ Thank you for choosing \`Visper-MD\` — your trusted W
 });
 //...
 
+
+cmd({
+  pattern: "systeemm",
+  alias: ["status"],
+  desc: "Check bot system status.",
+  category: "main",
+  use: '.system',
+  filename: __filename
+},
+async (conn, mek, m, { reply, from }) => {
+  try {
+
+    const initial = new Date().getTime();
+    
+    const os = require('os');
+
+
+    let hostname;
+    const hnLength = os.hostname().length;
+    if (hnLength === 12) hostname = 'Replit';
+    else if (hnLength === 36) hostname = 'Heroku';
+    else if (hnLength === 8) hostname = 'Koyeb';
+    else hostname = os.hostname();
+
+ 
+    const usedVal = process.memoryUsage().heapUsed / 1024 / 1024;
+    const totalVal = os.totalmem() / 1024 / 1024;
+    
+    const ramUsedMB = usedVal.toFixed(2);
+    const ramTotalMB = Math.round(totalVal);
+    
+
+    const percentage = Math.round((usedVal / totalVal) * 100);
+    
+ [████░░░░░░]
+    const barLength = 10;
+    const filledLength = Math.round((percentage / 100) * barLength);
+    const emptyLength = barLength - filledLength;
+    const progressBar = '█'.repeat(filledLength) + '░'.repeat(emptyLength);
+
+
+    const rtime = await runtime(process.uptime());
+
+    
+    const final = new Date().getTime();
+    const ping = final - initial;
+
+
+    const sysInfo = `
+╭━━━❮ 📡 𝗩𝗜𝗦𝗣𝗘𝗥 𝗦𝗧𝗔𝗧𝗨𝗦 ❯━━━╮
+┃
+┃ ⚡ *ᴜᴘᴛɪᴍᴇ* : ${rtime}
+┃ 🚀 *ᴘɪɴɢ* : ${ping}ms
+┃ 🧬 *ᴠᴇʀsɪᴏɴ* : 6.0.0
+┃ ⚙️ *ʜᴏsᴛ* : ${hostname}
+┃
+┃ 💾 *ᴍᴇᴍᴏʀʏ (ʀᴀᴍ)*
+┃ ┣ ❲${progressBar}❳ *${percentage}%*
+┃ ┗ ${ramUsedMB}MB / ${ramTotalMB}MB
+┃
+╰━━━━━━━━━━━━━━━━━━╯
+> 👨‍💻 ᴅᴇᴠᴇʟᴏᴘᴇᴅ ʙʏ ᴠɪsᴘᴇʀ ɪɴᴄ
+`;
+
+    await conn.sendMessage(m.chat, { text: sysInfo.trim() }, { quoted: fkontak || m });
+    m.react('🌙');
+    
+  } catch (e) {
+    await reply('*❌ Error fetching system info!*');
+    console.error(e);
+  }
+});
+
 cmd({
     pattern: "getpp",
     react: "📸",
