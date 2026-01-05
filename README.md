@@ -67,7 +67,7 @@
 
 | <a href="https://github.com/Saviyakolla"><img src="https://raw.githubusercontent.com/Saviyakolla/Voice_Database/main/Random-Images_DB/img/myedit.png" width=80 height=80></a> | <a href="https://github.com/themisadas"><img src="https://raw.githubusercontent.com/Saviyakolla/Voice_Database/main/Random-Images_DB/img/image.png" width=80 height=80></a> | <a href="https://github.com/Nadeenpoorna-app"><img src="https://raw.githubusercontent.com/Nadeenpoorna-app/main-data/refs/heads/main/footer/2036.jpg" width=80 height=80></a> | <a href="https://github.com/ALEX-ID-LK"><img src="https://raw.githubusercontent.com/Nadeenpoorna-app/main-data/refs/heads/main/footer/alex.jpg" width=80 height=80></a> |
 |---|---|---|---|
-| **[Savithu Induwara](https://github.com/Saviyskolla)**</br>Founder & Developer | **[Darksadas YT](https://github.com/DarksadasYT1)**</br>Co-Developer | **[Nadeen Poorna](https://github.com/Nadeenpoorna-app)**</br>Co-Developer | **[Alex-ID](https://github.com/ALEX-ID-LK)**</br>System Leader |
+| **[Savithu Induwara](https://github.com/Saviyskolla)**</br>Founder | **[Darksadas YT](https://github.com/DarksadasYT1)**</br>Developer & Coder | **[Nadeen Poorna](https://github.com/Nadeenpoorna-app)**</br>Co-Developer & Designer | **[Alex-ID](https://github.com/ALEX-ID-LK)**</br>System Leader |
 ----
 
 ## License
