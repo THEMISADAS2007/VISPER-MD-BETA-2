@@ -63,15 +63,8 @@ async function connectToWA() {
 
    const sessions = [
     { id: config.SESSION_ID, folder: 'auth_info_baileys', name: 'Session 01' },
-    { id: config.SESSION_ID2, folder: 'auth_info_session2', name: 'Session 02' },
-    { id: config.SESSION_ID3, folder: 'auth_info_session3', name: 'Session 03' },
-    { id: config.SESSION_ID4, folder: 'auth_info_session4', name: 'Session 04' },
-    { id: config.SESSION_ID5, folder: 'auth_info_session5', name: 'Session 05' },
-    { id: config.SESSION_ID6, folder: 'auth_info_session6', name: 'Session 06' },
-    { id: config.SESSION_ID7, folder: 'auth_info_session7', name: 'Session 07' },
-    { id: config.SESSION_ID8, folder: 'auth_info_session8', name: 'Session 08' },
-    { id: config.SESSION_ID9, folder: 'auth_info_session9', name: 'Session 09' },
-    { id: config.SESSION_ID10, folder: 'auth_info_session10', name: 'Session 10' }
+    { id: config.SESSION_ID2, folder: 'auth_info_session2', name: 'Session 02' }
+    
 ];
 
     for (const session of sessions) {
