@@ -176,12 +176,12 @@ cmd({
 },
 async (conn, mek, m, { reply, from }) => {
   try {
-
+    // 1. Start calculating time (Ping start)
     const initial = new Date().getTime();
     
     const os = require('os');
 
-
+    // --- Platform Detection ---
     let hostname;
     const hnLength = os.hostname().length;
     if (hnLength === 12) hostname = 'Replit';
@@ -189,29 +189,36 @@ async (conn, mek, m, { reply, from }) => {
     else if (hnLength === 8) hostname = 'Koyeb';
     else hostname = os.hostname();
 
- 
+    // --- Memory Usage & Progress Bar ---
     const usedVal = process.memoryUsage().heapUsed / 1024 / 1024;
     const totalVal = os.totalmem() / 1024 / 1024;
     
     const ramUsedMB = usedVal.toFixed(2);
     const ramTotalMB = Math.round(totalVal);
     
-
+    // Percentage
     const percentage = Math.round((usedVal / totalVal) * 100);
-
+    
+    // Progress Bar Generation (Using Unicode codes to prevent syntax errors)
+    // \u2588 = Solid Block (█), \u2591 = Light Shade (░)
     const barLength = 10;
     const filledLength = Math.round((percentage / 100) * barLength);
     const emptyLength = barLength - filledLength;
-    const progressBar = '█'.repeat(filledLength) + '░'.repeat(emptyLength);
+    
+    // Safe method to create bar
+    const filledBar = '\u2588'.repeat(filledLength);
+    const emptyBar = '\u2591'.repeat(emptyLength);
+    const progressBar = `${filledBar}${emptyBar}`;
 
-
+    // --- Runtime ---
+    // Make sure 'runtime' function is available in your bot utils
     const rtime = await runtime(process.uptime());
 
-    
+    // 2. Calculate Ping (End time - Start time)
     const final = new Date().getTime();
     const ping = final - initial;
 
-
+    // --- Premium Message Design ---
     const sysInfo = `
 ╭━━━❮ 📡 𝗩𝗜𝗦𝗣𝗘𝗥 𝗦𝗧𝗔𝗧𝗨𝗦 ❯━━━╮
 ┃
@@ -228,6 +235,7 @@ async (conn, mek, m, { reply, from }) => {
 > 👨‍💻 ᴅᴇᴠᴇʟᴏᴘᴇᴅ ʙʏ ᴠɪsᴘᴇʀ ɪɴᴄ
 `;
 
+    // Send the message
     await conn.sendMessage(m.chat, { text: sysInfo.trim() }, { quoted: fkontak || m });
     m.react('🌙');
     
@@ -236,6 +244,7 @@ async (conn, mek, m, { reply, from }) => {
     console.error(e);
   }
 });
+
 
 cmd({
     pattern: "getpp",
