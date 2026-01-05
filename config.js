@@ -9,7 +9,7 @@ module.exports = {
 SESSION_ID:'VISPER-MD&497966f0-f8b3-4fb5-9a23-aaebb5569e27',
 
 
-SESSION_ID2: '', // තිබේ නම් පමණක් (Optional)
+SESSION_ID2: 'VISPER-MD&13ad1c19-093e-4827-a315-57ed7bd8ed0b', // තිබේ නම් පමණක් (Optional)
 SESSION_ID3: '', // තිබේ නම් පමණක් (Optional)   
 ANTI_DELETE: process.env.ANTI_DELETE === undefined ? 'true' : process.env.ANTI_DELETE, 
 MV_BLOCK: process.env. MV_BLOCK === undefined ? 'true' : process.env. MV_BLOCK,    
