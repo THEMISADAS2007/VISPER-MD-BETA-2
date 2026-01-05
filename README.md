@@ -69,36 +69,104 @@ Developed and maintained by <b>VISPER INC</b>, VISPER-MD aims to push
 <b>WhatsApp automation to the next generation</b> while keeping everything
 secure, modern, and user-friendly.
 </p>
----
-<!-- FEATURE TILES -->
-<h3 align="center">✨ VISPER-MD Feature Tiles</h3>
 
-<table align="center">
+---
+
+<!-- VERTICAL FEATURE TILES -->
+<h3 align="center">✨ VISPER-MD Feature Modules</h3>
+
+<table align="center" width="80%">
   <tr>
-    <td align="center">🎬<br><b>Movie</b><br>✅</td>
-    <td align="center">❗<br><b>Info</b><br>✅</td>
-    <td align="center">🔞<br><b>NSFW</b><br>✅</td>
-    <td align="center">🪀<br><b>Tools</b><br>✅</td>
+    <td>🎬 <b>Movie System</b><br>
+    Search • Info • Stream • Download</td>
+    <td align="center">✅ Enabled</td>
   </tr>
+
   <tr>
-    <td align="center">👥<br><b>Group</b><br>✅</td>
-    <td align="center">🔍<br><b>Search</b><br>✅</td>
-    <td align="center">💫<br><b>Anime</b><br>✅</td>
-    <td align="center">🔃<br><b>Converter</b><br>✅</td>
+    <td>❗ <b>Info Menu</b><br>
+    Bot info • System details • Help</td>
+    <td align="center">✅ Enabled</td>
   </tr>
+
   <tr>
-    <td align="center">🌌<br><b>Wallpaper</b><br>✅</td>
-    <td align="center">📥<br><b>Downloader</b><br>✅</td>
-    <td align="center">🥳<br><b>Fun</b><br>✅</td>
-    <td align="center">📰<br><b>News</b><br>✅</td>
+    <td>🔞 <b>NSFW Module</b><br>
+    Adult content controls & commands</td>
+    <td align="center">✅ Enabled</td>
   </tr>
+
   <tr>
-    <td align="center">😻<br><b>Anti-Delete</b><br>✅</td>
-    <td align="center">🤖<br><b>AI</b><br>✅</td>
-    <td align="center">🎨<br><b>Logo</b><br>✅</td>
-    <td align="center">⚙️<br><b>Settings</b><br>✅</td>
+    <td>🪀 <b>Utility Tools</b><br>
+    Useful & extra helper commands</td>
+    <td align="center">✅ Enabled</td>
+  </tr>
+
+  <tr>
+    <td>👥 <b>Group Management</b><br>
+    Admin tools • Automation • Control</td>
+    <td align="center">✅ Enabled</td>
+  </tr>
+
+  <tr>
+    <td>🔍 <b>Smart Search</b><br>
+    Movies • Media • Data lookup</td>
+    <td align="center">✅ Enabled</td>
+  </tr>
+
+  <tr>
+    <td>💫 <b>Anime Hub</b><br>
+    Anime search • info • media</td>
+    <td align="center">✅ Enabled</td>
+  </tr>
+
+  <tr>
+    <td>🔃 <b>Converter Tools</b><br>
+    Audio • Video • Document formats</td>
+    <td align="center">✅ Enabled</td>
+  </tr>
+
+  <tr>
+    <td>🌌 <b>Wallpaper Engine</b><br>
+    HD • Anime • 4K wallpapers</td>
+    <td align="center">✅ Enabled</td>
+  </tr>
+
+  <tr>
+    <td>📥 <b>Downloader Core</b><br>
+    Video • Audio • File downloads</td>
+    <td align="center">✅ Enabled</td>
+  </tr>
+
+  <tr>
+    <td>🥳 <b>Fun & Useful</b><br>
+    Games • Fun cmds • Daily tools</td>
+    <td align="center">✅ Enabled</td>
+  </tr>
+
+  <tr>
+    <td>📰 <b>News System</b><br>
+    Latest updates & headlines</td>
+    <td align="center">✅ Enabled</td>
+  </tr>
+
+  <tr>
+    <td>😻 <b>Settings & Anti-Delete</b><br>
+    Custom settings • Message recovery</td>
+    <td align="center">✅ Enabled</td>
+  </tr>
+
+  <tr>
+    <td>🤖 <b>AI Tools</b><br>
+    Smart replies • AI commands</td>
+    <td align="center">✅ Enabled</td>
+  </tr>
+
+  <tr>
+    <td>🎨 <b>Logo Generator</b><br>
+    Stylish text • Logo designs</td>
+    <td align="center">✅ Enabled</td>
   </tr>
 </table>
+
 
 ---
 
