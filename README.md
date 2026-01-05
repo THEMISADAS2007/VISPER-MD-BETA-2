@@ -17,7 +17,7 @@
 <p align="center">
   <a href="https://git.io/typing-svg">
     <img
-      src="https://readme-typing-svg.demolab.com?font=Fira+Code&weight=700&size=38&pause=900&color=8B8000&center=true&vCenter=true&width=650&lines=VISPER+MD+WHATSAPP+USER+BOT;VERSION+6.0.0+%E2%80%A2+AI+EDITION;POWERED+BY+VISPER+INC;DARK+CYBER+AUTOMATION+SYSTEM"
+      src="https://readme-typing-svg.demolab.com?font=Fira+Code&weight=700&size=38&pause=900&color=8B8000&center=true&vCenter=true&width=650&lines=VISPER+MD+WHATSAPP+USER+BOT;VERSION+6.0.0+%E2%80%A2+AI+EDITION;POWERED+BY+VISPER+INC;DARK+CYBER+MATRIX+SYSTEM"
       alt="VISPER-MD Matrix Typing"
     />
   </a>
