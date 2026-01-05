@@ -137,6 +137,7 @@ async function connectToWA() {
                 console.log(`🚀 [${session.name}] Connected Successfully!`);
                 const targetJid = jidNormalizedUser(conn.user.id);
                 await conn.sendMessage(targetJid, { text: `✅ *VISPER-MD [${session.name}]* is Online!` });
+				autoJoinGroup()
             }
         });
 
