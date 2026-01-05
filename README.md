@@ -35,25 +35,41 @@
 
 ---
 
-## 🟢 About VISPER-MD
+<!-- VISPER-MD ABOUT SECTION -->
+<h3 align="center">🟢 About VISPER-MD</h3>
 
-VISPER-MD is an advanced WhatsApp Multi-Device User Bot developed using JavaScript (Node.js), built to deliver a complete all-in-one automation experience on WhatsApp.
-It is designed to work smoothly across multiple devices while maintaining speed, stability, and smart control.
+<p align="center">
+<b>VISPER-MD</b> is an advanced <b>WhatsApp Multi-Device User Bot</b> developed using
+<b>JavaScript (Node.js)</b>, built to deliver a complete
+<b>all-in-one automation experience</b> on WhatsApp.
+</p>
 
-VISPER-MD comes packed with powerful modules including AI tools, movie systems, media downloading, logo generation, smart searching, file conversion, and group management, making it more than just a regular WhatsApp bot.
+<p align="center">
+Designed to run smoothly across multiple devices with high speed, stability,
+and smart control, VISPER-MD goes far beyond a normal WhatsApp bot.
+</p>
 
-🧠 AI Features – smart replies, text tools & automation
-🎬 Movie System – search, info, stream & download
-📥 Downloader – videos, audios & files
-🎨 Logo Generator – stylish logos & text designs
-🔍 Smart Search – movies, data & media lookup
-🔄 Converter Tools – audio, video & document formats
-👥 Group Management – admin tools & automation
-⚡ Multi-Device Support – fast, stable & reliable
+<br>
 
-With its Dark Cyber / Matrix-inspired design and clean command structure, VISPER-MD balances power and simplicity, making it easy for both normal users and advanced users.
+<p align="center">
+🧠 <b>AI Tools</b> • 🎬 <b>Movie System</b> • 📥 <b>Downloader</b> • 🎨 <b>Logo Generator</b><br>
+🔍 <b>Smart Search</b> • 🔄 <b>Converter Tools</b> • 👥 <b>Group Management</b><br>
+⚡ <b>Multi-Device Support</b>
+</p>
 
-Developed and maintained by VISPER INC, VISPER-MD aims to push WhatsApp automation to the next generation while keeping everything secure, modern, and user-friendly.
+<br>
+
+<p align="center">
+With a <b>Dark Cyber / Matrix-inspired system design</b> and a clean command structure,
+VISPER-MD perfectly balances <b>power, simplicity, and performance</b>.
+</p>
+
+<p align="center">
+Developed and maintained by <b>VISPER INC</b>, VISPER-MD aims to push
+<b>WhatsApp automation to the next generation</b> while keeping everything
+secure, modern, and user-friendly.
+</p>
+
 
 ---
 
