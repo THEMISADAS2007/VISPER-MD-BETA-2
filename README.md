@@ -29,7 +29,7 @@
 <p align="center">
   <a href="https://nadeenmd.vercel.app/" target="_blank">
     <img
-      src="https://img.shields.io/badge/PAIR%20CODE-WEB%20PAGE-006400?style=for-the-badge&logo=whatsapp&logoColor=white"
+      src="https://img.shields.io/badge/PAIR%20CODE-WEB%20PAGE-8B8000?style=for-the-badge&logo=whatsapp&logoColor=white"
       alt="PAIR CODE WEB PAGE"
       height="55"
     />
