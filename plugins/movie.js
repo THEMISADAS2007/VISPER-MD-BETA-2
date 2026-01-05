@@ -14,7 +14,7 @@ const l = console.log
 const https = require("https")
 const { URL } = require('url');
 const { sizeFormatter} = require('human-readable');
-key = `82406ca340409d44`
+const key = `82406ca340409d44`
 
 
 cmd({
