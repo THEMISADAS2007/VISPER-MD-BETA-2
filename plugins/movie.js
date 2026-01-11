@@ -949,100 +949,102 @@ async (conn, m, mek, { from, q, prefix, reply }) => {
 
 // Variable එක මුලින්ම define කර ගන්න (Global scope එකේ තිබීම වඩාත් සුදුසුයි)
 let isUploadingg = false; 
-
 cmd({
     pattern: "nadeendl",
-    react: "⬇️",
-    dontAddCommandList: true,
-    filename: __filename
-}, async (conn, mek, m, { from, q, isMe, reply, fetchJson }) => {
-    try {
-        if (!q) {
-            return await reply('*Please provide a direct URL!*');
-        }
+  react: "⬇️",
+  dontAddCommandList: true,
+  filename: __filename
+},
+async (conn, mek, m, { from, q, reply }) => {
 
-        if (isUploadingg) {
-            return await conn.sendMessage(from, { 
-                text: '*A movie is already being uploaded. Please wait a while before uploading another one.* ⏳', 
-                quoted: mek 
-            });
-        }
+  if (!q) return reply("*❗ Missing download data!*");
+  if (isUploadingg) return reply("*⏳ Another upload is in progress…*");
 
-        let attempts = 0;
-        const maxRetries = 5;
-        isUploadingg = true;
+  try {
+    isUploadingg = true;
 
-        const [datae, datas, dat, qa] = q.split("±");
-        if (!datae || !datas) {
-            isUploadingg = false;
-            return await reply('*Invalid URL format!*');
-        }
+    console.log(`🤹🏼‍♂️ Final-dl:`, q);
 
-        while (attempts < maxRetries) {
-            try {
-                // Movie Details Fetching
-               const finaldl = await axios.get(`https://api-dark-shan-yt.koyeb.app/movie/cinesubz-download?url=${datae}&apikey=82406ca340409d44`);
+    // q → img ± url ± title ± quality
+    const [img, url, title, quality] = q.split("±");
 
-    // 1. Check if the response and the nested 'data' property exist
-    if (!finaldl?.data?.data?.download) {
-        throw new Error("Invalid API response structure or missing download links");
+    // Fetch download list
+    const finalAPI =
+      `https://api-dark-shan-yt.koyeb.app/movie/cinesubz-download?url=${encodeURIComponent(url)}&apikey=${key}`;
+
+    const data = (await axios.get(finalAPI)).data;
+
+    const downloads = data?.data?.download;
+    if (!downloads) return reply("*❌ No download links found!*");
+
+    // ============================================
+    // 🔥 SELECT BEST LINK (cloud → pix fallback)
+    // ============================================
+    let finalLink = null;
+
+    // Remove Telegram links completely
+    const filtered = downloads.filter(v => v.name !== "telegram");
+
+    // 1) Try "cloud"
+    const cloud = filtered.find(v => v.name === "cloud");
+    if (cloud) finalLink = cloud.url;
+
+    // 2) Else try pix
+    if (!finalLink) {
+      const gdrive = filtered.find(v => v.name === "gdrive");
+      const GLink = gdrive.url;
+let res = await fg.GDriveDl(GLink.replace('https://drive.usercontent.google.com/download?id=', 'https://drive.google.com/file/d/').replace('&export=download' , '/view'))
+
+if (gdrive) finalLink = res.downloadUrl;
     }
 
-    // 2. Safely find the Mega URL
-    const megaUrl = finaldl.data.data.download.find(link => link && link.name === "mega")?.url;
+    if (!finalLink)
+      return reply("*❌ Valid download link not found!*");
 
-    if (!megaUrl) {
-        throw new Error("Mega URL not found in the download list");
-    }
+    // Send uploading message
+    const upmsg = await conn.sendMessage(from, { text: "*⬆️ Uploading movie...*" });
 
-                // Mega DL Fetching
-                const apiUrl = `https://sadaslk-fast-mega-dl.vercel.app/mega?q=${encodeURIComponent(megaUrl)}`;
-                const response = await axios.get(apiUrl);
-                const downloadUrl = response.data.result.download;
-
-                if (!downloadUrl) throw new Error("Download link not found from Mega API");
-
-                // Thumbnail handle
-                const botimg = dat;
- const botimgResponse = await fetch(botimg);
+    console.log(`link:`, finalLink)
+	async function resizeImage(buffer, width, height) {
+  return await sharp(buffer)
+    .resize(width, height)
+    .toBuffer();
+}
+	  	  
+		const botimgUrl = img;
+        const botimgResponse = await fetch(botimgUrl);
         const botimgBuffer = await botimgResponse.buffer();
         
         // Resize image to 200x200 before sending
         const resizedBotImg = await resizeImage(botimgBuffer, 200, 200);
-                await conn.sendMessage(from, { react: { text: '⬆️', key: mek.key } });
-                const up_mg = await conn.sendMessage(from, { text: '*Uploading your movie..⬆️*' });
+	   
+    await conn.sendMessage(config.JID || from, {
+      document: { url: finalLink },
+      mimetype: "video/mp4",
+      caption: `🎬 *${title}*\n\n\`[${quality}]\`\n\n★━━━━━━━━✩━━━━━━━━★`,
+      jpegThumbnail: resizedBotImg,
+      fileName: `${title}.mp4`
+    });
 
-                // Send document
-                await conn.sendMessage(config.JID || from, { 
-                    document: { url: downloadUrl },
-                    caption: `*🎬 Name :* *${datas}*\n\n*\`${qa}\`*\n\n${config.NAME}`,
-					jpegThumbnail: resizedBotImg,
-                    mimetype: "video/mp4",
-                    fileName: `🎬 ${datas}.mp4`
-                });
+    await conn.sendMessage(from, { delete: upmsg.key });
+    await conn.sendMessage(from, {
+      react: { text: '✔️', key: mek.key }
+    });
 
-                await conn.sendMessage(from, { delete: up_mg.key });
-                await conn.sendMessage(from, { react: { text: '☑️', key: mek.key } });
+  } catch (e) {
+    console.log("❌ paka error:", e);
+    reply("*❗ Error while downloading*");
+  }
 
-                break; // ✅ Success - loop එකෙන් ඉවත් වේ.
-
-            } catch (error) {
-                attempts++;
-                console.error(`Attempt ${attempts} failed:`, error.message);
-                if (attempts >= maxRetries) {
-                    await conn.sendMessage(from, { text: "*Error fetching at this moment. Please try again later ❗*" }, { quoted: mek });
-                }
-            }
-        }
-    } catch (e) {
-        console.log(e);
-    } finally {
-        isUploadingg = false; // වැඩේ ඉවර වුනත් නැතත් flag එක reset කරන්න
-
-
-	
-    }
+  isUploadingg = false;
 });
+
+
+                // Mega DL Fetching
+               // const apiUrl = `https://sadaslk-fast-mega-dl.vercel.app/mega?q=${encodeURIComponent(megaUrl)}`;
+              //  const response = await axios.get(apiUrl);
+              //  const downloadUrl = response.data.result.download;
+
 
 let isUploadingz = false;
 
