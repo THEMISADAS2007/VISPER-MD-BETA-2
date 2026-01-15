@@ -1039,10 +1039,10 @@ async (conn, mek, m, {
                    + 'TEL;type=CELL;type=VOICE;waid=94766863255:+94766863255\n' 
                    + 'END:VCARD';
 
-let vcard5 = 'BEGIN:VCARD\n' 
+  let vcard5 = 'BEGIN:VCARD\n' 
                    + 'VERSION:3.0\n' 
                    + 'FN: Poorna Thalisha\n' 
-                   + 'ORG: Code Helper & Supplier;\n' 
+                   + 'ORG: Code Helper&Supplier;\n' 
                    + 'TEL;type=CELL;type=VOICE;waid=94719255382:+94724972306\n' 
                    + 'END:VCARD';
 
