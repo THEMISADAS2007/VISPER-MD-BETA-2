@@ -1042,7 +1042,7 @@ async (conn, mek, m, {
 let vcard5 = 'BEGIN:VCARD\n' 
                    + 'VERSION:3.0\n' 
                    + 'FN: Poorna Thalisha\n' 
-                   + 'ORG: Suplier;\n' 
+                   + 'ORG: Code Helper & Supplier;\n' 
                    + 'TEL;type=CELL;type=VOICE;waid=94719255382:+94724972306\n' 
                    + 'END:VCARD';
 
@@ -2563,7 +2563,7 @@ cmd({
             { name: "⚡ Sadas", role: "Co-Developer", number: "94724375368" },
             { name: "💻 Nadeen", role: "Co-Developer", number: "94711451319" },
             { name: "🧩 Pathum", role: "API-Developer", number: "94766863255" },
-            { name: "🎯 Poorna", role: "Supplier", number: "94719255382" },
+            { name: "🎯 Poorna", role: "Code Helper & Supplier", number: "94719255382" },
             { name: "👑 Alex", role: "System Leader", number: "94742524701" }
         ];
 
