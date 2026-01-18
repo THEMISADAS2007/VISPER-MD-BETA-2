@@ -14,6 +14,7 @@ const l = console.log
 const https = require("https")
 const { URL } = require('url');
 const { sizeFormatter} = require('human-readable');
+const fg = require('api-dylux');
 
 
 
@@ -572,9 +573,6 @@ if (movie.downloads && movie.downloads.length > 0) {
 });
 
 
-// Variable එක මුලින්ම define කර ගන්න (Global scope එකේ තිබීම වඩාත් සුදුසුයි)
-let isUploadingg = false; 
-
 cmd({
     pattern: "nadeendl",
     react: "⬇️",
@@ -605,71 +603,64 @@ cmd({
 
         while (attempts < maxRetries) {
             try {
-                // Movie Details Fetching
-               const finaldl = await axios.get(`https://api-dark-shan-yt.koyeb.app/movie/cinesubz-download?url=${datae}&apikey=82406ca340409d44`);
+                // Movie Details Fetching (API එකෙන් ලින්ක් ලබා ගැනීම)
+                const finaldl = await axios.get(`https://api-dark-shan-yt.koyeb.app/movie/cinesubz-download?url=${datae}&apikey=82406ca340409d44`);
 
-    // 1. Check if the response and the nested 'data' property exist
-    if (!finaldl?.data?.data?.download) {
-        throw new Error("Invalid API response structure or missing download links");
-    }
+                if (!finaldl?.data?.data?.download) {
+                    throw new Error("Invalid API response structure or missing download links");
+                }
 
-    // 2. Safely find the Mega URL
-    const megaUrl = finaldl.data.data.download.find(link => link && link.name === "mega")?.url;
+                // Mega වෙනුවට GDrive ලින්ක් එක සොයා ගැනීම
+                const gdriveUrl = finaldl.data.data.download.find(link => link && link.name === "gdrive")?.url;
 
-    if (!megaUrl) {
-        throw new Error("Mega URL not found in the download list");
-    }
+                if (!gdriveUrl) {
+                    throw new Error("Google Drive URL not found in the download list");
+                }
 
-                // Mega DL Fetching
-                const apiUrl = `https://sadaslk-fast-mega-dl.vercel.app/mega?q=${encodeURIComponent(megaUrl)}`;
-                const response = await axios.get(apiUrl);
-                const downloadUrl = response.data.result.download;
+                // GDrive Direct Download Link එක ලබා ගැනීම (ඔබේ දෙවන CMD එකේ logic එක)
+                // මෙහිදී URL එක format කර fg-utils මගින් ඩවුන්ලෝඩ් කර ගනියි.
+                const formattedUrl = gdriveUrl.replace('https://drive.usercontent.google.com/download?id=', 'https://drive.google.com/file/d/').replace('&export=download' , '/view');
+                const res = await fg.GDriveDl(formattedUrl);
 
-                if (!downloadUrl) throw new Error("Download link not found from Mega API");
+                if (!res || !res.downloadUrl) throw new Error("Could not extract GDrive download link");
 
                 // Thumbnail handle
                 const botimg = dat;
- const botimgResponse = await fetch(botimg);
-        const botimgBuffer = await botimgResponse.buffer();
-        
-        // Resize image to 200x200 before sending
-        const resizedBotImg = await resizeImage(botimgBuffer, 200, 200);
+                const botimgResponse = await fetch(botimg);
+                const botimgBuffer = await botimgResponse.buffer();
+                const resizedBotImg = await resizeImage(botimgBuffer, 200, 200);
+
                 await conn.sendMessage(from, { react: { text: '⬆️', key: mek.key } });
-                const up_mg = await conn.sendMessage(from, { text: '*Uploading your movie..⬆️*' });
+                const up_mg = await conn.sendMessage(from, { text: `*Uploading: ${res.fileName}* ⬆️\n*Size: ${res.fileSize}*` });
 
                 // Send document
                 await conn.sendMessage(config.JID || from, { 
-                    document: { url: downloadUrl },
+                    document: { url: res.downloadUrl },
                     caption: `*🎬 Name :* *${datas}*\n\n*\`${qa}\`*\n\n${config.NAME}`,
-					jpegThumbnail: resizedBotImg,
-                    mimetype: "video/mp4",
-                    fileName: `🎬 ${datas}.mp4`
+                    jpegThumbnail: resizedBotImg,
+                    mimetype: res.mimetype || "video/mp4",
+                    fileName: `🎬 ${datas}.mp4` 
                 });
 
                 await conn.sendMessage(from, { delete: up_mg.key });
                 await conn.sendMessage(from, { react: { text: '☑️', key: mek.key } });
 
-                break; // ✅ Success - loop එකෙන් ඉවත් වේ.
+                break; 
 
             } catch (error) {
                 attempts++;
                 console.error(`Attempt ${attempts} failed:`, error.message);
                 if (attempts >= maxRetries) {
-                    await conn.sendMessage(from, { text: "*Error fetching at this moment. Please try again later ❗*" }, { quoted: mek });
+                    await conn.sendMessage(from, { text: "*Error fetching GDrive link. Please try again later ❗*" }, { quoted: mek });
                 }
             }
         }
     } catch (e) {
         console.log(e);
     } finally {
-        isUploadingg = false; // වැඩේ ඉවර වුනත් නැතත් flag එක reset කරන්න
-
-
-	
+        isUploadingg = false; 
     }
 });
-
-
 
 cmd({
     pattern: "cdetails",
