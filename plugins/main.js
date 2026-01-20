@@ -1253,7 +1253,7 @@ async (conn, mek, m, { reply, from }) => {
 });
 
 
-{
+cmd({
     pattern: "forward",
     react: "⏩",
     alias: ["f"],
@@ -1262,23 +1262,25 @@ async (conn, mek, m, { reply, from }) => {
     category: "owner",
     filename: __filename
 },
-async(conn, mek, m, {from, l, prefix, quoted, body, isCmd, isSudo, isOwner, isMe, command, args, q, isGroup, sender, senderNumber, botNumber2, botNumber, pushname, isIsuru, isTharu, isSupporters, groupMetadata, groupName, participants, groupAdmins, isBotAdmins, isAdmins, reply}) => {
+async (conn, mek, m, { from, l, prefix, quoted, body, isCmd, isSudo, isOwner, isMe, command, args, q, isGroup, sender, senderNumber, botNumber2, botNumber, pushname, isIsuru, isTharu, isSupporters, groupMetadata, groupName, participants, groupAdmins, isBotAdmins, isAdmins, reply }) => {
 
-    if (!isMe && !isOwner && !isSudo) return await reply('*📛OWNER COMMAND*')
-    
+    // Check permissions
+    if (!isMe && !isOwner && !isSudo) return await reply('*📛 OWNER COMMAND*');
+
+    // Check if input or quoted message exists
     if (!q || !m.quoted) {
-        return reply("*Please give me a Jid and Quote a Message to continue.*");
+        return reply("*Please give me a JID and Quote a Message to continue.*");
     }
 
     // Split and trim JIDs
     let jidList = q.split(',').map(jid => jid.trim());
 
-    // Forwarding Options (Tag eka remove karana settings)
+    // Forwarding Options to remove "Forwarded" tag
     let forwardOpts = {
         contextInfo: {
             isForwarded: false,      // Tag eka ain karanna
-            forwardingScore: 0,      // Score eka 0 karanna
-            externalAdReply: {       // Optional: Meka dunnama look eka thawa lassanayi
+            forwardingScore: 0,      // Score eka reset karanna
+            externalAdReply: {      
                 showAdAttribution: false 
             }
         }
@@ -1286,22 +1288,22 @@ async(conn, mek, m, {from, l, prefix, quoted, body, isCmd, isSudo, isOwner, isMe
 
     let successfulJIDs = [];
 
-    // Message eka forward kirima
+    // Forward the message to each JID
     for (let i of jidList) {
         try {
-            // "true" kiana eka forceForwarding walata pawichchi wenne
+            // "false" as 3rd param stops automatic forwarding tag logic
             await conn.forwardMessage(i, m.quoted, false, forwardOpts);
             successfulJIDs.push(i);
         } catch (error) {
-            console.log(error);
+            console.error(`Error forwarding to ${i}:`, error);
         }
     }
 
-    // Result eka reply kirima
+    // Response based on success
     if (successfulJIDs.length > 0) {
-        return reply(`*✅ Message Forwarded without tag to:*\n\n` + successfulJIDs.join("\n"))
+        return reply(`*✅ Message Forwarded without tag to:*\n\n${successfulJIDs.join("\n")}`);
     } else {
-        return reply("*❌ Forwarding failed. Check the JID.*")
+        return reply("*❌ Forwarding failed. Check the JID or the Logs.*");
     }
 });
 
