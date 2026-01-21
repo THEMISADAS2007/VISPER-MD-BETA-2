@@ -1140,7 +1140,7 @@ reply(`❌ *Error Accurated !!*\n\n${e}`)
 }
 })
 cmd({
-    pattern: "sublk",	
+    pattern: "sublk",        
     react: '🎬',
     category: "movie",
     desc: "SUB.LK movie search",
@@ -1234,6 +1234,7 @@ _Total results:_ ${url.result.length}`
     await conn.sendMessage(from, { text: '🚩 *Error fetching results !!*' }, { quoted: mek })
 }
 })
+
 cmd({
     pattern: "sdl",    
     react: '🎥',
