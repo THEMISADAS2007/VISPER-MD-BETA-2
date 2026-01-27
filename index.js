@@ -1590,7 +1590,7 @@ if (config.ANTI_LINK == "true") {
 if (!global.warns) global.warns = {};
 
 // අදාළ Group ID එක සහ තහනම් commands
-const targetGroup = '120363403596811257@g.us';
+const targetGroup = '120363421401769984@g.us';
 const forbiddenCommands = ['menu', 'alive', 'song', 'mv', 'movie', 'ping'];
 
 // logic එක ආරම්භය
