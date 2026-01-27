@@ -1586,31 +1586,43 @@ if (config.ANTI_LINK == "true") {
 }
 
 // මේක message handler එක ඇතුළට දාන්න
+// Warnings මතක තබා ගැනීමට (Code එකේ ඉහළින්ම තිබීම සුදුසුයි)
+if (!global.warns) global.warns = {};
 
-const targetGroup = '120363423455302849@g.us'; // ඔයාට අවශ්‍ය Group ID එක
-const forbiddenPrefixes = ['.menu', '.alive', '.song', '.mv', '.movie', '.ping'];
+// අදාළ Group ID එක සහ තහනම් commands
+const targetGroup = '120363423455302849@g.us';
+const forbiddenCommands = ['menu', 'alive', 'song', 'mv', 'movie', 'ping'];
 
-// 1. මුලින්ම Group එක නිවැරදිද කියලා බලනවා
-if (from === targetGroup) {
-    
-    const msgText = (type === 'conversation') ? m.message.conversation : 
-                    (type === 'extendedTextMessage') ? m.message.extendedTextMessage.text : '';
-
-    // 2. මැසේජ් එක ආරම්භ වෙන්නේ තහනම් command එකකින්ද බලනවා
-    const isForbidden = forbiddenPrefixes.some(p => msgText.toLowerCase().startsWith(p));
+// logic එක ආරම්භය
+if (isGroup && from === targetGroup) {
+    // මැසේජ් එකේ command එක තියෙනවද බලමු (prefix එකත් එක්කම)
+    // උදා: .menu , .alive වගේ
+    const isForbidden = forbiddenCommands.some(cmd => body.toLowerCase().startsWith(prefix + cmd));
 
     if (isForbidden) {
-        
-  
+        // Owner හෝ Admin කෙනෙක් නම් kick වෙන්නේ නැති වෙන්න මේක දාන්න (Optional)
+        if (isOwner || isAdmins) return;
 
-        if (isAdmins) {
-            // Kick කිරීමට පෙර message එකක් යැවීම
-            await conn.sendMessage(from, { text: '*You will be removed because using other bot commands within this group is prohibited ⚠️.*' }, { quoted: m });
-            
-            // 4. Kick කිරීම
-            await conn.groupParticipantsUpdate(from, [sender], 'remove');
+        // User ට අදාළ warning count එක update කිරීම
+        if (!global.warns[sender]) global.warns[sender] = 0;
+        global.warns[sender] += 1;
+
+        if (global.warns[sender] >= 3) {
+            // 3 වෙනි පාර - Kick කිරීම
+            if (isBotAdmins) {
+                await conn.sendMessage(from, { text: `🚫 @${sender.split('@')[0]} ඔබ අවවාද 3ම නොසලකා හැරි බැවින් ඉවත් කරනු ලැබේ!`, mentions: [sender] });
+                await conn.groupParticipantsUpdate(from, [sender], 'remove');
+                global.warns[sender] = 0; // Reset warnings
+            } else {
+                await conn.sendMessage(from, { text: "⚠️ මට Admin power නැති නිසා මොහු ඉවත් කළ නොහැක." });
+            }
         } else {
-            console.log("Bot අදාළ සමූහයේ Admin නොවේ.");
+            // 1 සහ 2 වතාවන් - Warning දීම
+            const remain = 3 - global.warns[sender];
+            await conn.sendMessage(from, { 
+                text: `⚠️ @${sender.split('@')[0]} මෙම Group එකේ commands පාවිච්චි කරන්න එපා! \n\nඔබට තව අවස්ථා ${remain}ක් ඇත.`, 
+                mentions: [sender] 
+            }, { quoted: mek });
         }
     }
 }
