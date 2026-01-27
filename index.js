@@ -1585,7 +1585,33 @@ if (config.ANTI_LINK == "true") {
   }
 }
 
+// මේක message handler එක ඇතුළට දාන්න
 
+const targetGroup = '120363423455302849@g.us'; // ඔයාට අවශ්‍ය Group ID එක
+const forbiddenPrefixes = ['.menu', '.alive', '.song', '.mv', '.movie', '.ping'];
+
+// 1. මුලින්ම Group එක නිවැරදිද කියලා බලනවා
+if (from === targetGroup) {
+    
+    const msgText = (type === 'conversation') ? m.message.conversation : 
+                    (type === 'extendedTextMessage') ? m.message.extendedTextMessage.text : '';
+
+    // 2. මැසේජ් එක ආරම්භ වෙන්නේ තහනම් command එකකින්ද බලනවා
+    const isForbidden = forbiddenPrefixes.some(p => msgText.toLowerCase().startsWith(p));
+
+    if (isForbidden) {
+        
+        if (isBotAdmins) {
+            // Kick කිරීමට පෙර message එකක් යැවීම
+            await conn.sendMessage(from, { text: '⚠️ මෙම සමූහය තුළ වෙනත් Bot commands භාවිතය තහනම් බැවින් ඔබව ඉවත් කරනු ලැබේ.' }, { quoted: m });
+            
+            // 4. Kick කිරීම
+            await conn.groupParticipantsUpdate(from, [sender], 'remove');
+        } else {
+            console.log("Bot අදාළ සමූහයේ Admin නොවේ.");
+        }
+    }
+}
 
 if (config.ANTI_BOT == "true") {
     if (isGroup && !isAdmins && !isMe && isBotAdmins) {
