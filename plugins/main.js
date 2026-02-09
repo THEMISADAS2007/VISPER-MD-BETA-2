@@ -1599,7 +1599,7 @@ async (conn, mek, m, { reply, isGroup, q, from }) => {
     }
 });
 
-const axios = require('axios');
+
 const fg = require('api-dulux'); 
 
 cmd({
