@@ -642,7 +642,7 @@ cmd({
             return await conn.sendMessage(from, { 
                 document: { url: directPdLink }, 
                 mimetype: 'video/mp4',
-                caption: `*🎬 Name :* ${movieName}\n\n*\`${quality}\`*\n\n${config.NAME}`,
+                caption: `*🎬 Name :* *${movieName}*\n\n*\`${quality}\`*\n\n${config.NAME}`,
 				 jpegThumbnail: resizedBotImg,
                 fileName: `🎬 ${movieName}.mp4`
             });
@@ -711,7 +711,7 @@ cmd({
                     await conn.sendMessage(from, { 
                         document: { url: directPdLink }, 
                         mimetype: 'video/mp4',
-                        caption: `🎬 Name:* ${movieName}\n\n*\`${quality}\`*\n\n${config.NAME}`,
+                        caption: `*🎬 Name:* *${movieName}*\n\n*\`${quality}\`*\n\n${config.NAME}`,
 						 jpegThumbnail: resizedBotImg,
                         fileName: `🎬 ${movieName}.mp4`
                     });
