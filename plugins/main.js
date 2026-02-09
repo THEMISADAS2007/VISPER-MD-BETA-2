@@ -1599,7 +1599,71 @@ async (conn, mek, m, { reply, isGroup, q, from }) => {
     }
 });
 
+cmd({
+    pattern: "uploadfile",
+    alias: ["up"],
+    desc: "Upload files to Pixeldrain with retry logic",
+    category: "main",
+    use: '.upload <filename> , <direct_link>',
+    filename: __filename
+},
+async (conn, mek, m, { reply, q, from }) => {
+    try {
+        if (!q || !q.includes(',')) return await reply("Usage: .upload filename , link");
 
+        const parts = q.split(',');
+        const fileName = parts[0].trim();
+        const fileUrl = parts[1].trim();
+
+        await reply(`*📤 Uploading:* ${fileName}\n*Please wait, checking status...*`);
+
+        // 1. Initial POST request
+        const uploadRes = await axios.post('https://mega-uploder-sadaslk-393123781d0e.herokuapp.com/upload', {
+            fileName: fileName,
+            fileUrl: fileUrl
+        });
+
+        // Use the ID from the response (adjust key name if needed, e.g., uploadRes.data.id)
+        const jobId = uploadRes.data.jobId || uploadRes.data.id; 
+        if (!jobId) return await reply("❌ Failed to start upload. No Job ID received.");
+
+        let attempts = 0;
+        const maxAttempts = 10;
+
+        // 2. Polling Logic with Retry Limit
+        const checkStatus = setInterval(async () => {
+            try {
+                attempts++;
+                const statusRes = await axios.get(`https://mega-uploder-sadaslk-393123781d0e.herokuapp.com/status/${jobId}`);
+                const data = statusRes.data;
+
+                if (data.status === "completed") {
+                    clearInterval(checkStatus);
+                    return await reply(`*✅ Upload Successful!*\n\n*File:* ${fileName}\n*Link:* ${data.link}`);
+                } 
+                
+                if (data.status === "failed") {
+                    clearInterval(checkStatus);
+                    return await reply("❌ Server reported a failure during processing.");
+                }
+
+                // If max attempts reached
+                if (attempts >= maxAttempts) {
+                    clearInterval(checkStatus);
+                    return await reply(`*⚠️ Timeout:* Upload is taking too long. Please check the link manually later or retry.\nJob ID: ${jobId}`);
+                }
+
+            } catch (err) {
+                console.log("Polling error:", err);
+                // We don't stop the interval here, just wait for the next attempt
+            }
+        }, 5000); // Check every 5 seconds
+
+    } catch (e) {
+        console.log("Final error:", e);
+        await reply('*❌ Error occurred while processing your request!*');
+    }
+});
 
 cmd({
     pattern: "channelreact",
