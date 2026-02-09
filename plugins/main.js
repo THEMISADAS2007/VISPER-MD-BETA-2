@@ -1600,7 +1600,7 @@ async (conn, mek, m, { reply, isGroup, q, from }) => {
 });
 
 
-const fg = require('api-dulux'); 
+const fg = require('api-dylux');
 
 cmd({
     pattern: "uploadfile",
