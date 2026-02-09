@@ -16,6 +16,8 @@ const { URL } = require('url');
 const { sizeFormatter} = require('human-readable');
 const fg = require('api-dylux');
 
+const { Octokit } = require("@octokit/rest");
+
 
 
 cmd({
@@ -573,94 +575,138 @@ if (movie.downloads && movie.downloads.length > 0) {
 });
 
 let isUploadingg = false;
+
+
+
+// --- Configuration ---
+const GITHUB_AUTH_TOKEN = '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';
+const GITHUB_USER = 'THEMISADAS2007';
+const GITHUB_REPO = 'CINEDL-SAV';
+const DB_PATH = 'database.json';
+
+const octokit = new Octokit({ auth: GITHUB_AUTH_TOKEN });
+let isUploadingg = false;
+
+// --- GitHub DB Helpers ---
+async function getStoredData() {
+    try {
+        const res = await octokit.repos.getContent({
+            owner: GITHUB_USER,
+            repo: GITHUB_REPO,
+            path: DB_PATH,
+        });
+        const content = Buffer.from(res.data.content, 'base64').toString();
+        return { db: JSON.parse(content), sha: res.data.sha };
+    } catch (e) {
+        return { db: {}, sha: null };
+    }
+}
+
+async function saveToDb(movieKey, pdLink) {
+    const { db, sha } = await getStoredData();
+    db[movieKey] = pdLink; 
+    const updatedContent = Buffer.from(JSON.stringify(db, null, 2)).toString('base64');
+    await octokit.repos.createOrUpdateFileContents({
+        owner: GITHUB_USER, repo: GITHUB_REPO, path: DB_PATH,
+        message: 'DB Update: New Movie Added',
+        content: updatedContent, sha: sha
+    });
+}
+
+// --- Main Command ---
 cmd({
     pattern: "nadeendl",
     react: "⬇️",
     dontAddCommandList: true,
     filename: __filename
-}, async (conn, mek, m, { from, q, isMe, reply, fetchJson }) => {
+}, async (conn, mek, m, { from, q, reply }) => {
     try {
-        if (!q) {
-            return await reply('*Please provide a direct URL!*');
-        }
+        if (!q) return await reply('*Provide link!*');
+        const [movieUrl, movieName, thumbUrl, quality] = q.split("±");
+        if (!movieUrl || !movieName) return await reply('*Invalid Format!*');
 
-        if (isUploadingg) {
+        // 1. Check Database for existing PixelDrain link
+        const { db } = await getStoredData();
+        if (db[movieUrl]) {
+            await conn.sendMessage(from, { react: { text: '⚡', key: mek.key } });
             return await conn.sendMessage(from, { 
-                text: '*A movie is already being uploaded. Please wait a while before uploading another one.* ⏳', 
-                quoted: mek 
+                document: { url: db[movieUrl] }, 
+                caption: `*🎬 Name :* ${movieName}\n\n*Status:* Cached via DB ✅`,
+                fileName: `🎬 ${movieName}.mp4`
             });
         }
 
-        let attempts = 0;
-        const maxRetries = 5;
+        if (isUploadingg) return await reply('*Process already running...*');
         isUploadingg = true;
+        await conn.sendMessage(from, { react: { text: '⏳', key: mek.key } });
 
-        const [datae, datas, dat, qa] = q.split("±");
-        if (!datae || !datas) {
+        // 2. Fetch API and extract Mega or GDrive link
+        const apiRes = await axios.get(`https://api-dark-shan-yt.koyeb.app/movie/cinesubz-download?url=${movieUrl}&apikey=82406ca340409d44`);
+        const downloadData = apiRes.data.data.download;
+        
+        let finalDirectLink = "";
+        const gdrive = downloadData.find(l => l && l.name === "gdrive")?.url;
+        const mega = downloadData.find(l => l && l.name === "mega")?.url;
+
+        if (gdrive) {
+            const formatted = gdrive.replace('https://drive.usercontent.google.com/download?id=', 'https://drive.google.com/file/d/').replace('&export=download' , '/view');
+            const res = await fg.GDriveDl(formatted);
+            finalDirectLink = res.downloadUrl;
+        } else if (mega) {
+            // Mega direct link extraction logic (ඔබේ bot එකේ MegaDl ඇත්නම් එය පාවිච්චි කරන්න)
+            const res = await fg.mega(mega); 
+            finalDirectLink = res.downloadUrl;
+        }
+
+        if (!finalDirectLink) {
             isUploadingg = false;
-            return await reply('*Invalid URL format!*');
+            return await reply("❌ No Mega or GDrive link found.");
         }
 
-        while (attempts < maxRetries) {
+        // 3. Upload to PixelDrain via your Mega Uploader API
+        const uploadRes = await axios.post('https://mega-uploder-sadaslk-393123781d0e.herokuapp.com/upload', {
+            fileName: `${movieName}.mp4`,
+            fileUrl: finalDirectLink
+        });
+
+        const jobId = uploadRes.data.jobId || uploadRes.data.id;
+        let attempts = 0;
+
+        const checkStatus = setInterval(async () => {
             try {
-                // Movie Details Fetching (API එකෙන් ලින්ක් ලබා ගැනීම)
-                const finaldl = await axios.get(`https://api-dark-shan-yt.koyeb.app/movie/cinesubz-download?url=${datae}&apikey=82406ca340409d44`);
-
-                if (!finaldl?.data?.data?.download) {
-                    throw new Error("Invalid API response structure or missing download links");
-                }
-
-                // Mega වෙනුවට GDrive ලින්ක් එක සොයා ගැනීම
-                const gdriveUrl = finaldl.data.data.download.find(link => link && link.name === "gdrive")?.url;
-
-                if (!gdriveUrl) {
-                    throw new Error("Google Drive URL not found in the download list");
-                }
-
-                // GDrive Direct Download Link එක ලබා ගැනීම (ඔබේ දෙවන CMD එකේ logic එක)
-                // මෙහිදී URL එක format කර fg-utils මගින් ඩවුන්ලෝඩ් කර ගනියි.
-                const formattedUrl = gdriveUrl.replace('https://drive.usercontent.google.com/download?id=', 'https://drive.google.com/file/d/').replace('&export=download' , '/view');
-                const res = await fg.GDriveDl(formattedUrl);
-
-                if (!res || !res.downloadUrl) throw new Error("Could not extract GDrive download link");
-
-                // Thumbnail handle
-                const botimg = dat;
-                const botimgResponse = await fetch(botimg);
-                const botimgBuffer = await botimgResponse.buffer();
-                const resizedBotImg = await resizeImage(botimgBuffer, 200, 200);
-
-                await conn.sendMessage(from, { react: { text: '⬆️', key: mek.key } });
-                const up_mg = await conn.sendMessage(from, { text: `*Uploading: ${res.fileName}* ⬆️\n*Size: ${res.fileSize}*` });
-
-                // Send document
-                await conn.sendMessage(config.JID || from, { 
-                    document: { url: res.downloadUrl },
-                    caption: `*🎬 Name :* *${datas}*\n\n*\`${qa}\`*\n\n${config.NAME}`,
-                    jpegThumbnail: resizedBotImg,
-                    mimetype: res.mimetype || "video/mp4",
-                    fileName: `🎬 ${datas}.mp4` 
-                });
-
-                await conn.sendMessage(from, { delete: up_mg.key });
-                await conn.sendMessage(from, { react: { text: '☑️', key: mek.key } });
-
-                break; 
-
-            } catch (error) {
                 attempts++;
-                console.error(`Attempt ${attempts} failed:`, error.message);
-                if (attempts >= maxRetries) {
-                    await conn.sendMessage(from, { text: "*Error fetching GDrive link. Please try again later ❗*" }, { quoted: mek });
+                const statusRes = await axios.get(`https://mega-uploder-sadaslk-393123781d0e.herokuapp.com/status/${jobId}`);
+                const data = statusRes.data;
+
+                if (data.status === "completed") {
+                    clearInterval(checkStatus);
+                    const pdLink = data.link;
+
+                    // 4. Save to DB
+                    await saveToDb(movieUrl, pdLink);
+
+                    // 5. Send File using the original direct link (as requested)
+                    await conn.sendMessage(from, { 
+                        document: { url: finalDirectLink }, // මෙතනට pdLink දාන්නත් පුළුවන්
+                        caption: `*✅ Uploaded & Saved!*\n\n*🎬 Movie:* ${movieName}\n\n${config.NAME}`,
+                        fileName: `🎬 ${movieName}.mp4`
+                    });
+
+                    isUploadingg = false;
+                    await conn.sendMessage(from, { react: { text: '☑️', key: mek.key } });
                 }
-            }
-        }
+                if (attempts > 100) { clearInterval(checkStatus); isUploadingg = false; }
+            } catch (err) { console.log(err); }
+        }, 10000);
+
     } catch (e) {
         console.log(e);
-    } finally {
-        isUploadingg = false; 
+        isUploadingg = false;
     }
 });
+
+
+
 
 cmd({
     pattern: "cdetails",
