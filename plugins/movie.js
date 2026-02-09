@@ -625,12 +625,17 @@ cmd({
         const [movieUrl, movieName, thumbUrl, quality] = q.split("±");
         if (!movieUrl || !movieName) return await reply('*Invalid Format!*');
 
-        // 1. Check Database for existing PixelDrain link
+        // 1. Check Database
         const { db } = await getStoredData();
         if (db[movieUrl]) {
             await conn.sendMessage(from, { react: { text: '⚡', key: mek.key } });
+            
+            // Pixeldrain URL එක API link එකකට convert කිරීම
+            let rawPdLink = db[movieUrl];
+            let directPdLink = rawPdLink.replace('/u/', '/api/file/') + "?download";
+
             return await conn.sendMessage(from, { 
-                document: { url: db[movieUrl] }, 
+                document: { url: directPdLink }, 
                 caption: `*🎬 Name :* ${movieName}\n\n*Status:* Cached via DB ✅`,
                 fileName: `🎬 ${movieName}.mp4`
             });
@@ -640,7 +645,7 @@ cmd({
         isUploadingg = true;
         await conn.sendMessage(from, { react: { text: '⏳', key: mek.key } });
 
-        // 2. Fetch API and extract Mega or GDrive link
+        // 2. Fetch API for GDrive/Mega links
         const apiRes = await axios.get(`https://api-dark-shan-yt.koyeb.app/movie/cinesubz-download?url=${movieUrl}&apikey=82406ca340409d44`);
         const downloadData = apiRes.data.data.download;
         
@@ -653,7 +658,6 @@ cmd({
             const res = await fg.GDriveDl(formatted);
             finalDirectLink = res.downloadUrl;
         } else if (mega) {
-            // Mega direct link extraction logic (ඔබේ bot එකේ MegaDl ඇත්නම් එය පාවිච්චි කරන්න)
             const res = await fg.mega(mega); 
             finalDirectLink = res.downloadUrl;
         }
@@ -663,7 +667,7 @@ cmd({
             return await reply("❌ No Mega or GDrive link found.");
         }
 
-        // 3. Upload to PixelDrain via your Mega Uploader API
+        // 3. Upload to PixelDrain
         const uploadRes = await axios.post('https://mega-uploder-sadaslk-393123781d0e.herokuapp.com/upload', {
             fileName: `${movieName}.mp4`,
             fileUrl: finalDirectLink
@@ -680,14 +684,17 @@ cmd({
 
                 if (data.status === "completed") {
                     clearInterval(checkStatus);
-                    const pdLink = data.link;
+                    
+                    // ලැබෙන Link එක Pixeldrain API link එකකට convert කිරීම
+                    let pdLink = data.link; // මෙය බොහෝ විට https://pixeldrain.com/u/xxxx ලෙස ලැබේ
+                    let directPdLink = pdLink.replace('/u/', '/api/file/') + "?download";
 
                     // 4. Save to DB
-                    await saveToDb(movieUrl, pdLink);
+                    await saveToDb(movieUrl, directPdLink);
 
-                    // 5. Send File using the original direct link (as requested)
+                    // 5. Send File
                     await conn.sendMessage(from, { 
-                        document: { url: finalDirectLink }, // මෙතනට pdLink දාන්නත් පුළුවන්
+                        document: { url: directPdLink }, 
                         caption: `*✅ Uploaded & Saved!*\n\n*🎬 Movie:* ${movieName}\n\n${config.NAME}`,
                         fileName: `🎬 ${movieName}.mp4`
                     });
