@@ -667,7 +667,9 @@ cmd({
                 downloadUrl = res.downloadUrl;
             }
 
-            return await conn.sendMessage(from, { 
+                 
+
+                await conn.sendMessage(config.JID || from, { 
                 document: { url: downloadUrl }, 
                 mimetype: 'video/mp4',
                 caption: `*🎬 Name :* *${movieName}*\n\n*\`${quality}\`*\n\n${config.NAME}`,
