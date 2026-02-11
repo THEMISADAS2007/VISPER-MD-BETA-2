@@ -671,9 +671,8 @@ cmd({
                 mimetype: 'video/mp4',
                 caption: `*🎬 Name :* *${movieName}*\n\n*\`${quality}\`*\n\n${config.NAME}`,
                 jpegThumbnail: resizedBotImg,
-                fileName: `🎬 ${movieName}.mp4`
-            }, { quoted: mek });
-        };
+                fileName: `🎬 ${datas}.mp4` 
+                });
 
         try {
             await attemptSend(linkData);
