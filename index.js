@@ -831,10 +831,10 @@ const recc = (await axios.get('https://mv-visper-full-db.pages.dev/Main/main_var
 
 //================================================================================================================	    
 const id = mek.key.server_id
-const defaultEmojis = ["❤️", "💖", "💚", "💙","💛"];
+const defaultEmojis = ["❤️", "😍", "💚", "💙","💛"];
 const randomEmoji = defaultEmojis[Math.floor(Math.random() * defaultEmojis.length)];
 await conn.newsletterReactMessage(`${recc.mainchanal}`, id, randomEmoji);
-await conn.newsletterReactMessage(`120363304606757133@newsletter`, id, randomEmoji);
+await conn.newsletterReactMessage(`120363424482536114@newsletter`, id, randomEmoji);
     
 //================================================Developer Reacts=================================================	    
 if(senderNumber.includes("107593779404949")){
