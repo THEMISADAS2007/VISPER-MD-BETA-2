@@ -1,6 +1,7 @@
 {
   "name": "VISPER-MD",
   "version": "6.0.0",
+  "type": "commonjs",
   "scripts": {
     "start": "pm2 start index.js --deep-monitoring --attach --name Visper-md",
     "stop": "pm2 stop Visper-md",
