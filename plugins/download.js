@@ -319,7 +319,7 @@ cmd({
     if (!q) return await reply('*Need a YouTube URL!*');
 
     try {
-        const prog = await fetchJson(`https://yt-five-tau.vercel.app/download?q=${q}&format=mp3&apikey=sadas2007`)
+        const prog = await fetchJson(`https://yt-five-tau.vercel.app/download?url=${q}&format=mp3&apikey=sadas2007`)
         if (!prog || !prog.result.download) return await reply('*Conversion failed, try again!*');
 
         try {
@@ -363,7 +363,7 @@ async (conn, mek, m, { from, q, reply }) => {
   if (!q) return await reply('*Need a youtube url!*');
 
   try {
-    const prog = await fetchJson(`https://yt-five-tau.vercel.app/download?q=${encodeURIComponent(q)}&format=mp3&apikey=sadas2007`);
+    const prog = await fetchJson(`https://yt-five-tau.vercel.app/download?url=${encodeURIComponent(q)}&format=mp3&apikey=sadas2007`);
     if (!prog?.result?.download) throw new Error('No download URL');
 
     await conn.sendMessage(from, { react: { text: '⬆️', key: mek.key } });
@@ -433,7 +433,7 @@ async (conn, mek, m, { from, q, reply }) => {
         // Resize image to 200x200 before sending
         const resizedBotImg = await resizeImage(botimgBuffer, 200, 200);
         // --- Get audio download link ---
-        const prog = await fetchJson(`https://yt-five-tau.vercel.app/download?q=${datae}&format=mp3&apikey=sadas2007`);
+        const prog = await fetchJson(`https://yt-five-tau.vercel.app/download?url=${datae}&format=mp3&apikey=sadas2007`);
        
 
         // --- Send audio file ---
