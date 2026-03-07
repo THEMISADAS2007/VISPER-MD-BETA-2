@@ -632,7 +632,8 @@ async function fetchNewLink(movieUrl) {
 
 
 
-// --- Main Command ---
+
+
 cmd({
     pattern: "nadeendl",
     react: "⬇️",
@@ -640,78 +641,60 @@ cmd({
     filename: __filename
 }, async (conn, mek, m, { from, q, reply }) => {
     try {
-        if (!q) return await reply('*Provide link!*');
+        // 1. Input Check
+        if (!q) return await reply('*📍 Please provide the movie link!*');
+        
         const [movieUrl, movieName, thumbUrl, quality] = q.split("±");
-        if (!movieUrl || !movieName) return await reply('*Invalid Format!*');
+        if (!movieUrl || !movieName) return await reply('*⚠️ Invalid Format!*');
 
-        const botimgResponse = await fetch(thumbUrl);
-        const botimgBuffer = await botimgResponse.buffer();
-        const resizedBotImg = await resizeImage(botimgBuffer, 200, 200);
+        // 2. Fetching API Data
+        const response = await fetchJson(`https://cine-download-api.vercel.app/api/download?url=${movieUrl}`);
+        
+        // 3. Filtering Pahan Link
+        const pahanLink = response.data.downloadUrls.find(item => 
+            !item.url.includes("pixeldrain") && !item.url.includes("t.me")
+        );
 
-        const { db } = await getStoredData();
-        let linkData = db[movieUrl] || null;
+        if (!pahanLink) return await reply('*❌ Direct download link not found!*');
+        const downloadUrl = pahanLink.url;
+        const fileSize = response.data.size;
 
-        // 1. Fetch from source if not in DB
-        if (!linkData) {
-            await reply(`*🔍 Fetching links from Source...*`);
-            linkData = await fetchNewLink(movieUrl);
-            if (linkData) await saveToDb(movieUrl, linkData);
+        // 4. Sending "Uploading" Message
+        const loadingMsg = await conn.sendMessage(from, { 
+            text: `*🚀 Uploading Movie...*\n\n*🎬 Name:* ${movieName}\n*📦 Size:* ${fileSize}\n\n_Please wait a moment..._` 
+        }, { quoted: mek });
+
+        // 5. Preparing Thumbnail
+        let resizedBotImg = null;
+        try {
+            if (thumbUrl) {
+                const botimgResponse = await fetch(thumbUrl);
+                const botimgBuffer = await botimgResponse.buffer();
+                resizedBotImg = await resizeImage(botimgBuffer, 200, 200);
+            }
+        } catch (imgErr) {
+            console.log("Thumbnail Error: ", imgErr);
         }
 
-        if (!linkData) return await reply("❌ No GDrive or Mega links found.");
-
-        // Define the send function
-        const attemptSend = async (data) => {
-    let downloadUrl = "";
-
-    if (data.type === 'direct') {
-
-        downloadUrl = data.link;
-    } 
-    else if (data.type === 'gdrive') {
-        const res = await fg.GDriveDl(data.link);
-        downloadUrl = res.downloadUrl;
-    } 
-    else if (data.type === 'mega') {
-        const megaRes = await axios.get(`https://apis.sadas.dev/api/v1/download/mega?q=${encodeURIComponent(data.link)}&apiKey=${MEGA_API_KEY}`);
-        downloadUrl = megaRes.data.data.result.download;
-    }
-
-
-                await conn.sendMessage(config.JID || from, { 
+        // 6. Sending the Movie Document
+           await conn.sendMessage(config.JID || from, { 
                 document: { url: downloadUrl }, 
                 mimetype: 'video/mp4',
                 caption: `*🎬 Name :* *${movieName}*\n\n*\`${quality}\`*\n\n${config.NAME}`,
                 jpegThumbnail: resizedBotImg,
                 fileName: `🎬 ${movieName}.mp4` 
             });
-        }; 
-        // 2. Execution logic
-        try {
-            await attemptSend(linkData);
-            await conn.sendMessage(from, { react: { text: '✅', key: mek.key } });
-        } catch (err) {
-            // 3. Refresh if expired
-            await reply(`*⚠️ Cached link failed/expired. Refreshing...*`);
-            const freshData = await fetchNewLink(movieUrl);
 
-            if (freshData) {
-                await saveToDb(movieUrl, freshData); 
-                await attemptSend(freshData);
-                await conn.sendMessage(from, { react: { text: '✅', key: mek.key } });
-            } else {
-                await reply("❌ Failed to refresh link from source.");
-            }
-        }
+        // 7. Delete "Uploading" message & Update Reaction
+        await conn.sendMessage(from, { delete: loadingMsg.key }); // Upload වුනාම කලින් මැසේජ් එක මකනවා
+        await conn.sendMessage(from, { react: { text: "✅", key: mek.key } });
 
     } catch (e) {
         console.log(e);
         await reply(`*❌ Error:* ${e.message}`);
+        await conn.sendMessage(from, { react: { text: "⚠️", key: mek.key } });
     }
 });
-
-
-
 
 
 // --- Main Automation Command ---
