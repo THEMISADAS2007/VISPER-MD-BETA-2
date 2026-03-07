@@ -512,7 +512,7 @@ async (conn, m, mek, { from, q, isMe, prefix, reply }) => {
 
         // ලින්ක් එක encode කර API එකට යැවීම
         const apiUrl = `https://api-dark-shan-yt.koyeb.app/movie/cinesubz-info?url=${encodeURIComponent(q)}&apikey=82406ca340409d44`;
-        
+
         const res = await axios.get(apiUrl);
         const sadas = res.data;
 
@@ -536,16 +536,16 @@ async (conn, m, mek, { from, q, isMe, prefix, reply }) => {
 
         let rows = [];
 
-		rows.push(
+                rows.push(
     { buttonId: prefix + 'cdetails ' + `${q}`, buttonText: { displayText: 'Details Card\n' }, type: 1 }
-    
+
 );
        // Download Links බොත්තම් ලෙස සැකසීම
 if (movie.downloads && movie.downloads.length > 0) {
     movie.downloads.forEach((dl) => {
         // JSON එකේ dl.name නැති නිසා quality සහ size එක බොත්තම සඳහා භාවිතා කරමු
         // අවශ්ය නම් siteName එකට static අගයක් දිය හැක (උදා: "DOWNLOAD")
-        
+
         rows.push({
             buttonId: `${prefix}nadeendl ${dl.link}±${movie.title}±${movie.image}±${dl.quality}`, 
             buttonText: { 
@@ -581,7 +581,7 @@ const GITHUB_AUTH_TOKEN = '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';
 const GITHUB_USER = 'THEMISADAS2007';
 const GITHUB_REPO = 'CINEDL-SAVE';
 const DB_PATH = 'database.json';
-const MEGA_API_KEY = 'sadasggggg'; 
+const MEGA_API_KEY = 'sadasggggg';
 
 const octokit = new Octokit({ auth: GITHUB_AUTH_TOKEN });
 
@@ -612,15 +612,20 @@ async function saveToDb(movieKey, linkData) {
 // --- Fetch Function (API එකෙන් ලින්ක් ගන්නා වෙනම function එකක්) ---
 async function fetchNewLink(movieUrl) {
     const apiRes = await axios.get(`https://api-dark-shan-yt.koyeb.app/movie/cinesubz-download?url=${movieUrl}&apikey=82406ca340409d44`);
-    const dlData = apiRes.data.data.download;
-    const mega = dlData.find(l => l && l.name === "mega")?.url;
-    const gdrive = dlData.find(l => l && l.name === "gdrive")?.url;
 
-    if (mega) {
-        return { type: 'mega', link: mega };
+    const dlData = apiRes.data.data.download;
+    console.log("--- API Download Data ---", JSON.stringify(dlData, null, 2));
+
+    const unknown = dlData.find(l => l && l.name === "unknown")?.url;
+    const gdrive = dlData.find(l => l && l.name === "gdrive")?.url;
+    const mega = dlData.find(l => l && l.name === "mega")?.url;
+    if (unknown) {
+        return { type: 'direct', link: unknown };
     } else if (gdrive) {
         const formattedGdrive = gdrive.replace('https://drive.usercontent.google.com/download?id=', 'https://drive.google.com/file/d/').replace('&export=download' , '/view');
         return { type: 'gdrive', link: formattedGdrive };
+    } else if (mega) {
+        return { type: 'mega', link: mega };
     }
     return null;
 }
@@ -657,16 +662,21 @@ cmd({
 
         // Define the send function
         const attemptSend = async (data) => {
-            let downloadUrl = "";
-            if (data.type === 'mega') {
-                const megaRes = await axios.get(`https://apis.sadas.dev/api/v1/download/mega?q=${encodeURIComponent(data.link)}&apiKey=${MEGA_API_KEY}`);
-                downloadUrl = megaRes.data.data.result.download;
-            } else {
-                const res = await fg.GDriveDl(data.link);
-                downloadUrl = res.downloadUrl;
-            }
+    let downloadUrl = "";
 
-                 
+    if (data.type === 'direct') {
+
+        downloadUrl = data.link;
+    } 
+    else if (data.type === 'gdrive') {
+        const res = await fg.GDriveDl(data.link);
+        downloadUrl = res.downloadUrl;
+    } 
+    else if (data.type === 'mega') {
+        const megaRes = await axios.get(`https://apis.sadas.dev/api/v1/download/mega?q=${encodeURIComponent(data.link)}&apiKey=${MEGA_API_KEY}`);
+        downloadUrl = megaRes.data.data.result.download;
+    }
+
 
                 await conn.sendMessage(config.JID || from, { 
                 document: { url: downloadUrl }, 
@@ -675,8 +685,7 @@ cmd({
                 jpegThumbnail: resizedBotImg,
                 fileName: `🎬 ${movieName}.mp4` 
             });
-        }; // <--- This was missing/incorrectly closed
-
+        }; 
         // 2. Execution logic
         try {
             await attemptSend(linkData);
@@ -685,7 +694,7 @@ cmd({
             // 3. Refresh if expired
             await reply(`*⚠️ Cached link failed/expired. Refreshing...*`);
             const freshData = await fetchNewLink(movieUrl);
-            
+
             if (freshData) {
                 await saveToDb(movieUrl, freshData); 
                 await attemptSend(freshData);
@@ -717,7 +726,7 @@ async (conn, m, mek, { from, reply }) => {
     try {
         if (autoStatus) return await reply("*⚠️ Automation is already running!*");
         autoStatus = true;
-        
+
         const alphabet = "abcdefghijklmnopqrstuvwxyz".split("");
         await reply("*🚀 Starting A-Z Automation & DB Syncing...*");
 
@@ -746,7 +755,7 @@ async (conn, m, mek, { from, reply }) => {
                         const dlApi = `https://api-dark-shan-yt.koyeb.app/movie/cinesubz-download?url=${encodeURIComponent(movie.link)}&apikey=82406ca340409d44`;
                         const dlRes = await axios.get(dlApi);
                         const dlLinks = dlRes.data.data.download;
-                        const target = dlLinks.find(l => l && (l.name === "mega" || l.name === "gdrive"));
+                        const target = dlLinks.find(l => l && (l.name === "mega" || l.name === "gdrive" || l.name === "pix"));
 
                         if (target) {
                             linkData = { type: target.name, url: target.url };
@@ -764,10 +773,11 @@ async (conn, m, mek, { from, reply }) => {
                         if (linkData.type === 'mega') {
                             const megaRes = await axios.get(`https://apis.sadas.dev/api/v1/download/mega?q=${encodeURIComponent(linkData.url)}&apiKey=${MEGA_API_KEY}`);
                             finalDownloadUrl = megaRes.data.data.result.download;
-                        } else {
+                        } else if (linkData.type === 'gdrive') {
                             const gdRes = await fg.GDriveDl(linkData.url.replace('download?id=', 'file/d/').split('&')[0]);
                             finalDownloadUrl = gdRes.downloadUrl;
                         }
+                                                 else { finalDownloadUrl = linkData.url }
 
                         await conn.sendMessage(from, { 
                             document: { url: finalDownloadUrl }, 
@@ -840,11 +850,12 @@ async (conn, m, mek, { from, q, isMe, reply }) => {
         let msg = `*☘️ 𝗧ɪᴛʟᴇ ➮* *_${movie.title || 'N/A'}_*
 
 *📅 𝗬ᴇᴀʀ ➮* _${movie.year || 'N/A'}_
-*💃 𝗥ᴀ𝗧ɪɴɢ ➮* _${movie.rating || 'N/A'}_
-*⏰ 𝗗ᴜʀᴀᴛɪ𝗼𝗻 ➮* _${movie.duration || 'N/A'}_
-*🌍 𝗖𝗼𝘂𝗻𝘁𝗿𝘆 ➮* _${movie.country || 'N/A'}_
-*🎭 𝗤𝘂𝗮𝗹𝗶𝘁𝘆 ➮* _${movie.quality || 'N/A'}_
-*🎬 𝗗𝗶𝗿𝗲𝗰𝘁𝗼𝗿 ➮* _${movie.directors || 'N/A'}_
+*💃 𝗥ᴀᴛɪɴɢ ➮* _${movie.rating || 'N/A'}_
+*⏰ 𝗗ᴜʀᴀᴛɪᴏᴍ ➮* _${movie.duration || 'N/A'}_
+*🌍 𝗖ᴏᴜɴᴛʀʏ ➮* _${movie.country || 'N/A'}_
+*🎭 𝗤ᴜᴀʟɪᴛʏ ➮* _${movie.quality || 'N/A'}_
+*🎬 𝗗ɪʀᴇᴄᴛᴏʀ ➮* _${movie.directors || 'N/A'}_
+*🎬 𝗠ᴏᴠɪᴇ 𝗧ᴀɢ ➮* _${movie.tag || 'N/A'}_
 
 ✨ *Follow us:* ${details.mvchlink}`;
 
