@@ -456,12 +456,12 @@ I am *VISPER-MD* Userbot🎈
       { buttonId: prefix + 'moviemenu', buttonText: { displayText: 'MOVIE COMMANDS' }, type: 1 },
       { buttonId: prefix + 'downloadmenu', buttonText: { displayText: 'DOWNLOAD COMMANDS' }, type: 1 },
       { buttonId: prefix + 'convertmenu', buttonText: { displayText: 'CONVERT COMMANDS' }, type: 1 },
-		{ buttonId: prefix + 'searchmenu', buttonText: { displayText: 'SEARCH COMMANDS' }, type: 1 },
-		{ buttonId: prefix + 'logomenu', buttonText: { displayText: 'LOGO COMMANDS' }, type: 1 },
+	   	{ buttonId: prefix + 'searchmenu', buttonText: { displayText: 'SEARCH COMMANDS' }, type: 1 },
+		   { buttonId: prefix + 'logomenu', buttonText: { displayText: 'LOGO COMMANDS' }, type: 1 },
       { buttonId: prefix + 'aicommands', buttonText: { displayText: 'AI COMMANDS' }, type: 1 },
-		{ buttonId: prefix + 'othermenu', buttonText: { displayText: 'OTHER COMMANDS' }, type: 1 },
+		   { buttonId: prefix + 'othermenu', buttonText: { displayText: 'OTHER COMMANDS' }, type: 1 },
 
-{ buttonId: prefix + 'stickermenu', buttonText: { displayText: 'STICKER COMMANDS' }, type: 1 }
+      { buttonId: prefix + 'stickermenu', buttonText: { displayText: 'STICKER COMMANDS' }, type: 1 }
     ];
 
     const buttonMessage = {
@@ -488,7 +488,8 @@ I am *VISPER-MD* Userbot🎈
 				{ title: "SEARCH COMMANDS", "description":"Search command menu", id: `${prefix}searchmenu` },
 				{ title: "LOGO COMMANDS", "description":"Logo command menu", id: `${prefix}logomenu` },
 		    { title: "AI COMMANDS", "description":"AI command menu", id: `${prefix}aimenu` },
-				{ title: "OTHER COMMANDS", "description":"Other command menu", id: `${prefix}OTHERmenu` }
+				{ title: "OTHER COMMANDS", "description":"Other command menu", id: `${prefix}OTHERmenu` },
+      { title: "STICKER COMMANDS", "description":"Sticker command menu", id: `${prefix}stickermenu` }
             ]
           }
         ]
