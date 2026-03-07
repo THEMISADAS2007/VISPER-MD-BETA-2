@@ -633,7 +633,6 @@ async function fetchNewLink(movieUrl) {
 
 
 
-
 cmd({
     pattern: "nadeendl",
     react: "⬇️",
@@ -641,56 +640,59 @@ cmd({
     filename: __filename
 }, async (conn, mek, m, { from, q, reply }) => {
     try {
-        // 1. Input Check
         if (!q) return await reply('*📍 Please provide the movie link!*');
         
         const [movieUrl, movieName, thumbUrl, quality] = q.split("±");
         if (!movieUrl || !movieName) return await reply('*⚠️ Invalid Format!*');
 
-        // 2. Fetching API Data
+		console.log(movieUrl)
+
+        // API එකෙන් දත්ත ලබා ගැනීම
         const response = await fetchJson(`https://cine-download-api.vercel.app/api/download?url=${movieUrl}`);
-        
-        // 3. Filtering Pahan Link
+
+        // මෙන්න මෙතනදී තමයි දත්ත තියෙනවද කියලා පරීක්ෂා කරන්නේ (Error එක වැලැක්වීමට)
+        if (!response || !response.data || !response.data.downloadUrls) {
+            return await reply('*❌ Error: Could not fetch download links from API!*');
+        }
+
         const pahanLink = response.data.downloadUrls.find(item => 
-            !item.url.includes("pixeldrain") && !item.url.includes("t.me")
+            item.url && !item.url.includes("pixeldrain") && !item.url.includes("t.me")
         );
 
         if (!pahanLink) return await reply('*❌ Direct download link not found!*');
+        
         const downloadUrl = pahanLink.url;
-        const fileSize = response.data.size;
+        const fileSize = response.data.size || "Unknown Size";
 
-        // 4. Sending "Uploading" Message
+        // Uploading Status Message
         const loadingMsg = await conn.sendMessage(from, { 
-            text: `*🚀 Uploading Movie...*\n\n*🎬 Name:* ${movieName}\n*📦 Size:* ${fileSize}\n\n_Please wait a moment..._` 
+            text: `*🚀 Uploading Movie...*\n\n*🎬 Name:* ${movieName}\n*📦 Size:* ${fileSize}` 
         }, { quoted: mek });
 
-        // 5. Preparing Thumbnail
+        // Thumbnail Processing
         let resizedBotImg = null;
-        try {
-            if (thumbUrl) {
+        if (thumbUrl) {
+            try {
                 const botimgResponse = await fetch(thumbUrl);
                 const botimgBuffer = await botimgResponse.buffer();
                 resizedBotImg = await resizeImage(botimgBuffer, 200, 200);
-            }
-        } catch (imgErr) {
-            console.log("Thumbnail Error: ", imgErr);
+            } catch (e) { console.log("Thumb error skipped"); }
         }
 
-        // 6. Sending the Movie Document
-           await conn.sendMessage(config.JID || from, { 
-                document: { url: downloadUrl }, 
-                mimetype: 'video/mp4',
-                caption: `*🎬 Name :* *${movieName}*\n\n*\`${quality}\`*\n\n${config.NAME}`,
-                jpegThumbnail: resizedBotImg,
-                fileName: `🎬 ${movieName}.mp4` 
-            });
+        // Sending File
+        await conn.sendMessage(from, { 
+            document: { url: downloadUrl }, 
+            mimetype: 'video/mp4',
+            fileName: `🎬 ${movieName}.mp4`,
+            caption: `*🎬 Name :* *${movieName}*\n\n*\`${quality}\`*\n\n${config.NAME}`,
+            jpegThumbnail: resizedBotImg
+        }, { quoted: mek });
 
-        // 7. Delete "Uploading" message & Update Reaction
-        await conn.sendMessage(from, { delete: loadingMsg.key }); // Upload වුනාම කලින් මැසේජ් එක මකනවා
+        await conn.sendMessage(from, { delete: loadingMsg.key });
         await conn.sendMessage(from, { react: { text: "✅", key: mek.key } });
 
     } catch (e) {
-        console.log(e);
+        console.log("Error Log:", e);
         await reply(`*❌ Error:* ${e.message}`);
         await conn.sendMessage(from, { react: { text: "⚠️", key: mek.key } });
     }
