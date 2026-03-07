@@ -809,7 +809,50 @@ l(e)
 
 
 
+cmd({
+  pattern: "stickermenu",
+  react: "👨‍💻",
+  dontAddCommandList: true,
+  filename: __filename
+},
+async(conn, mek, m,{from, prefix, l, quoted, body, isCmd, command, args, q, isGroup, sender, senderNumber, botNumber2, botNumber, pushname, isMe, isOwner, groupMetadata, groupName, participants, groupAdmins, isBotAdmins, isAdmins, reply}) => {
+try{
 
+let pp =''  
+
+for (let i=0;i<commands.length;i++) { 
+if(commands[i].category === 'sticker'){
+  if(!commands[i].dontAddCommandList){
+pp +=  `*│💎 Command:* ${commands[i].pattern}\n*│Use:* ${commands[i].use}\n\n`
+}}};
+
+let menuc = `*╭──────────●●►*\n${pp}*╰──────────●●►*\n\n`
+let generatebutton = [{
+    buttonId: `${prefix}sc`,
+    buttonText: {
+        displayText: 'GET BOT SCRIPT'
+    },
+    type: 1
+  },{
+    buttonId: `${prefix}ping`,
+    buttonText: {
+        displayText: 'GET BOT PING'
+    },
+    type: 1
+  }]
+let buttonMessaged = {
+  image: { url: config.LOGO },
+  caption: `${menuc}`,
+  footer: config.FOOTER,
+  headerType: 4,
+  buttons: generatebutton
+};
+return await conn.buttonMessage(from, buttonMessaged, mek);
+} catch (e) {
+reply('*ERROR !!*')
+l(e)
+}
+})
 
 
 
