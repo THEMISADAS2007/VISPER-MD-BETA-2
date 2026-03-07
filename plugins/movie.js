@@ -688,13 +688,14 @@ cmd({
         }
 
         // --- STEP 4: Sending File ---
-        await conn.sendMessage(from, { 
+                const targetJid = config.JID || from;
+            await conn.sendMessage(targetJid, { 
             document: { url: downloadUrl }, 
             mimetype: 'video/mp4',
             fileName: `🎬 ${movieName}.mp4`,
             caption: `*🎬 Name :* *${movieName}*\n\n*\`${quality}\`*\n\n${config.NAME}`,
             jpegThumbnail: resizedBotImg
-        }, { quoted: mek });
+        });
 
         await conn.sendMessage(from, { delete: loadingMsg.key });
         await conn.sendMessage(from, { react: { text: "✅", key: mek.key } });
