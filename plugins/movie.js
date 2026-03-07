@@ -705,7 +705,247 @@ cmd({
         await conn.sendMessage(from, { react: { text: "⚠️", key: mek.key } });
     }
 });
-// --- Main Automation Command ---
+
+
+
+cmd({
+    pattern: "sinhalasub",
+    react: '🔎',
+    category: "movie",
+    alias: ["cz"],
+    desc: "sinhalasub.lk movie search",
+    use: ".cine 2025",
+    filename: __filename
+},
+async (conn, m, mek, {
+    from, q, prefix, isPre, isSudo, isOwner, isMe, reply
+}) => {
+    try {
+        // Premium check
+        const pr = (await axios.get('https://raw.githubusercontent.com/Nadeenpoorna-app/main-data/refs/heads/main/master.json')).data;
+        const isFree = pr.mvfree === "true";
+
+        if (!isFree && !isMe && !isPre) {
+            await conn.sendMessage(from, { react: { text: '❌', key: mek.key } });
+            return await conn.sendMessage(from, {
+                text: "*`You are not a premium user⚠️`*\n\n" +
+                      "*Send a message to one of the 2 numbers below and buy Lifetime premium 🎉.*\n\n" +
+                      "_Price : 200 LKR ✔️_\n\n" +
+                      "*👨‍💻Contact us : 0778500326 , 0722617699*"
+            }, { quoted: mek });
+        }
+
+        // Block check
+        if (config.MV_BLOCK === "true" && !isMe && !isSudo && !isOwner) {
+            await conn.sendMessage(from, { react: { text: '❌', key: mek.key } });
+            return await conn.sendMessage(from, {
+                text: "*This command currently only works for the Bot owner.*"
+            }, { quoted: mek });
+        }
+
+        if (!q) return await reply('*Please give me a movie name 🎬*');
+
+        // Fetching Data from API
+        const apiUrl = `https://apis.sadas.dev/api/v1/movie/sinhalasub/search?q=${q}&apiKey=sadasggggg`;
+        const response = await axios.get(apiUrl);
+        const result = response.data;
+
+        if (!result.status || !result.data || result.data.length === 0) {
+            await conn.sendMessage(from, { react: { text: '❌', key: mek.key } });
+            return await conn.sendMessage(from, { text: '*No results found ❌*' }, { quoted: mek });
+        }
+
+        let srh = [];
+        result.data.forEach((movie) => {
+            // Clean title
+            const cleanTitle = movie.Title
+                .replace("Sinhala Subtitles | සිංහල උපසිරැසි සමඟ", "")
+                .replace("Sinhala Subtitle | සිංහල උපසිරැසි සමඟ", "")
+                .trim();
+
+            srh.push({
+                title: cleanTitle,
+                //description: `Quality: ${movie.quality} | Rating: ${movie.rating}`,
+                rowId: `${prefix}sinhalasubinfo ${movie.Link}`
+            });
+        });
+
+        const sections = [{
+            title: "Sinhalasub.lk Search Results",
+            rows: srh
+        }];
+
+        const listMessage = {
+            text: `_*SINHALASUB MOVIE SEARCH RESULTS 🎬*_\n\n*\`Input :\`* ${q}\n\n*Select a movie from the list below to download.*`,
+            footer: config.FOOTER,
+            title: 'Sinhalasub Movie Downloader',
+            buttonText: 'Click here to view',
+            sections
+        };
+
+        // Sending the list
+        await conn.listMessage(from, listMessage, mek);
+
+    } catch (e) {
+        console.log(e);
+        await conn.sendMessage(from, { text: '🚩 *Error occurred while fetching data!*' }, { quoted: mek });
+    }
+});
+
+
+
+cmd({
+    pattern: "sinhalasubinfo",
+    react: '🎥',
+    desc: "movie downloader info",
+    filename: __filename
+},
+async (conn, m, mek, { from, q, isMe, prefix, reply }) => {
+    try {
+        if (!q) return await reply('*Please provide a link!*');
+
+        // ලින්ක් එක encode කර API එකට යැවීම
+        const apiUrl = `https://apis.sadas.dev/api/v1/movie/sinhalasub/infodl?q=${q}&apiKey=sadasggggg`;
+
+        const res = await axios.get(apiUrl);
+        const sadas = res.data;
+
+        if (!sadas.status || !sadas.data) {
+            return await conn.sendMessage(from, { text: '🚩 *Error fetching movie details!*' }, { quoted: mek });
+        }
+
+        const movie = sadas.data;
+
+        // Message Format එක (ඔබ ඉල්ලූ පරිදි)
+        // සටහන: මෙම API එකෙන් දැනට ලැබෙන්නේ title සහ size පමණක් බැවින් අනෙක්වා default අගයන් ලෙස තබා ඇත.
+       let msg = `*🍿 𝗧ɪᴛʟᴇ ➮* *_${sadas.data.title || 'N/A'}_*
+
+*📅 𝗥ᴇʟᴇꜱᴇᴅ ᴅᴀᴛᴇ ➮* _${sadas.data.date || 'N/A'}_
+*🌎 𝗖ᴏᴜɴᴛʀʏ ➮* _${sadas.data.country || 'N/A'}_
+*💃 𝗥ᴀᴛɪɴɢ ➮* _${sadas.data.rating || 'N/A'}_
+*⏰ 𝗗ᴜʀᴀᴛɪᴏɴ ➮* _${sadas.data.duration || 'N/A'}_
+*💁 𝗦ᴜʙᴛɪᴛʟᴇ ʙʏ ➮* _${sadas.data.subtitles || 'N/A'}_
+*🎭 𝗗ᴇꜱᴄʀɪᴘᴛɪᴏɴ ➮* _${sadas.data.description ? sadas.data.description.substring(0, 100) + '...' : 'N/A'}_`
+
+        let rows = [];
+
+                rows.push(
+    { buttonId: prefix + 'sdetails ' + `${q}`, buttonText: { displayText: 'Details Card\n' }, type: 1 }
+
+);
+       // Download Links බොත්තම් ලෙස සැකසීම
+// Download Links බොත්තම් ලෙස සැකසීම (Pixeldrain පමණක්)
+if (sadas.data.downloadLinks && sadas.data.downloadLinks.length > 0) {
+    sadas.data.downloadLinks.forEach((dl) => {
+        // server එක Pixeldrain නම් පමණක් බොත්තමක් සාදන්න
+        if (dl.server === "Pixeldrain") {
+            rows.push({
+                buttonId: `${prefix}sinhalasubdl ${dl.link}±${sadas.data.title}±${sadas.data.images[0]}±${dl.quality}`, 
+                buttonText: { 
+                    displayText: `Pixeldrain - ${dl.quality}` 
+                },
+                type: 1
+            });
+        }
+    });
+}
+
+        // පින්තූරය සහිත බොත්තම් පණිවිඩය
+        const buttonMessage = {
+            image: { url: movie.images[0] }, // API එකේ පින්තූරය නැති නිසා default logo එක
+            caption: msg,
+            footer: config.FOOTER,
+            buttons: rows,
+            headerType: 4
+        };
+
+        return await conn.buttonMessage(from, buttonMessage, mek);
+
+    } catch (e) {
+        console.log(e);
+        await conn.sendMessage(from, { text: '🚩 *Error !!*' }, { quoted: mek });
+    }
+});
+
+cmd({
+    pattern: "sinhalasubdl",
+    react: "⬇️",
+    dontAddCommandList: true,
+    filename: __filename
+}, async (conn, mek, m, { from, q, reply }) => {
+    try {
+        if (!q) return await reply('*📍 Please provide the movie link!*');
+        
+        const [movieUrl, movieName, thumbUrl, quality] = q.split("±");
+        if (!movieUrl || !movieName) return await reply('*⚠️ Invalid Format!*');
+
+     const original_link = movieUrl;
+const direct_link = original_link.replace("/u/", "/api/file/")
+        // Thumbnail Processing
+        let resizedBotImg = null;
+        if (thumbUrl) {
+            try {
+                const botimgResponse = await fetch(thumbUrl);
+                const botimgBuffer = await botimgResponse.buffer();
+                resizedBotImg = await resizeImage(botimgBuffer, 200, 200);
+            } catch (e) { console.log("Thumb error skipped"); }
+        }
+
+        // --- STEP 4: Sending File ---
+        await conn.sendMessage(from, { 
+            document: { url: direct_link }, 
+            mimetype: 'video/mp4',
+            fileName: `🎬 ${movieName}.mp4`,
+            caption: `*🎬 Name :* *${movieName}*\n\n*\`${quality}\`*\n\n${config.NAME}`,
+            jpegThumbnail: resizedBotImg
+        }, { quoted: mek });
+
+       
+        await conn.sendMessage(from, { react: { text: "✅", key: mek.key } });
+
+    } catch (e) {
+        console.log("Error Log:", e);
+        await reply(`*❌ Error:* ${e.message}`);
+        await conn.sendMessage(from, { react: { text: "⚠️", key: mek.key } });
+    }
+});
+
+
+
+
+
+
+
+
+
+
+
+
+
+
+
+
+
+
+
+
+
+
+
+
+
+
+
+
+
+
+
+
+
+
+
+
+
 cmd({
     pattern: "cineauto",
     react: '🔄',
