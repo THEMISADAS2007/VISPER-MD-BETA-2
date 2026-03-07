@@ -645,16 +645,24 @@ cmd({
         const [movieUrl, movieName, thumbUrl, quality] = q.split("±");
         if (!movieUrl || !movieName) return await reply('*⚠️ Invalid Format!*');
 
-		console.log(movieUrl)
+        // --- STEP 1: Bypass the Redirect Link ---
+        const bypassResponse = await fetchJson(`https://cine-redirect.vercel.app/bypass?url=${movieUrl}`);
+        
+        // අලුත් JSON structure එකට අනුව check කිරීම
+        if (!bypassResponse || !bypassResponse.success || !bypassResponse.final_link) {
+            return await reply('*❌ Error: Failed to get final link from redirect API!*');
+        }
+        
+        const finalMovieUrl = bypassResponse.final_link; // අලුත් key එක (final_link)
 
-        // API එකෙන් දත්ත ලබා ගැනීම
-        const response = await fetchJson(`https://cine-download-api.vercel.app/api/download?url=${movieUrl}`);
+        // --- STEP 2: Fetch Download Links ---
+        const response = await fetchJson(`https://cine-download-api.vercel.app/api/download?url=${finalMovieUrl}`);
 
-        // මෙන්න මෙතනදී තමයි දත්ත තියෙනවද කියලා පරීක්ෂා කරන්නේ (Error එක වැලැක්වීමට)
         if (!response || !response.data || !response.data.downloadUrls) {
             return await reply('*❌ Error: Could not fetch download links from API!*');
         }
 
+        // Pahan Server ලින්ක් එක පෙරීම
         const pahanLink = response.data.downloadUrls.find(item => 
             item.url && !item.url.includes("pixeldrain") && !item.url.includes("t.me")
         );
@@ -664,7 +672,7 @@ cmd({
         const downloadUrl = pahanLink.url;
         const fileSize = response.data.size || "Unknown Size";
 
-        // Uploading Status Message
+        // --- STEP 3: Status Message ---
         const loadingMsg = await conn.sendMessage(from, { 
             text: `*🚀 Uploading Movie...*\n\n*🎬 Name:* ${movieName}\n*📦 Size:* ${fileSize}` 
         }, { quoted: mek });
@@ -679,7 +687,7 @@ cmd({
             } catch (e) { console.log("Thumb error skipped"); }
         }
 
-        // Sending File
+        // --- STEP 4: Sending File ---
         await conn.sendMessage(from, { 
             document: { url: downloadUrl }, 
             mimetype: 'video/mp4',
@@ -697,8 +705,6 @@ cmd({
         await conn.sendMessage(from, { react: { text: "⚠️", key: mek.key } });
     }
 });
-
-
 // --- Main Automation Command ---
 cmd({
     pattern: "cineauto",
