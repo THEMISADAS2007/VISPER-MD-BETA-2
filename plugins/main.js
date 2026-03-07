@@ -1234,7 +1234,7 @@ async (conn, mek, m, { reply, from }) => {
 ⏰ *Uptime :* ${rtime}
 📊 *Ram usage :* ${ram}
 ☁️ *Platform :* ${hostname}
-🧬 *Version :* v6.0.0 ( Beta )
+🧬 *Version :* v6.0.0
 👨‍💻 *Developer :* VISPER INC
 🟢 *Status :* Active`;
 
