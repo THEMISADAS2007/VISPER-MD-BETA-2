@@ -1,4 +1,3 @@
-
 const config = require('../config')
 const { cmd, commands } = require('../command')
 const axios = require('axios');
@@ -831,7 +830,7 @@ async (conn, m, mek, { from, q, isMe, prefix, reply }) => {
         let rows = [];
 
                 rows.push(
-    { buttonId: prefix + 'sdetails ' + `${q}`, buttonText: { displayText: 'Details Card\n' }, type: 1 }
+    { buttonId: prefix + 'sinhalasubdetails ' + `${q}`, buttonText: { displayText: 'Details Card\n' }, type: 1 }
 
 );
        // Download Links බොත්තම් ලෙස සැකසීම
