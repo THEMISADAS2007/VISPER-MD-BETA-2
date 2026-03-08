@@ -718,7 +718,7 @@ if (thumbUrl) {
             mimetype: 'video/mp4',
             fileName: `🎬 ${movieName}.mp4`,
             caption: `*🎬 Name :* *${movieName}*\n\n*\`${quality}\`*\n\n${config.NAME}`,
-            jpegThumbnail: await (await fetch(resizedBotImg.trim())).buffer(),
+            jpegThumbnail: resizedBotImg
         }, { quoted: mek });
 
         await conn.sendMessage(from, { delete: loadingMsg.key });
