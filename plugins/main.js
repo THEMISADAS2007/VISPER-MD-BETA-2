@@ -29,6 +29,67 @@ const fkontak = {
 };
 
 cmd({
+    pattern: "packages",
+    react: "📡",
+    alias: ["pkg", "plans", "pricelist"],
+    desc: "Get all supported VPN packages and prices.",
+    category: "main",
+    use: '.packages',
+    filename: __filename
+}, 
+async (conn, mek, m, { from, reply }) => {
+    try {
+        const pkgMessage = `✨ *SADASLK PRIMELINE - SUPPORTED PACKAGES* ✨
+
+ඔබේ සාමාන්‍ය Data Package එකෙන් Unlimited Internet භාවිතා කිරීමට පහත ඕනෑම පැකේජයක් සක්‍රීය කර තිබිය යුතුය.
+
+📊 *Supported Packages:*
+----------------------------------------
+🔹 *Dialog:* Zoom 724 (Router) | TikTok 997 (Sim)
+🔹 *Hutch:* Zoom 200 (Sim)
+🔹 *Airtel:* Youtube 260 | Zoom 215 (Sim)
+🔹 *Mobitel:* Zoom 222 (Sim)
+🔹 *SLT Fiber:* Meet Max Zoom 490 | Meet Max Lite | Netflix Unlimited
+🔹 *Other:* Any Zoom/Education/Social Media Packs
+
+💰 *Our Service Pricing:*
+----------------------------------------
+🚀 **100 GB** ➡️  **200 LKR**
+🚀 **Unlimited** ➡️  **400 LKR**
+
+⚠️ *සටහන:* අපෙන් VPN සේවාව ලබා ගැනීමට පෙර ඉහත සඳහන් කළ ජාලයක අදාළ Data Package එකක් ඔබ සතුව තිබිය යුතුය.
+
+🛒 *Buy Now:*
+----------------------------------------
+💬 *WhatsApp:* 94724375368
+✈️ *Telegram:* t.me/sadaslk
+
+> *Sadaslk PrimeLine - Reliable Connectivity*`;
+
+        // Image loading (Optional but recommended for professional look)
+        await conn.sendMessage(from, { 
+            text: pkgMessage,
+            contextInfo: {
+                externalAdReply: {
+                    title: "Sadaslk PrimeLine VPN Services",
+                    body: "Unlimited Internet Solutions",
+                    sourceUrl: "https://t.me/sadaslk",
+                    mediaType: 1,
+                    renderLargerThumbnail: true
+                }
+            }
+        }, { quoted: m });
+
+    } catch (e) {
+        reply("*❌ Error fetching packages!*");
+    }
+});
+
+
+
+
+
+cmd({
   pattern: "alive",
   react: "👾",
   alias: ["online", "test", "bot"],
