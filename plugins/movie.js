@@ -674,8 +674,11 @@ cmd({
 
         // --- STEP 3: Status Message ---
         const loadingMsg = await conn.sendMessage(from, { 
-            text: `*🚀 Uploading Movie...*\n\n*🎬 Name:* ${movieName}\n*📦 Size:* ${fileSize}` 
+            text: `*Uploading your movie..⬆️*` 
+			
         }, { quoted: mek });
+
+		 await conn.sendMessage(from, { react: { text: '⬆️', key: mek.key } });
 
         // Thumbnail Processing
         let resizedBotImg = null;
@@ -686,7 +689,9 @@ cmd({
                 resizedBotImg = await resizeImage(botimgBuffer, 200, 200);
             } catch (e) { console.log("Thumb error skipped"); }
         }
+ await conn.sendMessage(from, { react: { text: '⬆️', key: mek.key } });
 
+    
         // --- STEP 4: Sending File ---
         await conn.sendMessage(from, { 
             document: { url: downloadUrl }, 
@@ -897,7 +902,7 @@ const direct_link = original_link.replace("/u/", "/api/file/")
             mimetype: 'video/mp4',
             fileName: `🎬 ${movieName}.mp4`,
             caption: `*🎬 Name :* *${movieName}*\n\n*\`${quality}\`*\n\n${config.NAME}`,
-            jpegThumbnail: resizedBotImg
+            jpegThumbnail: await (await fetch(thumbUrl.trim())).buffer(),
         }, { quoted: mek });
 
        
