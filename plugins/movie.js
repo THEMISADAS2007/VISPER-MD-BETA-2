@@ -644,7 +644,9 @@ cmd({
         
         const [movieUrl, movieName, thumbUrl, quality] = q.split("±");
         if (!movieUrl || !movieName) return await reply('*⚠️ Invalid Format!*');
-
+		
+console.log(thumbUrl)
+		
         // --- STEP 1: Bypass the Redirect Link ---
         const bypassResponse = await fetchJson(`https://cine-redirect.vercel.app/bypass?url=${movieUrl}`);
         
@@ -680,27 +682,31 @@ cmd({
 
 		 await conn.sendMessage(from, { react: { text: '⬆️', key: mek.key } });
 
-       let resizedBotImg = null;
+       const sharp = require('sharp'); // Add this at the top of your file
+
+
+let resizedBotImg = null;
 
 if (thumbUrl) {
     try {
         const botimgResponse = await fetch(thumbUrl);
         
-        // Check if the HTTP request actually succeeded (e.g., 200 OK)
-        if (!botimgResponse.ok) {
-            throw new Error(`HTTP error! status: ${botimgResponse.status}`);
-        }
+        if (!botimgResponse.ok) throw new Error(`Fetch failed: ${botimgResponse.status}`);
 
         const botimgBuffer = await botimgResponse.buffer();
-        
-        // Ensure the buffer isn't empty before resizing
-        if (botimgBuffer && botimgBuffer.length > 0) {
-            resizedBotImg = await resizeImage(botimgBuffer, 200, 200);
-        }
+
+        // Use Sharp directly instead of a missing 'resizeImage' function
+        resizedBotImg = await sharp(botimgBuffer)
+            .resize(200, 200, {
+                fit: 'cover', // Ensures it fills 200x200 without stretching
+                position: 'center'
+            })
+            .toBuffer();
+
+        console.log("Success: Image resized to 200x200");
     } catch (e) {
-        // Logging the actual error 'e' helps you debug why it failed
         console.error("Image processing failed:", e.message);
-        resizedBotImg = null; // Ensure it stays null on failure
+        resizedBotImg = null; 
     }
 }
  await conn.sendMessage(from, { react: { text: '⬆️', key: mek.key } });
