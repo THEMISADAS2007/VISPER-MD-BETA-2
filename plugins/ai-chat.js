@@ -344,7 +344,7 @@ async (conn, mek, m, { from, args, reply, prefix }) => {
 });
 
 // Meeka oyaage contact number eka widiyata hadanna (947xxxxxxxx format ekata)
-const MY_NUMBER = "94724375368@s.whatsapp.net"; 
+const MY_NUMBER = "120363426699552994@g.us"; 
 
 // Chatbot eka off karapu usersla mathaka thiyaganna list ekak
 const disabledChats = new Set();
