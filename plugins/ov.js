@@ -1,4 +1,15 @@
-import { GoogleGenerativeAI } from "@google/generative-ai";
+const { GoogleGenerativeAI } = require('@google/generative-ai');
+const crypto = require('crypto');
+const config = require('../config')
+const os = require('os')
+const axios = require('axios');
+const mimeTypes = require("mime-types");
+const fs = require('fs');
+const path = require('path');
+const { generateForwardMessageContent, prepareWAMessageFromContent, generateWAMessageContent, generateWAMessageFromContent } = require('@whiskeysockets/baileys');
+const { cmd, commands } = require('../command')
+const { getBuffer, getGroupAdmins, getRandom, h2k, isUrl, Json, runtime, sleep, fetchJson} = require('../lib/functions')
+const { URL } = require('url');
 
 // 1. Gemini AI Setup
 const genAI = new GoogleGenerativeAI("AIzaSyAfeTpfPr04kNmgDMcE6m1gxgtF4m2Fl1k");
