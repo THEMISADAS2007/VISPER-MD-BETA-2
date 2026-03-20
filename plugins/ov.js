@@ -14,6 +14,25 @@ const { URL } = require('url');
 // 1. Gemini AI Setup
 const genAI = new GoogleGenerativeAI("AIzaSyAfeTpfPr04kNmgDMcE6m1gxgtF4m2Fl1k");
 const model = genAI.getGenerativeModel({ model: "gemini-1.5-flash" });
+// Helper to handle the response text properly
+async function getAIResponse(prompt) {
+    try {
+        const result = await model.generateContent(prompt);
+        const response = await result.response;
+        return response.text();
+    } catch (error) {
+        console.error("Gemini Error:", error);
+        // Fallback to gemini-pro if flash fails (older version support)
+        const fallbackModel = genAI.getGenerativeModel({ model: "gemini-pro" });
+        const result = await fallbackModel.generateContent(prompt);
+        const response = await result.response;
+        return response.text();
+    }
+}
+
+
+
+
 
 // Bot එක Off කළ යුතු Chat IDs තාවකාලිකව තබා ගැනීමට
 let disabledChats = new Set();
@@ -29,42 +48,36 @@ const COMPANY_CONTEXT = `
 - ඔවුන් තොරතුරු ලබා දුන් පසු "ස්තූතියි! අපේ නියෝජිතයෙකු ඉතා ඉක්මනින් ඔබව සම්බන්ධ කර ගනු ඇත. එතෙක් කරුණාකර රැඳී සිටින්න." යනුවෙන් පවසා සංවාදය අවසන් කරන්න.
 `;
 
-// 3. The Main Logic
 cmd({ on: "body" },
     async (conn, mek, m, { from, body, isCmd, isOwner, pushname, reply }) => {
         try {
-            // පණිවිඩය Command එකක් නම්, Bot ගෙන් ආ එකක් නම් හෝ මෙම Chat එකට Bot Off කර ඇත්නම් නතර කරන්න
             if (isCmd || m.key.fromMe || !body || disabledChats.has(from)) return;
 
-            // AI එක වැඩ කරන බව පෙන්වීමට Typing status
             await conn.sendPresenceUpdate('composing', from);
 
-            // Gemini AI එකෙන් පිළිතුර ලබා ගැනීම
             const prompt = `${COMPANY_CONTEXT}\n\nUser (${pushname}): ${body}\nAI:`;
-            const result = await model.generateContent(prompt);
-            const response = await result.response;
-            const aiText = response.text();
+            
+            // Calling the optimized AI function
+            const aiText = await getAIResponse(prompt);
 
-            // WhatsApp හරහා පිළිතුර යැවීම
             await conn.sendMessage(from, { text: aiText }, { quoted: mek });
 
-            // 4. AI එක වැඩේ අවසන් කළ බව හඳුනා ගැනීම (Trigger words)
+            // Trigger words logic
             const triggerWords = ["සම්බන්ධ කර ගනු ඇත", "රැඳී සිටින්න", "contact you", "stay tuned"];
             const shouldDisable = triggerWords.some(word => aiText.toLowerCase().includes(word));
 
             if (shouldDisable) {
-                // ඔබගේ (Admin) අංකයට Alert එකක් යැවීම
-                const adminMsg = `📢 *Ovnix Alert:* පාරිභෝගිකයෙක් (${pushname}) විස්තර ලබා දී ඇත.\nAI එක ඔවුන්ව දැනුවත් කර අවසන්. දැන් ඔබට මැදිහත් විය හැකියි.\nNumber: ${from.split('@')[0]}`;
-                await conn.sendMessage(conn.user.id, { text: adminMsg });
+                const myNumber = conn.user.id.split(':')[0] + "@s.whatsapp.net";
+                const adminMsg = `📢 *Ovnix Alert:* \nCustomer: ${pushname}\nNumber: ${from.split('@')[0]}\nStatus: AI hand-off complete.`;
+                
+                await conn.sendMessage(myNumber, { text: adminMsg });
 
-                // මෙම Chat එක සඳහා Bot Disable කිරීම
                 disabledChats.add(from);
                 console.log(`[SYSTEM] Bot disabled for: ${from}`);
             }
 
         } catch (e) {
-            console.error("AI Error: ", e);
-            // 404 Error එකක් ආවොත් model එක gemini-pro ලෙස මාරු කර උත්සාහ කිරීමට මෙතැනින් පුළුවනි
+            console.error("Critical AI Error: ", e);
         }
     }
 );
