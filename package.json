@@ -47,6 +47,7 @@
     "mumaker": "^2.0.0",
     "node-cache": "latest",
     "node-fetch": "latest",
+    "@google/generative-ai": "^0.21.0",
     "pino": "latest",
     "stream": "^0.0.2",
     "util": "^0.12.4",
