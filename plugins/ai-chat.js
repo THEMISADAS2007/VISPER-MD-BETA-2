@@ -343,47 +343,45 @@ async (conn, mek, m, { from, args, reply, prefix }) => {
     }
 });
 
+// Meeka oyaage contact number eka widiyata hadanna (947xxxxxxxx format ekata)
+const MY_NUMBER = "94724375368@s.whatsapp.net"; 
+
+// Chatbot eka off karapu usersla mathaka thiyaganna list ekak
+const disabledChats = new Set();
+
 cmd({ on: "body" },
-    async (conn, mek, m, { from, body, isCmd, isOwner, botNumber2, sender, pushname, isGroup, reply, senderNumber, isBotAdmins, isAdmins, botNumber }) => {
-        try{
-        if (config.CHAT_BOT == "true" ){
-        if(m.fromMe) return;
-        const isMsgImage = m.type === 'imageMessage' || m.imageMessage;
-        const isQuotedImage = m.quoted && (m.quoted.type === 'imageMessage' || m.quoted.imageMessage);
+    async (conn, mek, m, { from, body, isCmd, sender, reply, pushname }) => {
+        try {
+            if (config.CHAT_BOT !== "true" || m.fromMe) return;
+            if (isCmd || !isNaN(m.body)) return;
+            
+            // Me user ta chatbot eka kalin off karala nam thiyenne, mokuth karanne na
+            if (disabledChats.has(m.sender)) return;
 
+            let inputText = m.body || m.imageMessage?.caption || "";
+            inputText = inputText.replace(/@\d+/g, '').trim();
 
-        if (!isNaN(m.body) || isCmd) return;
+            const imageBuffer = (m.type === 'imageMessage' || m.imageMessage) ? await m.download() : 
+                               (m.quoted && (m.quoted.type === 'imageMessage' || m.quoted.imageMessage)) ? await m.quoted.download() : null;
 
-        let inputText = m.body ? m.body : m.imageMessage?.caption;
-
-        if (!inputText && (isMsgImage || isQuotedImage)) {
-            inputText = "Describe this image";
-        }
-
-        if (!inputText) inputText = "";
-        inputText = inputText.replace(/@\d+/g, '').trim();
-        const lowerCaseText = inputText.toLowerCase(); 
-
-        let imageBuffer = null;
-
-
-            if (isMsgImage) {
-                imageBuffer = await m.download();
-            } else if (isQuotedImage) {
-                imageBuffer = await m.quoted.download();
-            }
-
-            const response = await getGeminiResponse(lowerCaseText, m.sender, { img: imageBuffer });
+            const response = await getGeminiResponse(inputText, m.sender, { img: imageBuffer });
 
             if (response.status) {
                 await reply(response.text);
-            } else {
-                await reply(`❌ *Error:* ${response.error}`);
-            }
+
+                // Gemini ge reply eke "ස්තූතියි! අපේ නියෝජිතයෙකු" kiana kotasa thiyenawa nam (Conversation end eka)
+                if (response.text.includes("ස්තූතියි!") && response.text.includes("නියෝජිතයෙකු")) {
+                    
+                    // 1. Oyaage number ekata notification ekak yawanna
+                    const notificationMsg = `🔔 *New Lead from Ovnix AI* 🔔\n\n👤 *Customer:* ${pushname}\n📱 *Number:* ${m.sender.split('@')[0]}\n📝 *Last Msg:* ${inputText}\n\n⚠️ Chatbot for this user is now *DISABLED*. Please take over manually.`;
+                    await conn.sendMessage(MY_NUMBER, { text: notificationMsg });
+
+                    // 2. Chatbot eka me user ta thava duratath wadakirima nawathvanna
+                    disabledChats.add(m.sender);
+                }
             }
         } catch (e) {
-            console.error(e);
-            await reply("❌ *An error occurred while processing your request.*" + e);
+            console.error("Ovnix AI Error:", e);
         }
     }
 );
