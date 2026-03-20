@@ -5,7 +5,7 @@ const { getBuffer, getGroupAdmins, getRandom, h2k, isUrl, Json, runtime, sleep, 
 
 // 1. Configuration Constants
 const API_KEY = "AIzaSyAfeTpfPr04kNmgDMcE6m1gxgtF4m2Fl1k"; // Your Gemini Key
-const MODEL_NAME = "gemini-1.5-flash";
+
 
 // Bot එක Off කළ යුතු Chat IDs තාවකාලිකව තබා ගැනීමට
 let disabledChats = new Set();
@@ -24,9 +24,14 @@ const COMPANY_CONTEXT = `
 /**
  * Direct API Call to Gemini to avoid SDK 404 Errors
  */
+// Updated MODEL_NAME
+const MODEL_NAME = "gemini-1.5-flash"; 
+
 async function getAIResponse(prompt) {
     try {
-        const url = `https://generativelanguage.googleapis.com/v1/models/${MODEL_NAME}:generateContent?key=${API_KEY}`;
+        // We use v1beta here because "flash" is often categorized there in some regions, 
+        // but we use the full model path.
+        const url = `https://generativelanguage.googleapis.com/v1beta/models/${MODEL_NAME}:generateContent?key=${API_KEY}`;
         
         const response = await axios.post(url, {
             contents: [{
@@ -36,14 +41,25 @@ async function getAIResponse(prompt) {
             headers: { 'Content-Type': 'application/json' }
         });
 
-        if (response.data && response.data.candidates && response.data.candidates[0].content) {
+        if (response.data && response.data.candidates) {
             return response.data.candidates[0].content.parts[0].text;
         } else {
-            return "සමාවන්න, මට මේ වෙලාවේ පිළිතුරක් ලබා දීමට නොහැක.";
+            throw new Error("No candidates found");
         }
     } catch (error) {
-        console.error("Gemini Direct API Error:", error.response ? error.response.data : error.message);
-        return "තාක්ෂණික දෝෂයක් පවතී. කරුණාකර පසුව උත්සාහ කරන්න.";
+        // Log the specific error to see if it's an API Key issue or Model issue
+        console.error("Gemini Error Detail:", error.response ? JSON.stringify(error.response.data) : error.message);
+        
+        // Final fallback to gemini-pro (the original stable model)
+        try {
+            const fallbackUrl = `https://generativelanguage.googleapis.com/v1beta/models/gemini-pro:generateContent?key=${API_KEY}`;
+            const fallbackRes = await axios.post(fallbackUrl, {
+                contents: [{ parts: [{ text: prompt }] }]
+            });
+            return fallbackRes.data.candidates[0].content.parts[0].text;
+        } catch (fallbackError) {
+            return "සමාවන්න, සර්වර් එකෙහි කාර්යබහුල තාවයක් පවතී. පසුව උත්සාහ කරන්න.";
+        }
     }
 }
 
