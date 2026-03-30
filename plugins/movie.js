@@ -781,9 +781,9 @@ cmd({
             fileName: `🎬 ${movieName}.mp4`,
             caption: `*🎬 Name :* *${movieName}*
 
- *\`${quality}\`*
+*\`${quality}\`*
 
- ${config.NAME}`,
+${config.NAME}`,
             jpegThumbnail: resizedBotImg
         });
 
@@ -797,6 +797,7 @@ cmd({
         await conn.sendMessage(from, { react: { text: "⚠️", key: mek.key } });
     }
 });
+
 
 
 
@@ -1197,6 +1198,85 @@ async (conn, m, mek, { from, q, isMe, reply }) => {
     }
 });
 
+
+// ==================== IMDb MOVIE/TV INFO COMMAND ====================
+cmd({
+    pattern: "imdb",
+    react: '🎬',
+    category: "info",
+    desc: "Get Movie/TV series details from IMDb",
+    filename: __filename
+},
+async (conn, m, mek, { from, q, reply }) => {
+    try {
+        if (!q) return await reply('*Please enter a Movie or TV Series name! 🎥*');
+
+        
+        let details = (await axios.get('https://mv-visper-full-db.pages.dev/Main/main_var.json')).data;
+
+        
+        const { data } = await axios.get(`http://www.omdbapi.com/?t=${encodeURIComponent(q)}&apikey=d90ff23e`);
+
+        if (data.Response === 'False') return await reply('*No results found on IMDb! ❌*');
+
+        
+        let imageUrl = data.Poster !== 'N/A' ? data.Poster : null;
+
+       
+        if (!imageUrl) {
+            try {
+    
+                const searchRes = await axios.get(`https://tharuzz-movie-api.vercel.app/api/cinesub/search?query=${encodeURIComponent(q)}`);
+                
+                if (searchRes.data && searchRes.data.result && searchRes.data.result.length > 0) {
+                    let movieUrl = searchRes.data.result[0].link;
+                    
+                  
+                    const infoRes = await axios.get(`https://api-dark-shan-yt.koyeb.app/movie/cinesubz-info?url=${encodeURIComponent(movieUrl)}&apikey=82406ca340409d44`);
+                    
+                    if (infoRes.data && infoRes.data.data && infoRes.data.data.image) {
+                        imageUrl = infoRes.data.data.image;
+                    }
+                }
+            } catch (err) {
+                console.log("Cinesubz image fallback error:", err.message);
+            }
+        }
+
+       
+        imageUrl = imageUrl || config.LOGO;
+        
+
+       
+        let msg = `*✨ 🄳𝙴𝚃𝙰𝙸𝙻𝚂 🄲𝙰𝚁𝙳 ✨*\n\n` +
+                  `*🍿 𝗧ɪᴛʟᴇ ➮* *_${data.Title}_*\n` +
+                  `*📅 𝗬𝐞𝐚𝐫 ➮* _${data.Year}_\n` +
+                  `*💃 𝗥ᴀᴛɪɴɢ ➮* _⭐ ${data.imdbRating}/10_\n` +
+                  `*⏰ 𝗥ᴜɴᴛɪᴍᴇ ➮* _${data.Runtime}_\n` +
+                  `*🎭 𝗚ᴇɴʀᴇ ➮* _${data.Genre}_\n` +
+                  `*🌍 𝗟ᴀɴɢᴜᴀɢᴇ ➮* _${data.Language}_\n` +
+                  `*🎬 𝗗ɪʀᴇᴄᴛᴏʀ ➮* _${data.Director}_\n` +
+                  `*👥 𝗖ᴀꜱᴛ ➮* _${data.Actors}_\n` +
+                  `*🏆 𝗔ᴡᴀʀᴅꜱ ➮* _${data.Awards}_\n\n` +
+                  `*📝 𝗣ʟᴏᴛ ➮* _${data.Plot}_\n\n` +
+                  `✨ *𝗙ᴏʟʟᴏᴡ 𝗨ꜱ:* ${details.mvchlink}`;
+
+        
+        const targetJid = config.JID || from;
+        await conn.sendMessage(targetJid, {
+            image: { url: imageUrl }, 
+            caption: msg 
+        });
+
+        await conn.sendMessage(from, { react: { text: '✅', key: mek.key } });
+
+    } catch (e) {
+        console.error("IMDb Error:", e);
+        reply('🚩 *Error fetching IMDb details!*');
+    }
+});
+
+
 cmd({
     pattern: "sinhalasubdetails",
     react: '🎬',
@@ -1251,7 +1331,7 @@ _${movie.description || 'N/A'}_
 
 
 cmd({
-    pattern: "imdb",  
+    pattern: "imdbinfo",  
     alias: ["mvinfo","filminfo"],
     desc: "Fetch detailed information about a movie.",
     category: "movie",
