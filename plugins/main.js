@@ -228,6 +228,100 @@ I am alive now 🎈\n✨ Thank you for choosing \`Visper-MD\` — your trusted W
 });
 //...
 
+cmd({
+    pattern: "cjid",
+    desc: "Get channel JIDs.",
+    category: "owner",
+    react: "📝",
+    filename: __filename
+},
+async (conn, mek, m, { isOwner, reply }) => {
+
+    if (!isOwner) return reply("❌ You are not the owner!");
+
+    try {
+
+        const channels = await conn.newsletterFetchAllParticipating();
+        const ids = Object.keys(channels);
+
+        if (!ids.length) return reply("📝 Bot not in any channels.");
+
+        let msg = "📝 *Channel JIDs:*\n\n";
+
+        ids.forEach((jid, i) => {
+            msg += `${i + 1}. \( {channels[jid].name}\n \){jid}\n\n`;
+        });
+
+        reply(msg);
+
+    } catch (err) {
+        reply(`❌ Error: ${err.message}`);
+    }
+});
+
+
+cmd({
+    pattern: "cjid1",
+    desc: "Get Channel JID from link (super robust)",
+    category: "owner",
+    react: "📝",
+    filename: __filename
+},
+async (conn, mek, m, { isOwner, reply, text }) => {
+
+    if (!isOwner) return reply("❌ You are not the owner!");
+
+
+    let link = text || '';
+
+
+    if (!link && m.quoted) {
+        link = m.quoted.text || m.quoted.body || m.quoted.message?.conversation || '';
+    }
+
+
+    if (!link) {
+        const fullBody = mek.message?.conversation || 
+                        mek.message?.extendedTextMessage?.text || 
+                        mek.message?.imageMessage?.caption || 
+                        mek.message?.videoMessage?.caption || '';
+        link = fullBody.replace(/^\.cjid\s*/i, '').trim();
+    }
+
+    if (!link) {
+        return reply("❌ Channel link එක දෙන්න!\n\nඋදා: .cjid https://whatsapp.com/channel/0029VbCivBO47Xe2vxN6oH16\n\nහෝ link එක quote කරලා .cjid යවන්න");
+    }
+
+    try {
+
+        let code = link.trim();
+        if (code.includes('whatsapp.com/channel/')) {
+            code = code.split('/channel/')[1].split(/[\s/?#]/)[0];
+        } else if (code.includes('https://') && code.includes('channel')) {
+            code = code.split('channel/')[1].split(/[\s/?#]/)[0];
+        }
+
+        if (!code || code.length < 10) {
+            return reply("❌ Invalid Channel link! සම්පූර්ණ link එක දෙන්න.");
+        }
+
+        const meta = await conn.newsletterMetadata("invite", code);
+
+        const jid = meta.id || meta.jid || "JID not found";
+        const name = meta.name || meta.subject || "Unknown Channel";
+
+        let msg = `✅ *Channel JID සාර්ථකව ලබාගත්තා!*\n\n`;
+        msg += `*📛 Channel Name:* ${name}\n`;
+        msg += `*🔗 JID:* \`${jid}\`\n\n`;
+        msg += `*Copy කරගන්න:* \`${jid}\``;
+
+        reply(msg);
+
+    } catch (err) {
+        reply(`❌ Error: ${err.message}\n\n• ලින්ක් එක නිවැරදිද බලන්න\n• Baileys ඔයාගේ version එක newsletter support කරනවද?`);
+    }
+});
+
 
 cmd({
   pattern: "systeemm",
