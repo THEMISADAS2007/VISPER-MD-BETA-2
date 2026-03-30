@@ -33,12 +33,12 @@ cmd({
 async (conn, m, mek, { from, q, prefix, reply }) => {
     try {
         if (!q) return await reply('*Please enter a TV series name! 📺*');
-        
-        
+
+
         const { data } = await axios.get(`https://api-dark-shan-yt.koyeb.app/movie/cinesubz-search?q=${encodeURIComponent(q)}&apikey=${API_KEY}`);
-        
+
         if (!data.data || !Array.isArray(data.data) || data.data.length === 0) return await reply('*No results found ❌*');
-        
+
         const results = data.data.filter(item => item.type === "tvshows");
         let srh = results.map(v => ({
             title: v.title.replace(/Sinhala Subtitles\s*\|?\s*සිංහල උපසිරසි.*/gi, "").trim(),
@@ -66,10 +66,10 @@ cmd({
 },
 async (conn, m, mek, { from, q, prefix, reply }) => {
     try {
-        
+
         const { data } = await axios.get(`https://api-dark-shan-yt.koyeb.app/tv/cinesubz-info?url=${encodeURIComponent(q)}&apikey=${API_KEY}`);
-        
-        
+
+
         const series = data.data;
         if (!series) return await reply("*Couldn't find TV series info!*");
 
@@ -79,7 +79,7 @@ async (conn, m, mek, { from, q, prefix, reply }) => {
             const season = series.seasons[i];
             let rows = [];
 
-           
+
             rows.push({
                 buttonId: `${prefix}tvallquality ${q}±${posterUrl}±${series.title}±${season.s_no}`,
                 buttonText: { displayText: `📥 Download All S${season.s_no}` },
@@ -95,10 +95,10 @@ async (conn, m, mek, { from, q, prefix, reply }) => {
             }
 
             season.episodes.forEach(ep => {
-                
+
                 const epTitle = `S${String(season.s_no).padStart(2, '0')} E${String(ep.e_no).padStart(2, '0')}`;
-                
-       
+
+
                 rows.push({
                     buttonId: `${prefix}tvquality ${ep.link}±${posterUrl}±${series.title} ${epTitle}±${q}`,
                     buttonText: { displayText: epTitle },
@@ -136,7 +136,7 @@ cmd({
 async (conn, m, mek, { from, q, reply }) => {
     try {
         const { data } = await axios.get(`https://api-dark-shan-yt.koyeb.app/tv/cinesubz-info?url=${encodeURIComponent(q)}&apikey=${API_KEY}`);
-        
+
         const movie = data.data;
         let details = { mvchlink: "https://whatsapp.com/channel/yourchannel" }; 
         try {
@@ -171,10 +171,10 @@ cmd({
 async (conn, m, mek, { from, q, prefix, reply }) => {
     try {
         const [epUrl, imgLink, title, mainUrl] = q.split("±");
-        
-       
+
+
         const { data: convData } = await axios.get(`https://api-dark-shan-yt.koyeb.app/episode/cinesubz-info?url=${encodeURIComponent(epUrl)}&apikey=${API_KEY}`);
-        
+
         let rows = convData.data.download.map(dl => ({
             buttonId: `${prefix}tvdl ${dl.link}±${imgLink}±${title}±${mainUrl}±${dl.quality}`, 
             buttonText: { displayText: `${dl.quality} (${dl.size})` },
@@ -204,15 +204,15 @@ cmd({
 async (conn, m, mek, { from, q, prefix, reply }) => {
     try {
         const [mainUrl, imgLink, title, seasonNum] = q.split("±");
-        
+
         const { data: seriesData } = await axios.get(`https://api-dark-shan-yt.koyeb.app/tv/cinesubz-info?url=${encodeURIComponent(mainUrl)}&apikey=${API_KEY}`);
-        
+
         const targetSeason = seriesData.data.seasons.find(s => s.s_no.toString() === seasonNum.toString());
         const firstEpUrl = targetSeason.episodes[0].link; 
 
-      
+
         const { data: convData } = await axios.get(`https://api-dark-shan-yt.koyeb.app/episode/cinesubz-info?url=${encodeURIComponent(firstEpUrl)}&apikey=${API_KEY}`);
-        
+
         let rows = convData.data.download.map(dl => ({
             buttonId: `${prefix}tvdlall ${mainUrl}±${imgLink}±${title}±${dl.quality}±${seasonNum}`,
             buttonText: { displayText: dl.quality },
@@ -253,18 +253,18 @@ async (conn, m, mek, { from, q, reply }) => {
             for (const ep of season.episodes) {
                 try {
                     const epTitle = `${title} S${String(season.s_no).padStart(2, '0')}E${String(ep.e_no).padStart(2, '0')}`;
-                    
+
                     const { data: qData } = await axios.get(`https://api-dark-shan-yt.koyeb.app/episode/cinesubz-info?url=${encodeURIComponent(ep.link)}&apikey=${API_KEY}`);
-                    
+
                     const matchingDl = qData.data.download.find(d => d.quality.trim() === selectedQuality.trim()) || qData.data.download[0]; 
-                    
+
                     const { data: apiRes } = await axios.get(`https://api-dark-shan-yt.koyeb.app/movie/cinesubz-download?url=${encodeURIComponent(matchingDl.link)}&apikey=${API_KEY}`);
-                    
+
                     const downloadLinks = apiRes.data.download;
                     let downloadUrl = null;
                     let fileName = apiRes.data.title || epTitle;
-                    
-                  
+
+
                     const directEntry = downloadLinks.find(dl => 
                         dl.name.toLowerCase() === "unknown" || 
                         dl.url.includes("/dl/") || 
@@ -272,7 +272,7 @@ async (conn, m, mek, { from, q, reply }) => {
                         dl.name.toLowerCase().includes("direct")
                     );
                     if (directEntry) downloadUrl = directEntry.url;
-                    
+
                     if (!downloadUrl) {
                         const gdriveEntry = downloadLinks.find(dl => dl.name.toLowerCase() === "gdrive");
                         if (gdriveEntry) {
@@ -285,12 +285,12 @@ async (conn, m, mek, { from, q, reply }) => {
                             } catch (e) { }
                         }
                     }
-                    
+
                     if (!downloadUrl) {
                         const pixelEntry = downloadLinks.find(dl => dl.name.toLowerCase().includes("pixeldrain") || dl.name.toLowerCase() === "pix" || dl.url.includes("pixeldrain.com"));
                         if (pixelEntry) downloadUrl = pixelEntry.url.replace('/u/', '/api/file/') + "?download";
                     }
-                
+
                     if (!downloadUrl) {
                         const fallbackEntry = downloadLinks.find(dl => dl.name.toLowerCase() !== "telegram");
                         if (fallbackEntry) downloadUrl = fallbackEntry.url;
@@ -299,7 +299,7 @@ async (conn, m, mek, { from, q, reply }) => {
                     if (downloadUrl) {
                         const resizedThumb = await getResizedThumb(imgLink);
                         const caption = `🎬 *𝗡𝗮𝗺𝗲 :* ${epTitle}\n\n\`[${selectedQuality.trim()}]\` \n\n${config.NAME || 'Bot'}`;
-                        
+
                         const targetJid = config.JID || from;
                         await conn.sendMessage(targetJid, { 
                             document: { url: downloadUrl }, 
@@ -332,13 +332,13 @@ async (conn, m, mek, { from, q, reply }) => {
     if (isUploadingTv) return await reply('*Another episode is uploading. Please wait ⏳*');
     try {
         const [processedUrl, imgLink, title, mainUrl, quality] = q.split("±");
-        
+
         const { data: apiRes } = await axios.get(`https://api-dark-shan-yt.koyeb.app/movie/cinesubz-download?url=${encodeURIComponent(processedUrl)}&apikey=${API_KEY}`);
-        
+
         const downloadLinks = apiRes.data.download;
         let downloadUrl = null;
         let fileName = apiRes.data.title || title; 
-      
+
         const directEntry = downloadLinks.find(dl => 
             dl.name.toLowerCase() === "unknown" || 
             dl.url.includes("/dl/") || 
@@ -346,7 +346,7 @@ async (conn, m, mek, { from, q, reply }) => {
             dl.name.toLowerCase().includes("direct")
         );
         if (directEntry) downloadUrl = directEntry.url;
-       
+
         if (!downloadUrl) {
             const gdriveEntry = downloadLinks.find(dl => dl.name.toLowerCase() === "gdrive");
             if (gdriveEntry) {
@@ -366,7 +366,7 @@ async (conn, m, mek, { from, q, reply }) => {
                 downloadUrl = pixelEntry.url.replace('/u/', '/api/file/') + "?download";
             }
         }
-    
+
         if (!downloadUrl) {
             const fallbackEntry = downloadLinks.find(dl => dl.name.toLowerCase() !== "telegram");
             if (fallbackEntry) downloadUrl = fallbackEntry.url;
@@ -376,11 +376,11 @@ async (conn, m, mek, { from, q, reply }) => {
 
         isUploadingTv = true;
         await conn.sendMessage(from, { react: { text: '⬆️', key: mek.key } });
-        
+
         const resizedThumb = await getResizedThumb(imgLink);
         const qText = quality ? quality.trim() : 'Unknown';
         const caption = `🎬 *𝗡𝗮𝗺𝗲 :* ${title}\n\n\`[ ${qText} ]\`\n\n${config.NAME || 'Bot'}`;
-        
+
         const targetJid = config.JID || from;
         await conn.sendMessage(targetJid, { 
             document: { url: downloadUrl }, 
